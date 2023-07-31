@@ -1,33 +1,43 @@
-mod consts;
+pub mod consts; // TODO: remove pub
 mod fen;
+mod state;
 
 use crate::{
-    board::consts::PieceNames,
+    board::{
+        consts::{PieceNames, Pieces, SQUARE_BBS},
+        state::State,
+    },
     consts::{Bitboard, Color, Colors, NrOf, Piece, Square},
     utils::find_ones,
 };
-use consts::SQUARES_BB;
 
 pub struct Board {
-    pub piece_bbs: [[Bitboard; NrOf::PIECE_TYPES]; Colors::BOTH],
-
-    active_color: Color,
+    piece_bbs: [[Bitboard; NrOf::PIECE_TYPES]; Colors::BOTH],
+    pub state: State,
 }
 
 impl Board {
     pub fn new() -> Self {
         Self {
             piece_bbs: [[0u64; NrOf::PIECE_TYPES]; Colors::BOTH],
-            active_color: Colors::WHITE,
+            state: State::new(),
         }
     }
 
     fn put_piece(&mut self, piece: Piece, color: Color, square: Square) {
-        self.piece_bbs[color][piece] |= SQUARES_BB[square]
+        // TODO: add material calculation
+        self.piece_bbs[color][piece] |= SQUARE_BBS[square]
     }
 
     fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
-        self.piece_bbs[color][piece] ^= SQUARES_BB[square]
+        // TODO: add material calculation
+        self.piece_bbs[color][piece] ^= SQUARE_BBS[square]
+    }
+
+    // TODO:remove dbg function
+    pub fn print_pawns(&self) {
+        println!("{:064b}", self.piece_bbs[Colors::WHITE][Pieces::BISHOP]);
+        println!("{:064b}", self.piece_bbs[Colors::BLACK][Pieces::BISHOP]);
     }
 }
 
