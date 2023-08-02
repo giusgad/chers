@@ -1,7 +1,7 @@
 use crate::consts::{Colors, NrOf, Piece};
 
 use super::{
-    consts::{Castling, Pieces, SQUARE_NAMES},
+    consts::{square_by_name, Castling, Pieces, SQUARE_NAMES},
     Board,
 };
 
@@ -103,7 +103,7 @@ impl Board {
         if *ep_square == "-" {
             board.state.ep_square = None;
         } else {
-            if let Some(square) = SQUARE_NAMES.iter().position(|s| -> bool { s == ep_square }) {
+            if let Ok(square) = square_by_name(ep_square) {
                 board.state.ep_square = Some(square);
             } else {
                 return Err(FenError::EpSquare);

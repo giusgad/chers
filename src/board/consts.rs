@@ -1,4 +1,7 @@
-use crate::consts::{Bitboard, NrOf, Piece};
+use crate::{
+    consts::{Bitboard, NrOf, Piece, Square},
+    utils::const_str_equal,
+};
 
 pub const STARTING_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -32,7 +35,7 @@ impl Castling {
 }
 
 #[rustfmt::skip]
-pub const SQUARE_NAMES: [&str;NrOf::SQUARES] = [
+pub const SQUARE_NAMES: [&str; NrOf::SQUARES] = [
     "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
     "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
     "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
@@ -42,6 +45,17 @@ pub const SQUARE_NAMES: [&str;NrOf::SQUARES] = [
     "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
     "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"
 ];
+
+pub const fn square_by_name(name: &str) -> Result<Square, ()> {
+    let mut i = 0;
+    while i < NrOf::SQUARES {
+        if const_str_equal(name, SQUARE_NAMES[i]) {
+            return Ok(i);
+        }
+        i += 1;
+    }
+    Err(())
+}
 
 const fn init_square_bbs() -> [Bitboard; NrOf::SQUARES] {
     let mut res = [0; NrOf::SQUARES];
