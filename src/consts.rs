@@ -17,3 +17,5 @@ impl NrOf {
     pub const FILES: usize = 8;
     pub const SQUARES: usize = 64;
 }
+
+pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 310, 300, 100];

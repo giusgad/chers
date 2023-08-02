@@ -7,7 +7,7 @@ use crate::{
         consts::{PieceNames, Pieces, SQUARE_BBS},
         state::State,
     },
-    consts::{Bitboard, Color, Colors, NrOf, Piece, Square},
+    consts::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
     utils::find_ones,
 };
 
@@ -25,19 +25,13 @@ impl Board {
     }
 
     fn put_piece(&mut self, piece: Piece, color: Color, square: Square) {
-        // TODO: add material calculation
-        self.piece_bbs[color][piece] |= SQUARE_BBS[square]
+        self.piece_bbs[color][piece] |= SQUARE_BBS[square];
+        self.state.material[color] += PIECE_VALUES[piece];
     }
 
     fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
-        // TODO: add material calculation
-        self.piece_bbs[color][piece] ^= SQUARE_BBS[square]
-    }
-
-    // TODO:remove dbg function
-    pub fn print_pawns(&self) {
-        println!("{:064b}", self.piece_bbs[Colors::WHITE][Pieces::BISHOP]);
-        println!("{:064b}", self.piece_bbs[Colors::BLACK][Pieces::BISHOP]);
+        self.piece_bbs[color][piece] ^= SQUARE_BBS[square];
+        self.state.material[color] -= PIECE_VALUES[piece];
     }
 }
 

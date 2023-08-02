@@ -1,7 +1,5 @@
 #![allow(dead_code, unused_variables)]
 
-use crate::board::consts::STARTING_FEN;
-
 mod board;
 mod consts;
 mod utils;
