@@ -18,4 +18,6 @@ impl NrOf {
     pub const SQUARES: usize = 64;
 }
 
+pub const MAX_MOVES: usize = 1024; // TODO: maybe adjust
+
 pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 310, 300, 100];
