@@ -1,4 +1,4 @@
-use crate::consts::{Piece, Square};
+use crate::consts::{Piece, Square, MASK_3, MASK_6};
 
 // A move is represented as a struct to be able to attach decoding functions
 // Move.data contains all the information for the move encoded in bits as follows (from LSB):
@@ -15,9 +15,6 @@ use crate::consts::{Piece, Square};
 //
 // representation:
 // 000 000 000000 000000 000
-
-const MASK_3: u32 = 0b111;
-const MASK_6: u32 = 0b111111;
 
 impl From<u32> for Move {
     fn from(value: u32) -> Self {
@@ -108,6 +105,7 @@ impl Into<usize> for MoveType {
     }
 }
 
+#[derive(Debug)]
 pub enum MoveDirection {
     N,
     NE,
@@ -120,6 +118,16 @@ pub enum MoveDirection {
 }
 
 impl MoveDirection {
+    pub const VALUES: [MoveDirection; 8] = [
+        MoveDirection::N,
+        MoveDirection::NE,
+        MoveDirection::E,
+        MoveDirection::SE,
+        MoveDirection::S,
+        MoveDirection::SW,
+        MoveDirection::W,
+        MoveDirection::NW,
+    ];
     pub const fn bb_val(&self) -> i8 {
         match self {
             MoveDirection::N => 8,

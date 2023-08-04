@@ -3,6 +3,10 @@ pub type Piece = usize;
 pub type Color = usize;
 pub type Square = usize;
 
+pub const MASK_3: u32 = 0b111;
+pub const MASK_6: u32 = 0b111111;
+pub const MASK_8: u64 = 255;
+
 pub struct Colors;
 impl Colors {
     pub const WHITE: Color = 0;

@@ -1,7 +1,7 @@
 #![allow(dead_code, unused_variables)]
 
-use crate::board::consts::{square_by_name, PieceNames, Pieces, SQUARE_NAMES};
-use crate::moves::consts::{Move, MoveType};
+use moves::movegenerator::MoveGenerator;
+use utils::print_bb;
 
 mod board;
 mod consts;
@@ -15,7 +15,7 @@ fn main() {
     println!("{b}");
     let state: String = b.state.into();
     println!("{state}") */
-    let m = Move::new(Pieces::BISHOP, 20, 29, MoveType::Capture, Pieces::PAWN);
+    /* let m = Move::new(Pieces::BISHOP, 20, 29, MoveType::Capture, Pieces::PAWN);
     println!("{:024b}", m.data);
     println!(
         "piece: {}, from:{}, to:{}, type:{:?}, target:{}",
@@ -24,5 +24,11 @@ fn main() {
         SQUARE_NAMES[m.to()],
         m.move_type(),
         PieceNames::FULL[m.target_piece()],
-    );
+    ); */
+
+    let lm = MoveGenerator::new();
+    /* for (i, bb) in lm.king.iter().enumerate() {
+        print_bb(bb);
+        println!("{i}^")
+    } */
 }

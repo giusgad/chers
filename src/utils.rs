@@ -1,3 +1,5 @@
+use crate::consts::{Bitboard, NrOf, Square, MASK_8};
+
 // find position of ones in binary representation of given u64
 pub fn find_ones(input: u64) -> Vec<usize> {
     let mut res = Vec::new();
@@ -27,4 +29,30 @@ const fn const_bytes_equal(lhs: &[u8], rhs: &[u8]) -> bool {
 // const fn used to compare two &str
 pub const fn const_str_equal(lhs: &str, rhs: &str) -> bool {
     const_bytes_equal(lhs.as_bytes(), rhs.as_bytes())
+}
+
+pub fn add_square_i8(sq: usize, i: i8) -> Option<usize> {
+    if i < 0 {
+        sq.checked_sub(i.unsigned_abs() as usize)
+    } else {
+        let res = sq + i as usize;
+        if res < NrOf::SQUARES {
+            Some(res)
+        } else {
+            None
+        }
+    }
+}
+
+pub fn print_bb(bb: &Bitboard) {
+    let mut ranks = [0; 8];
+    for (i, rank) in ranks.iter_mut().enumerate() {
+        *rank = (bb >> 8 * i) & MASK_8;
+    }
+    for rank in (0..8).rev() {
+        for bit in 0..8 {
+            print!("|{}", ranks[rank] >> bit & 1);
+        }
+        println!("|")
+    }
 }
