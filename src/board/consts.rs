@@ -89,5 +89,7 @@ pub const FILE_BBS: [Bitboard; NrOf::FILES] = init_file_bbs();
 pub struct Files;
 impl Files {
     pub const A: usize = 0;
+    pub const B: usize = 1;
+    pub const G: usize = 6;
     pub const H: usize = 7;
 }

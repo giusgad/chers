@@ -1,6 +1,7 @@
 use crate::{
-    board::consts::{Files, FILE_BBS, SQUARE_BBS},
+    board::consts::{Files, Pieces, FILE_BBS, SQUARE_BBS},
     consts::{Piece, Square, MASK_3, MASK_6},
+    utils::remove_from_vec,
 };
 
 // A move is represented as a struct to be able to attach decoding functions
@@ -18,12 +19,6 @@ use crate::{
 //
 // representation:
 // 000 000 000000 000000 000
-
-impl From<u32> for Move {
-    fn from(value: u32) -> Self {
-        todo!()
-    }
-}
 
 #[derive(Clone, Copy)]
 pub struct Move {
@@ -108,7 +103,7 @@ impl Into<usize> for MoveType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MoveDirection {
     N,
     NE,
@@ -131,6 +126,9 @@ impl MoveDirection {
         MoveDirection::W,
         MoveDirection::NW,
     ];
+
+    // return the number that has to be added to the square index
+    // to move in the specified direction
     pub const fn bb_val(&self) -> i8 {
         match self {
             MoveDirection::N => 8,
@@ -143,17 +141,26 @@ impl MoveDirection {
             MoveDirection::NW => 7,
         }
     }
-    pub fn from_pos(square: Square) -> Vec<Self> {
+
+    // This function returns the possible directions a piece can move in
+    // from a starting square, removing horizontal overflow
+    pub fn from_pos(square: Square, piece: Piece) -> Vec<Self> {
         let mut res = Vec::from(Self::VALUES);
         let bb_square = SQUARE_BBS[square];
+
+        // handle horizontal overflow
         if bb_square & FILE_BBS[Files::H] > 0 {
-            res.remove(1);
-            res.remove(1);
-            res.remove(1);
+            res.drain(1..4);
         } else if bb_square & FILE_BBS[Files::A] > 0 {
-            res.pop();
-            res.pop();
-            res.pop();
+            res.drain(5..8);
+        }
+
+        // only keep the possible moves for the specified piece
+        use MoveDirection::*;
+        match piece {
+            Pieces::BISHOP => remove_from_vec(&mut res, &[N, E, S, W]),
+            Pieces::ROOK => remove_from_vec(&mut res, &[NE, SE, SW, NW]),
+            _ => (),
         }
         res
     }

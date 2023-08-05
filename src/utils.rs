@@ -56,3 +56,11 @@ pub fn print_bb(bb: &Bitboard) {
         println!("|")
     }
 }
+
+pub fn remove_from_vec<T: PartialEq>(v: &mut Vec<T>, r: &[T]) {
+    for val in r.iter() {
+        if let Some(i) = v.iter().position(|x| x == val) {
+            v.remove(i);
+        }
+    }
+}

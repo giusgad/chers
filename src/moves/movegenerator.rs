@@ -1,17 +1,13 @@
-use crate::{
-    board::consts::SQUARE_BBS,
-    consts::{Bitboard, Colors, NrOf},
-    utils::{add_square_i8, print_bb},
-};
-
-use super::consts::MoveDirection;
+use crate::consts::{Bitboard, Colors, NrOf};
 
 pub struct MoveGenerator {
+    // TODO: remove pub
     pub king: [Bitboard; NrOf::SQUARES],
-    queen: [Bitboard; NrOf::SQUARES],
-    bishop: [Bitboard; NrOf::SQUARES],
-    knight: [Bitboard; NrOf::SQUARES],
-    pawn: [[Bitboard; NrOf::SQUARES]; Colors::BOTH],
+    pub queen: [Bitboard; NrOf::SQUARES],
+    pub rook: [Bitboard; NrOf::SQUARES],
+    pub bishop: [Bitboard; NrOf::SQUARES],
+    pub knight: [Bitboard; NrOf::SQUARES],
+    pub pawn: [[Bitboard; NrOf::SQUARES]; Colors::BOTH],
 }
 
 impl MoveGenerator {
@@ -19,21 +15,16 @@ impl MoveGenerator {
         let mut mg = Self {
             king: [0; NrOf::SQUARES],
             queen: [0; NrOf::SQUARES],
+            rook: [0; NrOf::SQUARES],
             bishop: [0; NrOf::SQUARES],
             knight: [0; NrOf::SQUARES],
             pawn: [[0; NrOf::SQUARES]; Colors::BOTH],
         };
         mg.init_king();
+        mg.init_knight();
+        mg.init_bishop();
+        mg.init_rook();
+        mg.init_queen();
         mg
-    }
-
-    fn init_king(&mut self) {
-        for sq in 0..NrOf::SQUARES {
-            for direction in MoveDirection::from_pos(sq).iter() {
-                if let Some(i) = add_square_i8(sq, direction.bb_val()) {
-                    self.king[sq] |= SQUARE_BBS[i];
-                }
-            }
-        }
     }
 }

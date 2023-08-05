@@ -1,6 +1,5 @@
 #![allow(dead_code, unused_variables)]
 
-use board::consts::FILE_BBS;
 use moves::movegenerator::MoveGenerator;
 use utils::print_bb;
 
@@ -28,7 +27,7 @@ fn main() {
     ); */
 
     let lm = MoveGenerator::new();
-    for (i, bb) in lm.king.iter().enumerate() {
+    for (i, bb) in lm.knight.iter().enumerate() {
         print_bb(bb);
         println!("{i}^")
     }
