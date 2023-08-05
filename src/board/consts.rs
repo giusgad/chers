@@ -57,6 +57,7 @@ pub const fn square_by_name(name: &str) -> Result<Square, ()> {
     Err(())
 }
 
+// Bitboards with a 1 in the nth square
 const fn init_square_bbs() -> [Bitboard; NrOf::SQUARES] {
     let mut res = [0; NrOf::SQUARES];
     let mut i = 0;
@@ -67,4 +68,26 @@ const fn init_square_bbs() -> [Bitboard; NrOf::SQUARES] {
     res
 }
 
+// Bitboards with files filled with 1s
+const fn init_file_bbs() -> [Bitboard; NrOf::FILES] {
+    let mut res = [0; NrOf::FILES];
+    let mut i = 0;
+    while i < NrOf::FILES {
+        let mut j = 0;
+        while j < NrOf::SQUARES {
+            res[i] |= 1 << (i + j);
+            j += 8;
+        }
+        i += 1;
+    }
+    res
+}
+
 pub const SQUARE_BBS: [Bitboard; NrOf::SQUARES] = init_square_bbs();
+pub const FILE_BBS: [Bitboard; NrOf::FILES] = init_file_bbs();
+
+pub struct Files;
+impl Files {
+    pub const A: usize = 0;
+    pub const H: usize = 7;
+}

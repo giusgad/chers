@@ -1,4 +1,7 @@
-use crate::consts::{Piece, Square, MASK_3, MASK_6};
+use crate::{
+    board::consts::{Files, FILE_BBS, SQUARE_BBS},
+    consts::{Piece, Square, MASK_3, MASK_6},
+};
 
 // A move is represented as a struct to be able to attach decoding functions
 // Move.data contains all the information for the move encoded in bits as follows (from LSB):
@@ -139,5 +142,19 @@ impl MoveDirection {
             MoveDirection::W => -1,
             MoveDirection::NW => 7,
         }
+    }
+    pub fn from_pos(square: Square) -> Vec<Self> {
+        let mut res = Vec::from(Self::VALUES);
+        let bb_square = SQUARE_BBS[square];
+        if bb_square & FILE_BBS[Files::H] > 0 {
+            res.remove(1);
+            res.remove(1);
+            res.remove(1);
+        } else if bb_square & FILE_BBS[Files::A] > 0 {
+            res.pop();
+            res.pop();
+            res.pop();
+        }
+        res
     }
 }

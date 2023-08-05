@@ -29,7 +29,7 @@ impl MoveGenerator {
 
     fn init_king(&mut self) {
         for sq in 0..NrOf::SQUARES {
-            for direction in MoveDirection::VALUES.iter() {
+            for direction in MoveDirection::from_pos(sq).iter() {
                 if let Some(i) = add_square_i8(sq, direction.bb_val()) {
                     self.king[sq] |= SQUARE_BBS[i];
                 }
