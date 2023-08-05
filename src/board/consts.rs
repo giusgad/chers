@@ -1,5 +1,5 @@
 use crate::{
-    consts::{Bitboard, NrOf, Piece, Square},
+    consts::{Bitboard, NrOf, Piece, Square, MASK_8},
     utils::const_str_equal,
 };
 
@@ -83,8 +83,20 @@ const fn init_file_bbs() -> [Bitboard; NrOf::FILES] {
     res
 }
 
+// Bitboards with ranks filled with 1s
+const fn init_rank_bbs() -> [Bitboard; NrOf::RANKS] {
+    let mut res = [0; NrOf::RANKS];
+    let mut i = 0;
+    while i < NrOf::RANKS {
+        res[i] |= MASK_8 << (i * 8);
+        i += 1;
+    }
+    res
+}
+
 pub const SQUARE_BBS: [Bitboard; NrOf::SQUARES] = init_square_bbs();
 pub const FILE_BBS: [Bitboard; NrOf::FILES] = init_file_bbs();
+pub const RANK_BBS: [Bitboard; NrOf::RANKS] = init_rank_bbs();
 
 pub struct Files;
 impl Files {
@@ -92,4 +104,10 @@ impl Files {
     pub const B: usize = 1;
     pub const G: usize = 6;
     pub const H: usize = 7;
+}
+
+pub struct Ranks;
+impl Ranks {
+    pub const R2: usize = 1;
+    pub const R7: usize = 6;
 }

@@ -7,7 +7,8 @@ pub struct MoveGenerator {
     pub rook: [Bitboard; NrOf::SQUARES],
     pub bishop: [Bitboard; NrOf::SQUARES],
     pub knight: [Bitboard; NrOf::SQUARES],
-    pub pawn: [[Bitboard; NrOf::SQUARES]; Colors::BOTH],
+    pub pawn_quiet: [[Bitboard; NrOf::SQUARES]; Colors::BOTH],
+    pub pawn_capture: [[Bitboard; NrOf::SQUARES]; Colors::BOTH],
 }
 
 impl MoveGenerator {
@@ -18,13 +19,16 @@ impl MoveGenerator {
             rook: [0; NrOf::SQUARES],
             bishop: [0; NrOf::SQUARES],
             knight: [0; NrOf::SQUARES],
-            pawn: [[0; NrOf::SQUARES]; Colors::BOTH],
+            pawn_quiet: [[0; NrOf::SQUARES]; Colors::BOTH],
+            pawn_capture: [[0; NrOf::SQUARES]; Colors::BOTH],
         };
         mg.init_king();
         mg.init_knight();
         mg.init_bishop();
         mg.init_rook();
         mg.init_queen();
+        mg.init_pawn_quiet();
+        mg.init_pawn_captures();
         mg
     }
 }

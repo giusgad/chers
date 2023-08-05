@@ -1,6 +1,6 @@
 use crate::{
-    board::consts::{Files, Pieces, FILE_BBS, SQUARE_BBS},
-    consts::{NrOf, Piece, Square},
+    board::consts::{Files, Pieces, Ranks, FILE_BBS, RANK_BBS, SQUARE_BBS},
+    consts::{Colors, NrOf, Piece, Square},
     utils::add_square_i8,
 };
 
@@ -115,6 +115,49 @@ impl MoveGenerator {
                         break;
                     }
                     dir_sq = i;
+                }
+            }
+        }
+    }
+
+    pub fn init_pawn_quiet(&mut self) {
+        for sq in 0..NrOf::SQUARES {
+            if let Some(i) = add_square_i8(sq, MoveDirection::N.bb_val()) {
+                self.pawn_quiet[Colors::WHITE][sq] = 1 << i;
+            }
+            if let Some(i) = add_square_i8(sq, MoveDirection::S.bb_val()) {
+                self.pawn_quiet[Colors::BLACK][sq] = 1 << i;
+            }
+            let bb_sq = SQUARE_BBS[sq];
+            if bb_sq & RANK_BBS[Ranks::R2] > 0 {
+                // white doublestep
+                self.pawn_quiet[Colors::WHITE][sq] |=
+                    1 << add_square_i8(sq, MoveDirection::N.bb_val() * 2).unwrap();
+            } else if bb_sq & RANK_BBS[Ranks::R7] > 0 {
+                // black doublestep
+                self.pawn_quiet[Colors::BLACK][sq] |=
+                    1 << add_square_i8(sq, MoveDirection::S.bb_val() * 2).unwrap();
+            }
+        }
+    }
+
+    pub fn init_pawn_captures(&mut self) {
+        for sq in 0..NrOf::SQUARES {
+            let bb_sq = SQUARE_BBS[sq];
+            if !(bb_sq & FILE_BBS[Files::H] > 0) {
+                if let Some(i) = add_square_i8(sq, MoveDirection::NE.bb_val()) {
+                    self.pawn_capture[Colors::WHITE][sq] |= 1 << i;
+                }
+                if let Some(i) = add_square_i8(sq, MoveDirection::SE.bb_val()) {
+                    self.pawn_capture[Colors::BLACK][sq] |= 1 << i;
+                }
+            }
+            if !(bb_sq & FILE_BBS[Files::A] > 0) {
+                if let Some(i) = add_square_i8(sq, MoveDirection::NW.bb_val()) {
+                    self.pawn_capture[Colors::WHITE][sq] |= 1 << i;
+                }
+                if let Some(i) = add_square_i8(sq, MoveDirection::SW.bb_val()) {
+                    self.pawn_capture[Colors::BLACK][sq] |= 1 << i;
                 }
             }
         }
