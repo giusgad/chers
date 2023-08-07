@@ -12,9 +12,11 @@ use crate::{
 // | from              | 6 bits | Square
 // | to                | 6 bits | Square
 // | move type         | 3 bits | MoveType
-// | target piece      | 3 bits | Piece
+// | captured piece    | 3 bits | Piece
+// | promoted to       | 3 bits | Piece
+// | promotion         | 1 bit  | bool
 //
-// 21 bits total
+// 25 bits total
 // target piece is the captured piece in case of a capture or promoted_to in case of promotion
 //
 // representation:
@@ -30,17 +32,32 @@ impl MoveOffsets {
     pub const FROM: usize = 3;
     pub const TO: usize = 9;
     pub const TYPE: usize = 15;
-    pub const TARGET: usize = 18;
+    pub const CAPTURED: usize = 18;
+    pub const PROMOTED_TO: usize = 21;
+    pub const PROMOTION: usize = 24;
 }
 
 impl Move {
-    pub fn new(piece: Piece, from: Square, to: Square, move_type: MoveType, target: Piece) -> Self {
+    pub fn new(
+        piece: Piece,
+        from: Square,
+        to: Square,
+        move_type: MoveType,
+        captured: Piece,
+        promoted_to: Option<Piece>,
+    ) -> Self {
         let move_type: usize = move_type.into();
-        let data = (piece
+        let mut data = piece
             | from << MoveOffsets::FROM
             | to << MoveOffsets::TO
             | move_type << MoveOffsets::TYPE
-            | target << MoveOffsets::TARGET) as u32;
+            | captured << MoveOffsets::CAPTURED;
+        if let Some(prom_piece) = promoted_to {
+            data |= 1 << MoveOffsets::PROMOTION | prom_piece << MoveOffsets::PROMOTED_TO;
+        } else {
+            data |= Pieces::NONE << MoveOffsets::PROMOTED_TO;
+        }
+        let data = data as u32;
         Move { data }
     }
 
@@ -59,8 +76,14 @@ impl Move {
             .try_into()
             .unwrap()
     }
-    pub fn target_piece(&self) -> Piece {
-        ((self.data >> MoveOffsets::TARGET) & MASK_3) as Piece
+    pub fn captured_piece(&self) -> Piece {
+        ((self.data >> MoveOffsets::CAPTURED) & MASK_3) as Piece
+    }
+    pub fn is_promotion(&self) -> bool {
+        ((self.data >> MoveOffsets::PROMOTION) & 1) == 1
+    }
+    pub fn promoted_to(&self) -> Piece {
+        ((self.data >> MoveOffsets::PROMOTED_TO) & MASK_3) as Piece
     }
 }
 

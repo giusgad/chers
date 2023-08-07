@@ -1,6 +1,7 @@
 pub mod consts;
 mod fen;
 mod history;
+mod makemove;
 mod state;
 
 use crate::{
@@ -10,31 +11,39 @@ use crate::{
         state::State,
     },
     consts::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
-    utils::find_ones,
+    utils::bit_ops::find_ones,
 };
 
 pub struct Board {
     piece_bbs: [[Bitboard; NrOf::PIECE_TYPES]; Colors::BOTH],
+    pub color_bbs: [Bitboard; Colors::BOTH],
     pub state: State,
     history: History,
+    pub pieces: [[Piece; NrOf::SQUARES]; Colors::BOTH],
 }
 
 impl Board {
     pub fn new() -> Self {
         Self {
             piece_bbs: [[0u64; NrOf::PIECE_TYPES]; Colors::BOTH],
+            color_bbs: [0; Colors::BOTH],
             state: State::new(),
             history: History::new(),
+            pieces: [[Pieces::NONE; NrOf::SQUARES]; Colors::BOTH],
         }
     }
 
     fn put_piece(&mut self, piece: Piece, color: Color, square: Square) {
         self.piece_bbs[color][piece] |= SQUARE_BBS[square];
+        self.color_bbs[color] |= SQUARE_BBS[square];
+        self.pieces[color][square] = piece;
         self.state.material[color] += PIECE_VALUES[piece];
     }
 
     fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
         self.piece_bbs[color][piece] ^= SQUARE_BBS[square];
+        self.color_bbs[color] ^= SQUARE_BBS[square];
+        self.pieces[color][square] = Pieces::NONE;
         self.state.material[color] -= PIECE_VALUES[piece];
     }
 
@@ -42,6 +51,10 @@ impl Board {
     pub fn print_pawns(&self) {
         println!("{:064b}", self.piece_bbs[Colors::WHITE][Pieces::BISHOP]);
         println!("{:064b}", self.piece_bbs[Colors::BLACK][Pieces::BISHOP]);
+    }
+
+    pub fn get_pieces(&self, piece: Piece, color: Color) -> Bitboard {
+        self.piece_bbs[color][piece]
     }
 }
 

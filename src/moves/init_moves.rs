@@ -4,7 +4,7 @@ use crate::{
     utils::add_square_i8,
 };
 
-use super::{consts::MoveDirection, movegenerator::MoveGenerator};
+use super::{consts::MoveDirection, MoveGenerator};
 
 // The init functions create bitboards with all the possible moves for every
 // piece starting from every square. These can then be used to find legal moves

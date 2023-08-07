@@ -1,14 +1,24 @@
 use crate::consts::{Bitboard, NrOf, Square, MASK_8};
 
 // find position of ones in binary representation of given u64
-pub fn find_ones(input: u64) -> Vec<usize> {
-    let mut res = Vec::new();
-    for i in 0..8 {
-        if input >> i & 1 == 1 {
-            res.push(i)
+pub mod bit_ops {
+    use crate::consts::{Bitboard, Square};
+
+    pub fn find_ones(input: u64) -> Vec<usize> {
+        let mut res = Vec::new();
+        for i in 0..8 {
+            if input >> i & 1 == 1 {
+                res.push(i)
+            }
         }
+        res
     }
-    res
+
+    pub fn next_one(bb: &mut Bitboard) -> Square {
+        let sq = bb.trailing_zeros();
+        *bb ^= 1 << sq;
+        sq as Square
+    }
 }
 
 // used to compare bytes in const
