@@ -1,6 +1,6 @@
 use crate::{
     board::consts::{Files, Pieces, Ranks, FILE_BBS, RANK_BBS, SQUARE_BBS},
-    consts::{Colors, NrOf, Piece, Square},
+    consts::{Colors, NrOf, Square},
     utils::add_square_i8,
 };
 
@@ -49,72 +49,6 @@ impl MoveGenerator {
             for direction in Self::knight_bb_vals(sq).iter() {
                 if let Some(i) = add_square_i8(sq, *direction) {
                     self.knight[sq] |= SQUARE_BBS[i];
-                }
-            }
-        }
-    }
-
-    /* This function returns the condition to stop the piece ray from traversing the board.
-     * In the init functions for bishop, rook and queen the ray keeps going in the same direction
-     * until it either overflows (it would be above or below the board) or it reaches the side of
-     * the board (break_condition returns false).
-     */
-    fn break_condition(p: Piece, sq: Square, dir: &MoveDirection) -> bool {
-        use MoveDirection::*;
-        let bishop =
-            SQUARE_BBS[sq] & FILE_BBS[Files::A] > 0 || SQUARE_BBS[sq] & FILE_BBS[Files::H] > 0;
-        let rook = bishop && (dir == &E || dir == &W);
-        match p {
-            Pieces::BISHOP => bishop,
-            Pieces::ROOK => rook,
-            Pieces::QUEEN => match dir {
-                N | E | S | W => rook,
-                _ => bishop,
-            },
-            _ => false,
-        }
-    }
-
-    pub fn init_bishop(&mut self) {
-        for sq in 0..NrOf::SQUARES {
-            for direction in MoveDirection::from_pos(sq, Pieces::BISHOP).iter() {
-                let mut dir_sq = sq;
-                while let Some(i) = add_square_i8(dir_sq, direction.bb_val()) {
-                    self.bishop[sq] |= SQUARE_BBS[i];
-                    if Self::break_condition(Pieces::BISHOP, i, direction) {
-                        break;
-                    }
-                    dir_sq = i;
-                }
-            }
-        }
-    }
-
-    pub fn init_rook(&mut self) {
-        for sq in 0..NrOf::SQUARES {
-            for direction in MoveDirection::from_pos(sq, Pieces::ROOK).iter() {
-                let mut dir_sq = sq;
-                while let Some(i) = add_square_i8(dir_sq, direction.bb_val()) {
-                    self.rook[sq] |= SQUARE_BBS[i];
-                    if Self::break_condition(Pieces::ROOK, i, direction) {
-                        break;
-                    }
-                    dir_sq = i;
-                }
-            }
-        }
-    }
-
-    pub fn init_queen(&mut self) {
-        for sq in 0..NrOf::SQUARES {
-            for direction in MoveDirection::from_pos(sq, Pieces::QUEEN).iter() {
-                let mut dir_sq = sq;
-                while let Some(i) = add_square_i8(dir_sq, direction.bb_val()) {
-                    self.queen[sq] |= SQUARE_BBS[i];
-                    if Self::break_condition(Pieces::QUEEN, i, direction) {
-                        break;
-                    }
-                    dir_sq = i;
                 }
             }
         }

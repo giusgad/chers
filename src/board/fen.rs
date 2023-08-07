@@ -94,6 +94,7 @@ impl Board {
                 'q' => board.state.castling |= Castling::BQ,
                 'K' => board.state.castling |= Castling::WK,
                 'Q' => board.state.castling |= Castling::WQ,
+                '-' => board.state.castling = 0,
                 _ => return Err(FenError::Castling),
             }
         }

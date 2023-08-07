@@ -1,5 +1,5 @@
 use crate::{
-    board::consts::{Files, Pieces, FILE_BBS, SQUARE_BBS},
+    board::consts::{Files, PieceNames, Pieces, FILE_BBS, SQUARE_BBS, SQUARE_NAMES},
     consts::{Piece, Square, MASK_3, MASK_6},
     utils::remove_from_vec,
 };
@@ -84,6 +84,22 @@ impl Move {
     }
     pub fn promoted_to(&self) -> Piece {
         ((self.data >> MoveOffsets::PROMOTED_TO) & MASK_3) as Piece
+    }
+}
+
+impl std::fmt::Debug for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "piece: {}, from:{}, to:{}, type:{:?}, captured:{}, promotion:{}, promoted to:{}",
+            PieceNames::FULL[self.piece()],
+            SQUARE_NAMES[self.from()],
+            SQUARE_NAMES[self.to()],
+            self.move_type(),
+            PieceNames::FULL[self.captured_piece()],
+            self.is_promotion(),
+            PieceNames::FULL[self.promoted_to()]
+        )
     }
 }
 

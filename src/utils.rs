@@ -1,4 +1,4 @@
-use crate::consts::{Bitboard, NrOf, Square, MASK_8};
+use crate::consts::{Bitboard, NrOf, MASK_8};
 
 // find position of ones in binary representation of given u64
 pub mod bit_ops {
