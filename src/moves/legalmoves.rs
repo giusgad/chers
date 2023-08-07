@@ -1,9 +1,10 @@
 use crate::{
     board::{
-        consts::{Files, Pieces, FILE_BBS, SQUARE_BBS},
+        consts::{Files, Pieces, Ranks, FILE_BBS, RANK_BBS, SQUARE_BBS},
         Board,
     },
-    consts::{Color, Piece, Square},
+    consts::{Color, Colors, Piece, Square},
+    moves::consts::MoveOffsets,
     utils::{add_square_i8, bit_ops},
 };
 
@@ -14,8 +15,6 @@ use super::{
 };
 
 impl MoveGenerator {
-    fn square_attacked(&self, board: &Board, sq: Square, attacker: Color) {}
-
     // This function sends to the MoveList all the legal moves for a specified piece
     pub fn piece_legal_moves(&self, list: &mut MoveList, board: &Board, p: Piece) {
         match p {
@@ -28,10 +27,95 @@ impl MoveGenerator {
         }
     }
 
-    fn pawn_moves(&self, board: &Board, list: &MoveList) {}
+    fn pawn_moves(&self, board: &Board, list: &mut MoveList) {
+        const PROMOTION_PIECES: [Piece; 4] =
+            [Pieces::QUEEN, Pieces::BISHOP, Pieces::KNIGHT, Pieces::ROOK];
+        let color = board.state.active_color;
+        let self_pieces = board.color_bbs[color];
+        let enemy_pieces = board.color_bbs[color ^ 1];
+        let empty = !(self_pieces | enemy_pieces);
+
+        let mut pawns_bb = board.get_pieces(Pieces::PAWN, color);
+        while pawns_bb > 0 {
+            let from = bit_ops::next_one(&mut pawns_bb);
+            let available_bb = self.pawn_quiet[color][from];
+            let mut quiets = available_bb & empty;
+            while quiets > 0 {
+                let to = bit_ops::next_one(&mut quiets);
+                if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
+                    || ((SQUARE_BBS[to] & RANK_BBS[Ranks::R1] > 0) && color == Colors::BLACK)
+                {
+                    // promotion
+                    for promote_to in PROMOTION_PIECES {
+                        let m = Move::new(
+                            Pieces::PAWN,
+                            from,
+                            to,
+                            MoveType::Quiet,
+                            Pieces::NONE,
+                            Some(promote_to),
+                        );
+                        list.push(m);
+                    }
+                } else {
+                    let m = Move::new(Pieces::PAWN, from, to, MoveType::Quiet, Pieces::NONE, None);
+                    list.push(m);
+                }
+            }
+
+            let available_bb = self.pawn_capture[color][from];
+            let mut captures = available_bb & enemy_pieces;
+            if let Some(ep_square) = board.state.ep_square {
+                if SQUARE_BBS[ep_square] & available_bb > 0 {
+                    let mut m = Move::new(
+                        Pieces::PAWN,
+                        from,
+                        ep_square,
+                        MoveType::Capture,
+                        Pieces::PAWN,
+                        None,
+                    );
+                    m.data |= 1 << MoveOffsets::EN_PASSANT;
+                    list.push(m);
+                }
+            }
+            while captures > 0 {
+                let to = bit_ops::next_one(&mut captures);
+                if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
+                    || ((SQUARE_BBS[to] & RANK_BBS[Ranks::R1] > 0) && color == Colors::BLACK)
+                {
+                    for promote_to in PROMOTION_PIECES {
+                        let m = Move::new(
+                            Pieces::PAWN,
+                            from,
+                            to,
+                            MoveType::Capture,
+                            board.pieces[color ^ 1][to],
+                            Some(promote_to),
+                        );
+                        list.push(m);
+                    }
+                } else {
+                    let m = Move::new(
+                        Pieces::PAWN,
+                        from,
+                        to,
+                        MoveType::Capture,
+                        board.pieces[color ^ 1][to],
+                        None,
+                    );
+                    list.push(m);
+                }
+            }
+        }
+    }
 
     fn non_sliding_moves(&self, piece: Piece, board: &Board, list: &mut MoveList) {
         let color = board.state.active_color;
+        let self_pieces = board.color_bbs[color];
+        let enemy_pieces = board.color_bbs[color ^ 1];
+        let empty = !(self_pieces | enemy_pieces);
+
         let mut piece_bb = board.get_pieces(piece, color);
         while piece_bb > 0 {
             let from = bit_ops::next_one(&mut piece_bb);
@@ -40,10 +124,6 @@ impl MoveGenerator {
                 Pieces::KNIGHT => self.knight[from],
                 p => panic!("Invalid piece for non_sliding_moves: {p}"),
             };
-
-            let self_pieces = board.color_bbs[color];
-            let enemy_pieces = board.color_bbs[color ^ 1];
-            let empty = !(self_pieces | enemy_pieces);
 
             let mut captures = available_bb & enemy_pieces; // TODO: check if the king is in check after move
             while captures > 0 {
@@ -123,4 +203,8 @@ impl MoveGenerator {
             _ => bishop,
         }
     }
+}
+
+impl MoveGenerator {
+    fn square_attacked(&self, board: &Board, sq: Square, attacker: Color) {}
 }

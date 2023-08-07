@@ -35,11 +35,9 @@ impl MoveGenerator {
 
     pub fn get_all_legal_moves(&self, board: &Board) -> MoveList {
         let mut list = MoveList::new();
-        self.piece_legal_moves(&mut list, board, Pieces::KING);
-        self.piece_legal_moves(&mut list, board, Pieces::QUEEN);
-        self.piece_legal_moves(&mut list, board, Pieces::BISHOP);
-        self.piece_legal_moves(&mut list, board, Pieces::KNIGHT);
-        self.piece_legal_moves(&mut list, board, Pieces::ROOK);
+        for piece in 0..NrOf::PIECE_TYPES {
+            self.piece_legal_moves(&mut list, board, piece)
+        }
         list
     }
 }

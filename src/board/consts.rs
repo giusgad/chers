@@ -108,6 +108,8 @@ impl Files {
 
 pub struct Ranks;
 impl Ranks {
+    pub const R1: usize = 0;
     pub const R2: usize = 1;
     pub const R7: usize = 6;
+    pub const R8: usize = 7;
 }

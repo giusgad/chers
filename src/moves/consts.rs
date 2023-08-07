@@ -15,8 +15,9 @@ use crate::{
 // | captured piece    | 3 bits | Piece
 // | promoted to       | 3 bits | Piece
 // | promotion         | 1 bit  | bool
+// | en_passant        | 1 bit  | bool
 //
-// 25 bits total
+// 26 bits total
 // target piece is the captured piece in case of a capture or promoted_to in case of promotion
 //
 // representation:
@@ -35,6 +36,7 @@ impl MoveOffsets {
     pub const CAPTURED: usize = 18;
     pub const PROMOTED_TO: usize = 21;
     pub const PROMOTION: usize = 24;
+    pub const EN_PASSANT: usize = 25;
 }
 
 impl Move {
@@ -85,20 +87,24 @@ impl Move {
     pub fn promoted_to(&self) -> Piece {
         ((self.data >> MoveOffsets::PROMOTED_TO) & MASK_3) as Piece
     }
+    pub fn is_en_passant(&self) -> bool {
+        ((self.data >> MoveOffsets::EN_PASSANT) & 1) == 1
+    }
 }
 
 impl std::fmt::Debug for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "piece: {}, from:{}, to:{}, type:{:?}, captured:{}, promotion:{}, promoted to:{}",
+            "piece: {}, from:{}, to:{}, type:{:?}, captured:{}, promotion:{}, promoted to:{}, en_passant:{}",
             PieceNames::FULL[self.piece()],
             SQUARE_NAMES[self.from()],
             SQUARE_NAMES[self.to()],
             self.move_type(),
             PieceNames::FULL[self.captured_piece()],
             self.is_promotion(),
-            PieceNames::FULL[self.promoted_to()]
+            PieceNames::FULL[self.promoted_to()],
+            self.is_en_passant(),
         )
     }
 }
@@ -107,10 +113,7 @@ impl std::fmt::Debug for Move {
 pub enum MoveType {
     Quiet,
     Capture,
-    DoubleStep,
-    Castling,
-    Promotion,
-    EnPassant,
+    Both,
 }
 
 impl TryFrom<u32> for MoveType {
@@ -120,10 +123,7 @@ impl TryFrom<u32> for MoveType {
         match value {
             0 => Ok(Quiet),
             1 => Ok(Capture),
-            2 => Ok(DoubleStep),
-            3 => Ok(Castling),
-            4 => Ok(Promotion),
-            5 => Ok(EnPassant),
+            2 => Ok(Both),
             _ => Err("Not a valid movetype"),
         }
     }
@@ -134,10 +134,7 @@ impl Into<usize> for MoveType {
         match self {
             Quiet => 0,
             Capture => 1,
-            DoubleStep => 2,
-            Castling => 3,
-            Promotion => 4,
-            EnPassant => 5,
+            Both => 2,
         }
     }
 }
