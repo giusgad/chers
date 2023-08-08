@@ -54,27 +54,6 @@ impl MoveGenerator {
         }
     }
 
-    pub fn init_pawn_quiet(&mut self) {
-        for sq in 0..NrOf::SQUARES {
-            if let Some(i) = add_square_i8(sq, MoveDirection::N.bb_val()) {
-                self.pawn_quiet[Colors::WHITE][sq] = 1 << i;
-            }
-            if let Some(i) = add_square_i8(sq, MoveDirection::S.bb_val()) {
-                self.pawn_quiet[Colors::BLACK][sq] = 1 << i;
-            }
-            let bb_sq = SQUARE_BBS[sq];
-            if bb_sq & RANK_BBS[Ranks::R2] > 0 {
-                // white doublestep
-                self.pawn_quiet[Colors::WHITE][sq] |=
-                    1 << add_square_i8(sq, MoveDirection::N.bb_val() * 2).unwrap();
-            } else if bb_sq & RANK_BBS[Ranks::R7] > 0 {
-                // black doublestep
-                self.pawn_quiet[Colors::BLACK][sq] |=
-                    1 << add_square_i8(sq, MoveDirection::S.bb_val() * 2).unwrap();
-            }
-        }
-    }
-
     pub fn init_pawn_captures(&mut self) {
         for sq in 0..NrOf::SQUARES {
             let bb_sq = SQUARE_BBS[sq];

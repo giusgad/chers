@@ -89,6 +89,9 @@ impl MoveGenerator {
     }
 
     fn pawn_moves(&self, board: &Board, list: &mut MoveList) {
+        // TODO: REDO PAWN MOVES
+        // pieces on the 3rd rank don't obstruct pawns from moving to the 4th
+
         const PROMOTION_PIECES: [Piece; 4] =
             [Pieces::QUEEN, Pieces::BISHOP, Pieces::KNIGHT, Pieces::ROOK];
         let color = board.state.active_color;
@@ -99,31 +102,58 @@ impl MoveGenerator {
         let mut pawns_bb = board.get_pieces(Pieces::PAWN, color);
         while pawns_bb > 0 {
             let from = bit_ops::next_one(&mut pawns_bb);
-            let available_bb = self.pawn_quiet[color][from];
-            let mut quiets = available_bb & empty;
-            while quiets > 0 {
-                let to = bit_ops::next_one(&mut quiets);
-                if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
-                    || ((SQUARE_BBS[to] & RANK_BBS[Ranks::R1] > 0) && color == Colors::BLACK)
-                {
-                    // promotion
-                    for promote_to in PROMOTION_PIECES {
-                        let m = Move::new(
-                            Pieces::PAWN,
-                            from,
-                            to,
-                            MoveType::Quiet,
-                            Pieces::NONE,
-                            Some(promote_to),
-                        );
+            let dir = if color == Colors::WHITE {
+                MoveDirection::N
+            } else {
+                MoveDirection::S
+            };
+
+            if let Some(to) = add_square_i8(from, dir.bb_val()) {
+                if SQUARE_BBS[to] & empty > 0 {
+                    if (SQUARE_BBS[from] & RANK_BBS[Ranks::R2] > 0 && color == Colors::WHITE)
+                        || (SQUARE_BBS[from] & RANK_BBS[Ranks::R7] > 0 && color == Colors::BLACK)
+                    {
+                        // DOUBLE STEP
+                        if let Some(to) = add_square_i8(from, dir.bb_val() * 2) {
+                            if SQUARE_BBS[to] & empty > 0 {
+                                let mut m = Move::new(
+                                    Pieces::PAWN,
+                                    from,
+                                    to,
+                                    MoveType::Quiet,
+                                    Pieces::NONE,
+                                    None,
+                                );
+                                m.data |= 1 << MoveOffsets::DOUBLESTEP;
+                                list.push(m);
+                            }
+                        }
+                    }
+                    if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
+                        || ((SQUARE_BBS[to] & RANK_BBS[Ranks::R1] > 0) && color == Colors::BLACK)
+                    {
+                        // PROMOTION
+                        for promote_to in PROMOTION_PIECES {
+                            let m = Move::new(
+                                Pieces::PAWN,
+                                from,
+                                to,
+                                MoveType::Quiet,
+                                Pieces::NONE,
+                                Some(promote_to),
+                            );
+                            list.push(m);
+                        }
+                    } else {
+                        // QUIET
+                        let m =
+                            Move::new(Pieces::PAWN, from, to, MoveType::Quiet, Pieces::NONE, None);
                         list.push(m);
                     }
-                } else {
-                    let m = Move::new(Pieces::PAWN, from, to, MoveType::Quiet, Pieces::NONE, None);
-                    list.push(m);
                 }
             }
 
+            // EN PASSANT
             let available_bb = self.pawn_capture[color][from];
             let mut captures = available_bb & enemy_pieces;
             if let Some(ep_square) = board.state.ep_square {
@@ -140,6 +170,7 @@ impl MoveGenerator {
                     list.push(m);
                 }
             }
+
             while captures > 0 {
                 let to = bit_ops::next_one(&mut captures);
                 if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
