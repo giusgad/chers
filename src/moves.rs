@@ -4,7 +4,7 @@ mod legalmoves;
 mod list;
 
 use crate::{
-    board::{consts::Pieces, Board},
+    board::Board,
     consts::{Bitboard, Colors, NrOf},
 };
 

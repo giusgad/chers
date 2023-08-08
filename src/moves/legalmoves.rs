@@ -1,9 +1,9 @@
 use crate::{
     board::{
-        consts::{Files, Pieces, Ranks, FILE_BBS, RANK_BBS, SQUARE_BBS},
+        consts::{Castling, Files, Pieces, Ranks, Squares, FILE_BBS, RANK_BBS, SQUARE_BBS},
         Board,
     },
-    consts::{Color, Colors, Piece, Square},
+    consts::{Bitboard, Color, Colors, Piece, Square},
     moves::consts::MoveOffsets,
     utils::{add_square_i8, bit_ops},
 };
@@ -24,6 +24,67 @@ impl MoveGenerator {
             }
             Pieces::PAWN => self.pawn_moves(board, list),
             _ => (),
+        }
+    }
+
+    pub fn castling(&self, board: &Board, list: &mut MoveList) {
+        let perms = board.state.castling;
+        let color = board.state.active_color;
+        let occupied = board.color_bbs[Colors::BLACK] | board.color_bbs[Colors::WHITE];
+
+        let mut piece_bb = board.piece_bbs[color][Pieces::KING];
+        let from = bit_ops::next_one(&mut piece_bb);
+
+        let (queenside_perm, kingside_perm): (bool, bool) = match color {
+            Colors::WHITE => (perms & Castling::WQ > 0, perms & Castling::WK > 0),
+            Colors::BLACK => (perms & Castling::BQ > 0, perms & Castling::BK > 0),
+            c => panic!("Invalid active color in castling: {c}"),
+        };
+        let (to_q, to_k) = match color {
+            Colors::WHITE => (Squares::C1, Squares::G1),
+            Colors::BLACK => (Squares::C8, Squares::G8),
+            c => panic!("Invalid active color in castling: {c}"),
+        };
+
+        // can't castle if there are pieces in the way or one of the squares is under attack
+        let (mut ok_q, mut ok_k) = (true, true);
+        for sq in to_q..from {
+            if occupied & SQUARE_BBS[sq] > 0 || Self::square_attacked(&self, board, sq, color ^ 1) {
+                ok_q = false;
+
+                break;
+            }
+        }
+        for sq in (from + 1)..=to_k {
+            if occupied & SQUARE_BBS[sq] > 0 || Self::square_attacked(&self, board, sq, color ^ 1) {
+                ok_k = false;
+                break;
+            }
+        }
+
+        if kingside_perm && ok_k {
+            let mut m = Move::new(
+                Pieces::KING,
+                from,
+                to_k,
+                MoveType::Quiet,
+                Pieces::NONE,
+                None,
+            );
+            m.data |= 1 << MoveOffsets::CASTLING;
+            list.push(m);
+        }
+        if queenside_perm && ok_q {
+            let mut m = Move::new(
+                Pieces::KING,
+                from,
+                to_q,
+                MoveType::Quiet,
+                Pieces::NONE,
+                None,
+            );
+            m.data |= 1 << MoveOffsets::CASTLING;
+            list.push(m);
         }
     }
 
@@ -111,6 +172,9 @@ impl MoveGenerator {
     }
 
     fn non_sliding_moves(&self, piece: Piece, board: &Board, list: &mut MoveList) {
+        if piece == Pieces::KING {
+            self.castling(board, list);
+        }
         let color = board.state.active_color;
         let self_pieces = board.color_bbs[color];
         let enemy_pieces = board.color_bbs[color ^ 1];
@@ -206,5 +270,40 @@ impl MoveGenerator {
 }
 
 impl MoveGenerator {
-    fn square_attacked(&self, board: &Board, sq: Square, attacker: Color) {}
+    fn sliding_moves_bb(piece: Piece, board: &Board, sq: Square) -> Bitboard {
+        // WARN: the bitboard includes captures on pieces of the same color
+        let mut res_bb = 0u64;
+        let occupied = board.color_bbs[Colors::WHITE] | board.color_bbs[Colors::BLACK];
+        for dir in MoveDirection::from_pos(sq, piece) {
+            let mut ray_sq = sq;
+            while let Some(i) = add_square_i8(ray_sq, dir.bb_val()) {
+                res_bb |= SQUARE_BBS[i];
+                if Self::reached_edge(i, &dir) || occupied & SQUARE_BBS[i] > 0 {
+                    break;
+                }
+                ray_sq = i;
+            }
+        }
+        res_bb
+    }
+
+    pub fn square_attacked(&self, board: &Board, sq: Square, attacker: Color) -> bool {
+        let attacker_pieces = board.piece_bbs[attacker];
+
+        let pawn_bb = self.pawn_capture[attacker ^ 1][sq];
+        let king_bb = self.king[sq];
+        let knight_bb = self.knight[sq];
+        let bishop_bb = Self::sliding_moves_bb(Pieces::BISHOP, board, sq);
+        let rook_bb = Self::sliding_moves_bb(Pieces::ROOK, board, sq);
+        let queen_bb = bishop_bb | rook_bb;
+
+        // get the attacks starting from the square to check and then, if there are pieces
+        // that are on the squares the target square can attack, then it is attacked.
+        attacker_pieces[Pieces::PAWN] & pawn_bb > 0
+            || attacker_pieces[Pieces::KING] & king_bb > 0
+            || attacker_pieces[Pieces::KNIGHT] & knight_bb > 0
+            || attacker_pieces[Pieces::BISHOP] & bishop_bb > 0
+            || attacker_pieces[Pieces::QUEEN] & queen_bb > 0
+            || attacker_pieces[Pieces::ROOK] & rook_bb > 0
+    }
 }

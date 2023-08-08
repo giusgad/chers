@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub struct Board {
-    piece_bbs: [[Bitboard; NrOf::PIECE_TYPES]; Colors::BOTH],
+    pub piece_bbs: [[Bitboard; NrOf::PIECE_TYPES]; Colors::BOTH],
     pub color_bbs: [Bitboard; Colors::BOTH],
     pub state: State,
     history: History,

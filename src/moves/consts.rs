@@ -16,12 +16,14 @@ use crate::{
 // | promoted to       | 3 bits | Piece
 // | promotion         | 1 bit  | bool
 // | en_passant        | 1 bit  | bool
+// | castling          | 1 bit  | bool
 //
-// 26 bits total
+// 27 bits total
 // target piece is the captured piece in case of a capture or promoted_to in case of promotion
 //
 // representation:
 // 000 000 000000 000000 000
+// TODO: reduce movetype size
 
 #[derive(Clone, Copy)]
 pub struct Move {
@@ -37,6 +39,7 @@ impl MoveOffsets {
     pub const PROMOTED_TO: usize = 21;
     pub const PROMOTION: usize = 24;
     pub const EN_PASSANT: usize = 25;
+    pub const CASTLING: usize = 26;
 }
 
 impl Move {
@@ -90,13 +93,16 @@ impl Move {
     pub fn is_en_passant(&self) -> bool {
         ((self.data >> MoveOffsets::EN_PASSANT) & 1) == 1
     }
+    pub fn is_castling(&self) -> bool {
+        ((self.data >> MoveOffsets::CASTLING) & 1) == 1
+    }
 }
 
 impl std::fmt::Debug for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "piece: {}, from:{}, to:{}, type:{:?}, captured:{}, promotion:{}, promoted to:{}, en_passant:{}",
+            "piece: {}, from:{}, to:{}, type:{:?}, captured:{}, promotion:{}, promoted to:{}, en_passant:{}, castling:{}",
             PieceNames::FULL[self.piece()],
             SQUARE_NAMES[self.from()],
             SQUARE_NAMES[self.to()],
@@ -105,6 +111,7 @@ impl std::fmt::Debug for Move {
             self.is_promotion(),
             PieceNames::FULL[self.promoted_to()],
             self.is_en_passant(),
+            self.is_castling(),
         )
     }
 }

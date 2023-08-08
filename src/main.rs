@@ -10,15 +10,15 @@ use moves::MoveGenerator;
 
 fn main() {
     let mut b = board::Board::new();
-    b.read_fen("rnbqkbnr/pppp1p1p/6p1/3Pp3/8/8/PPP1PPPP/RNBQKBNR w KQkq e6 0 3")
+    b.read_fen("r1bqkbnr/pp3ppp/2p5/4p3/3pPQ1P/n2PB3/PPPN1PP1/R3KBNR w KQkq - 3 9")
         .expect("error reading fen in main");
     println!("{b}");
 
-    let lm = MoveGenerator::new();
-    let list = lm.get_all_legal_moves(&b);
+    let mg = MoveGenerator::new();
+    let moves = mg.get_all_legal_moves(&b);
     let mut i = 0;
-    while i < list.index {
-        dbg!(list.list[i]);
+    while i < moves.index {
+        dbg!(moves.list[i]);
         i += 1;
     }
 }

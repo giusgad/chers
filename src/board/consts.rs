@@ -3,8 +3,6 @@ use crate::{
     utils::const_str_equal,
 };
 
-pub const STARTING_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
 pub struct Pieces;
 impl Pieces {
     pub const KING: Piece = 0;
@@ -45,6 +43,23 @@ pub const SQUARE_NAMES: [&str; NrOf::SQUARES] = [
     "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
     "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"
 ];
+
+pub struct Squares;
+impl Squares {
+    pub const B1: Square = 1;
+    pub const C1: Square = 2;
+    pub const D1: Square = 3;
+
+    pub const F1: Square = 5;
+    pub const G1: Square = 6;
+
+    pub const B8: Square = 57;
+    pub const C8: Square = 58;
+    pub const D8: Square = 59;
+
+    pub const F8: Square = 61;
+    pub const G8: Square = 62;
+}
 
 pub const fn square_by_name(name: &str) -> Result<Square, ()> {
     let mut i = 0;
