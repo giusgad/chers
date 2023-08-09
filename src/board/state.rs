@@ -1,7 +1,5 @@
 use crate::consts::{Color, Colors};
 
-use super::consts::Castling;
-
 pub struct State {
     pub active_color: Color,
     pub castling: u8,
@@ -14,7 +12,7 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         Self {
-            castling: Castling::ALL,
+            castling: 0,
             active_color: Colors::WHITE,
             ep_square: None,
             halfmove_count: 0,

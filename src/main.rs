@@ -10,9 +10,10 @@ use moves::MoveGenerator;
 
 fn main() {
     let mut b = board::Board::new();
-    b.read_fen("2kr1b1r/ppp1nppp/3p1q1R/4pb2/3P4/n2BPN2/PPPN1PPP/R1BQK3 b Qk - 0 1")
+    b.read_fen("2kr1b1r/ppp1nppp/3p1q1R/4pb2/3P4/n2BPN2/PPPN1PPP/R1BQK3 b Q - 0 1")
         .expect("error reading fen in main");
     println!("{b}");
+    dbg!(b.state.castling);
 
     /* let mg = MoveGenerator::new();
     let mut i = 0;

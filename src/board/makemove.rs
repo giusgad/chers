@@ -33,7 +33,7 @@ impl Board {
                 let promotion = m.is_promotion();
             }
             Pieces::KING => {
-                // remove castling permissions
+                // remove castling permissions if the king castles or moves
                 let castling = m.is_castling();
             }
             Pieces::ROOK => {

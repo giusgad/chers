@@ -46,6 +46,13 @@ impl MoveGenerator {
             c => panic!("Invalid active color in castling: {c}"),
         };
 
+        if (queenside_perm || kingside_perm)
+            && ((color == Colors::WHITE && from != Squares::E1)
+                || (color == Colors::BLACK && from != Squares::E8))
+        {
+            panic!("Castling permissions error: king is not on the starting square")
+        }
+
         // can't castle if there are pieces in the way or one of the squares is under attack
         let (mut ok_q, mut ok_k) = (true, true);
         for sq in to_q..from {

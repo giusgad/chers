@@ -11,7 +11,7 @@ use crate::{
 // | piece that moved  | 3 bits | Piece
 // | from              | 6 bits | Square
 // | to                | 6 bits | Square
-// | move type         | 3 bits | MoveType
+// | move type         | 2 bits | MoveType
 // | captured piece    | 3 bits | Piece
 // | promoted to       | 3 bits | Piece
 // | promotion         | 1 bit  | bool
@@ -24,7 +24,6 @@ use crate::{
 //
 // representation:
 // 000 000 000000 000000 000
-// TODO: reduce movetype size
 
 #[derive(Clone, Copy)]
 pub struct Move {
@@ -36,12 +35,12 @@ impl MoveOffsets {
     pub const FROM: usize = 3;
     pub const TO: usize = 9;
     pub const TYPE: usize = 15;
-    pub const CAPTURED: usize = 18;
-    pub const PROMOTED_TO: usize = 21;
-    pub const PROMOTION: usize = 24;
-    pub const EN_PASSANT: usize = 25;
-    pub const CASTLING: usize = 26;
-    pub const DOUBLESTEP: usize = 27;
+    pub const CAPTURED: usize = 17;
+    pub const PROMOTED_TO: usize = 20;
+    pub const PROMOTION: usize = 23;
+    pub const EN_PASSANT: usize = 24;
+    pub const CASTLING: usize = 25;
+    pub const DOUBLESTEP: usize = 26;
 }
 
 impl Move {
@@ -78,10 +77,9 @@ impl Move {
         ((self.data >> MoveOffsets::TO) & MASK_6) as Square
     }
     pub fn move_type(&self) -> MoveType {
-        // TODO: maybe handle the error
-        ((self.data >> MoveOffsets::TYPE) & MASK_3)
+        ((self.data >> MoveOffsets::TYPE) & 0b11)
             .try_into()
-            .unwrap()
+            .expect("move type invalid")
     }
     pub fn captured_piece(&self) -> Piece {
         ((self.data >> MoveOffsets::CAPTURED) & MASK_3) as Piece
@@ -118,6 +116,16 @@ impl std::fmt::Debug for Move {
             self.is_en_passant(),
             self.is_castling(),
             self.is_doublestep(),
+        )
+    }
+}
+impl std::fmt::Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}{}",
+            SQUARE_NAMES[self.from()],
+            SQUARE_NAMES[self.to()]
         )
     }
 }

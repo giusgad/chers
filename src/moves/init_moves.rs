@@ -1,5 +1,5 @@
 use crate::{
-    board::consts::{Files, Pieces, Ranks, FILE_BBS, RANK_BBS, SQUARE_BBS},
+    board::consts::{Files, Pieces, FILE_BBS, SQUARE_BBS},
     consts::{Colors, NrOf, Square},
     utils::add_square_i8,
 };
