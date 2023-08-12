@@ -1,5 +1,6 @@
 use crate::consts::{Color, Colors};
 
+#[derive(Debug)]
 pub struct State {
     pub active_color: Color,
     pub castling: u8,

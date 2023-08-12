@@ -46,19 +46,23 @@ pub const SQUARE_NAMES: [&str; NrOf::SQUARES] = [
 
 pub struct Squares;
 impl Squares {
+    pub const A1: Square = 0;
     pub const B1: Square = 1;
     pub const C1: Square = 2;
     pub const D1: Square = 3;
     pub const E1: Square = 4;
     pub const F1: Square = 5;
     pub const G1: Square = 6;
+    pub const H1: Square = 7;
 
+    pub const A8: Square = 56;
     pub const B8: Square = 57;
     pub const C8: Square = 58;
     pub const D8: Square = 59;
     pub const E8: Square = 60;
     pub const F8: Square = 61;
     pub const G8: Square = 62;
+    pub const H8: Square = 63;
 }
 
 pub const fn square_by_name(name: &str) -> Result<Square, ()> {

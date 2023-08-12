@@ -130,7 +130,7 @@ impl std::fmt::Display for Move {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MoveType {
     Quiet,
     Capture,

@@ -37,6 +37,7 @@ impl Board {
         self.piece_bbs[color][piece] |= SQUARE_BBS[square];
         self.color_bbs[color] |= SQUARE_BBS[square];
         self.pieces[color][square] = piece;
+
         self.state.material[color] += PIECE_VALUES[piece];
     }
 
@@ -44,13 +45,8 @@ impl Board {
         self.piece_bbs[color][piece] ^= SQUARE_BBS[square];
         self.color_bbs[color] ^= SQUARE_BBS[square];
         self.pieces[color][square] = Pieces::NONE;
-        self.state.material[color] -= PIECE_VALUES[piece];
-    }
 
-    // TODO:remove dbg function
-    pub fn print_pawns(&self) {
-        println!("{:064b}", self.piece_bbs[Colors::WHITE][Pieces::BISHOP]);
-        println!("{:064b}", self.piece_bbs[Colors::BLACK][Pieces::BISHOP]);
+        self.state.material[color] -= PIECE_VALUES[piece];
     }
 
     pub fn get_pieces(&self, piece: Piece, color: Color) -> Bitboard {
