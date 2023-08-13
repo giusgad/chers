@@ -1,15 +1,21 @@
 use crate::{
     consts::{Color, Colors, Piece, Square},
-    moves::consts::{Move, MoveType},
+    moves::{
+        consts::{Move, MoveType},
+        MoveGenerator,
+    },
 };
 
 use super::{
-    consts::{Castling, Pieces, Squares},
+    consts::{Castling, Pieces, Squares, SQUARE_BBS},
     Board,
 };
 
 impl Board {
-    pub fn make_move(&mut self, m: Move) {
+    pub fn make_move(&mut self, m: Move, mg: &MoveGenerator) -> bool {
+        self.state.next_move = m;
+        self.history.push(self.state);
+
         let piece = m.piece();
         let from = m.from();
         let to = m.to();
@@ -43,15 +49,7 @@ impl Board {
 
         // move the rook in castling
         if m.is_castling() {
-            let (rook_from, rook_to) = match to {
-                Squares::C1 => (Squares::A1, Squares::D1),
-                Squares::G1 => (Squares::H1, Squares::F1),
-                Squares::C8 => (Squares::A8, Squares::D8),
-                Squares::G8 => (Squares::H8, Squares::F8),
-                _ => panic!("Invalid castling square when moving rook"),
-            };
-            self.remove_piece(Pieces::ROOK, color, rook_from);
-            self.put_piece(Pieces::ROOK, color, rook_to);
+            self.castle_rook(to);
         }
 
         // UPDATE STATE
@@ -80,9 +78,27 @@ impl Board {
         self.update_castling_perms(piece, color, from);
 
         self.state.active_color ^= 1; // switch active color
+
+        let is_check = mg.square_attacked(self, self.king_square(color), color ^ 1);
+        if is_check {
+            self.unmake()
+        }
+
+        !is_check
     }
 
-    pub fn unmake(&mut self) {}
+    fn castle_rook(&mut self, king: Square) {
+        let (rook_from, rook_to) = match king {
+            Squares::C1 => (Squares::A1, Squares::D1),
+            Squares::G1 => (Squares::H1, Squares::F1),
+            Squares::C8 => (Squares::A8, Squares::D8),
+            Squares::G8 => (Squares::H8, Squares::F8),
+            _ => panic!("Invalid castling square when moving rook"),
+        };
+        let color = self.state.active_color;
+        self.remove_piece(Pieces::ROOK, color, rook_from);
+        self.put_piece(Pieces::ROOK, color, rook_to);
+    }
 
     fn update_castling_perms(&mut self, piece: Piece, color: Color, from: Square) {
         match piece {
@@ -105,5 +121,70 @@ impl Board {
             },
             _ => (),
         }
+    }
+}
+
+// piece function without material calculation because it is already calculated when the state is
+// reset
+
+fn put_piece(b: &mut Board, piece: Piece, color: Color, square: Square) {
+    b.piece_bbs[color][piece] |= SQUARE_BBS[square];
+    b.color_bbs[color] |= SQUARE_BBS[square];
+    b.pieces[color][square] = piece;
+}
+
+fn remove_piece(b: &mut Board, piece: Piece, color: Color, square: Square) {
+    b.piece_bbs[color][piece] ^= SQUARE_BBS[square];
+    b.color_bbs[color] ^= SQUARE_BBS[square];
+    b.pieces[color][square] = Pieces::NONE;
+}
+impl Board {
+    pub fn unmake(&mut self) {
+        self.state = self.history.pop();
+        let m = self.state.next_move;
+
+        let color = self.state.active_color;
+        let piece = m.piece();
+        let from = m.from();
+        let to = m.to();
+
+        if m.is_promotion() {
+            remove_piece(self, m.promoted_to(), color, to);
+            put_piece(self, Pieces::PAWN, color, from);
+        } else {
+            remove_piece(self, piece, color, to);
+            put_piece(self, piece, color, from);
+        }
+
+        if m.is_castling() {
+            self.uncastle_rook(to)
+        }
+
+        if m.move_type() == MoveType::Capture {
+            if m.is_en_passant() {
+                let ep_capture = match color {
+                    Colors::WHITE => to - 8,
+                    _ => to + 8,
+                };
+                put_piece(self, Pieces::PAWN, color ^ 1, ep_capture)
+            } else {
+                put_piece(self, m.captured_piece(), color ^ 1, to);
+            }
+        }
+
+        put_piece(self, piece, color, from);
+    }
+
+    fn uncastle_rook(&mut self, king: Square) {
+        let (rook_from, rook_to) = match king {
+            Squares::C1 => (Squares::A1, Squares::D1),
+            Squares::G1 => (Squares::H1, Squares::F1),
+            Squares::C8 => (Squares::A8, Squares::D8),
+            Squares::G8 => (Squares::H8, Squares::F8),
+            _ => panic!("Invalid castling square when moving rook"),
+        };
+        let color = self.state.active_color;
+        remove_piece(self, Pieces::ROOK, color, rook_to);
+        put_piece(self, Pieces::ROOK, color, rook_from);
     }
 }

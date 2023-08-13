@@ -1,6 +1,9 @@
-use crate::consts::{Color, Colors};
+use crate::{
+    consts::{Color, Colors},
+    moves::consts::Move,
+};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct State {
     pub active_color: Color,
     pub castling: u8,
@@ -8,6 +11,7 @@ pub struct State {
     pub halfmove_count: u8,
     pub fullmove_count: u16,
     pub material: [u16; Colors::BOTH],
+    pub next_move: Move,
 }
 
 impl State {
@@ -19,6 +23,7 @@ impl State {
             halfmove_count: 0,
             fullmove_count: 0,
             material: [0; Colors::BOTH],
+            next_move: Move { data: 0 },
         }
     }
 }

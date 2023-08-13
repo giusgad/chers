@@ -8,6 +8,8 @@ mod utils;
 
 use moves::MoveGenerator;
 
+use crate::{board::consts::PieceNames, consts::Colors};
+
 fn main() {
     let mut b = board::Board::new();
     b.read_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
@@ -15,8 +17,8 @@ fn main() {
     // println!("{b}");
 
     let mg = MoveGenerator::new();
-    let mut i = 0;
-    /* while i < 20 {
+    /* let mut i = 0;
+    while i < 20 {
         use rand::{thread_rng, Rng};
         let mut rng = thread_rng();
         let legal = mg.get_all_legal_moves(&b);
@@ -27,7 +29,9 @@ fn main() {
         dbg!(&b.state);
         i += 1;
     } */
-    loop {
+
+    /* loop {
+        // LOOP TO MANUALLY INPUT MOVES
         println!("{b}\n");
         let legal = mg.get_all_legal_moves(&b);
         for i in 0..legal.index {
@@ -37,10 +41,61 @@ fn main() {
         let mut n = String::new();
         let io = std::io::stdin();
         io.read_line(&mut n).unwrap();
-        let n: usize = n.split('\n').next().unwrap().parse().unwrap();
-        b.make_move(legal.list[n]);
+        if let Ok(n) = n.split('\n').next().unwrap().parse::<usize>() {
+            let legal = b.make_move(legal.list[n], &mg);
+            if !legal {
+                println!("ILLEGAL MOVE");
+                continue;
+            }
+        } else {
+            b.unmake()
+        }
         dbg!(&b.state);
+        println!(
+            "material:{}",
+            (b.state.material[0] as i16 - b.state.material[1] as i16) / 100
+        )
+    } */
+    let mut finished = false;
+    while !finished {
+        // LOOP to make the engine play itself
+        use rand::{thread_rng, Rng};
+        println!("{b}\n");
+        /* println!(
+            "white:{} black:{}",
+            b.state.material[Colors::WHITE],
+            b.state.material[Colors::BLACK]
+        );
+        dbg!(b.state); */
+
+        let mut rng = thread_rng();
+        let legal_moves = mg.get_all_legal_moves(&b);
+        let mut legal_moves = Vec::from_iter(legal_moves.list[0..legal_moves.index].iter());
+        let mut move_made = false;
+        while !move_made {
+            if legal_moves.len() == 0 {
+                finished = true;
+                break;
+            }
+            let i = rng.gen_range(0..legal_moves.len());
+            move_made = b.make_move(*legal_moves[i], &mg);
+
+            legal_moves.remove(i);
+        }
+        if b.state.halfmove_count >= 40 {
+            println!("draw");
+            finished = true;
+        }
+        println!()
     }
+    println!(
+        "{} wins",
+        if b.state.active_color ^ 1 == Colors::WHITE {
+            "white"
+        } else {
+            "black"
+        }
+    );
     /* let mg = MoveGenerator::new();
     let moves = mg.get_all_legal_moves(&b);
     let mut i = 0;

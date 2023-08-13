@@ -6,7 +6,7 @@ mod state;
 
 use crate::{
     board::{
-        consts::{PieceNames, Pieces, SQUARE_BBS},
+        consts::{PieceNames, Pieces, SQUARE_BBS, SQUARE_NAMES},
         history::History,
         state::State,
     },
@@ -52,6 +52,10 @@ impl Board {
     pub fn get_pieces(&self, piece: Piece, color: Color) -> Bitboard {
         self.piece_bbs[color][piece]
     }
+
+    pub fn king_square(&self, color: Color) -> Square {
+        self.piece_bbs[color][Pieces::KING].trailing_zeros() as Square
+    }
 }
 
 impl std::fmt::Display for Board {
@@ -62,7 +66,11 @@ impl std::fmt::Display for Board {
                 // shift the bitboard to the right to align the rank and mask it to preserve 8 bits
                 let rank = (bb >> (8 * rank_nr)) & (u8::MAX as u64);
                 for file_nr in find_ones(rank) {
-                    board_chars[rank_nr * 8 + file_nr] = PieceNames::CHAR_UPPERCASE[piecetype];
+                    let i = rank_nr * 8 + file_nr;
+                    if board_chars[i] != ' ' {
+                        panic!("two pieces on {} printing board", SQUARE_NAMES[i])
+                    }
+                    board_chars[i] = PieceNames::CHAR_UPPERCASE[piecetype];
                 }
             }
         }
@@ -71,7 +79,11 @@ impl std::fmt::Display for Board {
                 // shift the bitboard to the right to align the rank and mask it to preserve 8 bits
                 let rank = (bb >> (8 * rank_nr)) & (u8::MAX as u64);
                 for file_nr in find_ones(rank) {
-                    board_chars[rank_nr * 8 + file_nr] = PieceNames::CHAR_LOWERCASE[piecetype];
+                    let i = rank_nr * 8 + file_nr;
+                    if board_chars[i] != ' ' {
+                        panic!("two pieces on {} printing board", SQUARE_NAMES[i])
+                    }
+                    board_chars[i] = PieceNames::CHAR_LOWERCASE[piecetype];
                 }
             }
         }
