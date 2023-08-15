@@ -57,7 +57,7 @@ pub fn add_square_i8(sq: usize, i: i8) -> Option<usize> {
 pub fn print_bb(bb: &Bitboard) {
     let mut ranks = [0; 8];
     for (i, rank) in ranks.iter_mut().enumerate() {
-        *rank = (bb >> 8 * i) & MASK_8;
+        *rank = (bb >> (8 * i)) & MASK_8;
     }
     for rank in (0..8).rev() {
         for bit in 0..8 {

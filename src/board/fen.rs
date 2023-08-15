@@ -6,7 +6,6 @@ use super::{
 };
 
 // fen notation is composed by: piecepositions activecolor castling enpassant halfmovecount fullmovecount
-//TODO: calculate material for game state
 
 #[derive(Debug)]
 pub enum FenError {
@@ -55,7 +54,7 @@ impl Board {
                     rank -= 1;
                     file = 0
                 }
-                c if c.is_digit(10) => {
+                c if c.is_ascii_digit() => {
                     let n = (c.to_digit(10).unwrap() as usize) + file;
                     file = match n {
                         n @ 0..=7 => n,
@@ -103,12 +102,10 @@ impl Board {
         let ep_square = fen_iter.next().unwrap();
         if *ep_square == "-" {
             board.state.ep_square = None;
+        } else if let Ok(square) = square_by_name(ep_square) {
+            board.state.ep_square = Some(square);
         } else {
-            if let Ok(square) = square_by_name(ep_square) {
-                board.state.ep_square = Some(square);
-            } else {
-                return Err(FenError::EpSquare);
-            }
+            return Err(FenError::EpSquare);
         }
 
         // HALF MOVES

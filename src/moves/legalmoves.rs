@@ -56,7 +56,7 @@ impl MoveGenerator {
         // can't castle if there are pieces in the way or one of the squares is under attack
         let (mut ok_q, mut ok_k) = (true, true);
         for sq in to_q..from {
-            if occupied & SQUARE_BBS[sq] > 0 || Self::square_attacked(&self, board, sq, color ^ 1) {
+            if occupied & SQUARE_BBS[sq] > 0 || Self::square_attacked(self, board, sq, color ^ 1) {
                 ok_q = false;
 
                 break;
