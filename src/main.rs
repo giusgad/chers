@@ -4,15 +4,17 @@ mod board;
 mod consts;
 mod engine;
 mod moves;
+mod uci;
 mod utils;
 
+use engine::Engine;
 use moves::MoveGenerator;
 
 use crate::{board::consts::PieceNames, consts::Colors};
 
-fn main() {
+/* fn main() {
     let mut b = board::Board::new();
-    b.read_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+    b.read_fen("r3k2r/pp2qppp/2nb1n2/3Ppb2/N1pQP3/4BP2/PPP1N1PP/R3K2R w KQkq - 5 11")
         .expect("error reading fen in main");
     // println!("{b}");
 
@@ -30,7 +32,7 @@ fn main() {
         i += 1;
     } */
 
-    /* loop {
+    loop {
         // LOOP TO MANUALLY INPUT MOVES
         println!("{b}\n");
         let legal = mg.get_all_legal_moves(&b);
@@ -55,8 +57,9 @@ fn main() {
             "material:{}",
             (b.state.material[0] as i16 - b.state.material[1] as i16) / 100
         )
-    } */
-    let mut finished = false;
+    }
+
+    /* let mut finished = false;
     while !finished {
         // LOOP to make the engine play itself
         use rand::{thread_rng, Rng};
@@ -95,7 +98,8 @@ fn main() {
         } else {
             "black"
         }
-    );
+    ); */
+
     /* let mg = MoveGenerator::new();
     let moves = mg.get_all_legal_moves(&b);
     let mut i = 0;
@@ -103,4 +107,8 @@ fn main() {
         println!("{}", moves.list[i]);
         i += 1;
     } */
+} */
+fn main() {
+    let mut engine = Engine::new();
+    engine.start();
 }
