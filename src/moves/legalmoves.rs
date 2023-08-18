@@ -96,9 +96,6 @@ impl MoveGenerator {
     }
 
     fn pawn_moves(&self, board: &Board, list: &mut MoveList) {
-        // TODO: REDO PAWN MOVES
-        // pieces on the 3rd rank don't obstruct pawns from moving to the 4th
-
         const PROMOTION_PIECES: [Piece; 4] =
             [Pieces::QUEEN, Pieces::BISHOP, Pieces::KNIGHT, Pieces::ROOK];
         let color = board.state.active_color;
@@ -227,7 +224,7 @@ impl MoveGenerator {
                 p => panic!("Invalid piece for non_sliding_moves: {p}"),
             };
 
-            let mut captures = available_bb & enemy_pieces; // TODO: check if the king is in check after move
+            let mut captures = available_bb & enemy_pieces;
             while captures > 0 {
                 let to = bit_ops::next_one(&mut captures);
                 let m = Move::new(

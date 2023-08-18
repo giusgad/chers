@@ -13,6 +13,7 @@ use super::{
 
 impl Board {
     pub fn make_move(&mut self, m: Move, mg: &MoveGenerator) -> bool {
+        // add the move to the state so that the info can be used when unmaking
         self.state.next_move = m;
         self.history.push(self.state);
 
@@ -125,7 +126,7 @@ impl Board {
 }
 
 // piece function without material calculation because it is already calculated when the state is
-// reset
+// reset from history
 
 fn put_piece(b: &mut Board, piece: Piece, color: Color, square: Square) {
     b.piece_bbs[color][piece] |= SQUARE_BBS[square];

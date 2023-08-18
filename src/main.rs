@@ -108,6 +108,7 @@ use crate::{board::consts::PieceNames, consts::Colors};
         i += 1;
     } */
 } */
+
 fn main() {
     let mut engine = Engine::new();
     engine.start();

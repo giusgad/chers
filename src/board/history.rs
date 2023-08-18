@@ -2,7 +2,6 @@ use crate::consts::MAX_MOVE_COUNT;
 
 use super::state::State;
 
-// TODO: hold state instead of moves
 pub struct History {
     moves: [State; MAX_MOVE_COUNT],
     current: usize,
