@@ -121,11 +121,18 @@ impl std::fmt::Debug for Move {
 }
 impl std::fmt::Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // algebraic move format
+        let prom = if self.is_promotion() {
+            PieceNames::CHAR_LOWERCASE[self.promoted_to()].to_string()
+        } else {
+            "".to_string()
+        };
         write!(
             f,
-            "{}{}",
+            "{}{}{}",
             SQUARE_NAMES[self.from()],
-            SQUARE_NAMES[self.to()]
+            SQUARE_NAMES[self.to()],
+            prom,
         )
     }
 }
