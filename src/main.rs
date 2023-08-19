@@ -3,14 +3,28 @@
 mod board;
 mod consts;
 mod engine;
+mod eval;
 mod moves;
+mod search;
 mod uci;
 mod utils;
+
+use std::sync::{Arc, Mutex};
 
 use engine::Engine;
 use moves::MoveGenerator;
 
 use crate::{board::consts::PieceNames, consts::Colors};
+
+fn main() {
+    let mut b = board::Board::new();
+    b.read_fen("8/8/8/3k4/8/8/8/5RQK w - - 0 1")
+        .expect("error reading fen in main");
+
+    let mut engine = Engine::new();
+    engine.board = Arc::new(Mutex::new(b));
+    engine.start();
+}
 
 /* fn main() {
     let mut b = board::Board::new();
@@ -108,8 +122,3 @@ use crate::{board::consts::PieceNames, consts::Colors};
         i += 1;
     } */
 } */
-
-fn main() {
-    let mut engine = Engine::new();
-    engine.start();
-}

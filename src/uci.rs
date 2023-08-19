@@ -8,7 +8,7 @@ use std::{
 };
 
 pub struct Uci {
-    stop: Arc<bool>,
+    pub stop: Arc<bool>,
 }
 
 impl Uci {
@@ -17,7 +17,7 @@ impl Uci {
             stop: Arc::new(false),
         }
     }
-    pub fn start(&mut self, tx: Sender<UciData>) {
+    pub fn init(&mut self, tx: Sender<UciData>) {
         // self.tx = Some(tx);
         let stop = Arc::clone(&self.stop);
         thread::spawn(move || {

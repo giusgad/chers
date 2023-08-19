@@ -2,7 +2,8 @@ use super::{consts::UciData, Uci};
 
 impl Uci {
     pub fn commands_from_string(s: String) -> UciData {
-        match s.as_str() {
+        let s = s.trim_end(); // remove the \n
+        match s {
             cmd if cmd == "uci" => UciData::Uci,
             cmd if cmd == "isready" => UciData::IsReady,
             cmd if cmd == "newgame" => UciData::NewGame,

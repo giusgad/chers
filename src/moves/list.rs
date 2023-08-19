@@ -19,3 +19,11 @@ impl MoveList {
         self.index += 1;
     }
 }
+
+impl std::ops::Deref for MoveList {
+    type Target = [Move];
+
+    fn deref(&self) -> &Self::Target {
+        &self.list[..self.index]
+    }
+}
