@@ -1,3 +1,5 @@
+use crate::{search::consts::SearchResult, uci::consts::UciData};
+
 pub type Bitboard = u64;
 pub type Piece = usize;
 pub type Color = usize;
@@ -26,3 +28,8 @@ pub const MAX_MOVE_COUNT: usize = 1024; // TODO: maybe adjust
 pub const MAX_LEGAL_MOVES: u8 = u8::MAX; // 255
 
 pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 310, 300, 100];
+
+pub enum Info {
+    Search(SearchResult),
+    Uci(UciData),
+}

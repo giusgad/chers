@@ -9,9 +9,9 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use crate::{board::Board, moves::MoveGenerator};
+use crate::{board::Board, consts::Info, moves::MoveGenerator};
 
-use self::consts::SearchControl;
+use self::consts::{SearchControl, SearchResult};
 
 pub struct Search {
     pub control_tx: Option<Sender<SearchControl>>, // control tx is used in the engine to send commands
@@ -22,7 +22,12 @@ impl Search {
         Self { control_tx: None }
     }
 
-    pub fn init(&mut self, board: Arc<Mutex<Board>>, mg: Arc<MoveGenerator>) {
+    pub fn init(
+        &mut self,
+        report_tx: Sender<Info>,
+        board: Arc<Mutex<Board>>,
+        mg: Arc<MoveGenerator>,
+    ) {
         let (tx, rx) = mpsc::channel::<SearchControl>();
 
         thread::spawn(move || {
@@ -37,8 +42,14 @@ impl Search {
                 match cmd {
                     // TODO: implement start and stop functionality
                     SearchControl::Start => {
-                        let a = Self::alpha_beta(&mut *board, &mg, depth, -25000, 25000);
-                        println!("finished:{a}");
+                        use rand::Rng;
+                        let moves = mg.get_all_legal_moves(&board);
+                        let mut rng = rand::thread_rng();
+                        let i = rng.gen_range(0..moves.index);
+                        report_tx.send(Info::Search(SearchResult::BestMove(moves.list[i])));
+
+                        /* let a = Self::alpha_beta(&mut *board, &mg, depth, -25000, 25000);
+                        println!("finished:{a}"); */
                     }
                     SearchControl::Stop => stop = true,
                     SearchControl::Quit => quit = true,
