@@ -1,7 +1,7 @@
-use crate::consts::{Colors, NrOf, Piece};
+use crate::defs::{Colors, NrOf, Piece};
 
 use super::{
-    consts::{square_by_name, Castling, Pieces},
+    defs::{square_by_name, Castling, Pieces},
     Board,
 };
 

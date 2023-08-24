@@ -1,10 +1,10 @@
 use crate::{
-    board::consts::{Files, Pieces, FILE_BBS, SQUARE_BBS},
-    consts::{Colors, NrOf, Square},
+    board::defs::{Files, Pieces, FILE_BBS, SQUARE_BBS},
+    defs::{Colors, NrOf, Square},
     utils::add_square_i8,
 };
 
-use super::{consts::MoveDirection, MoveGenerator};
+use super::{defs::MoveDirection, MoveGenerator};
 
 // The init functions create bitboards with all the possible moves for every
 // piece starting from every square. These can then be used to find legal moves

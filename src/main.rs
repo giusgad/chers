@@ -1,7 +1,7 @@
 #![allow(dead_code, unused_variables)]
 
 mod board;
-mod consts;
+mod defs;
 mod engine;
 mod eval;
 mod moves;
@@ -14,7 +14,7 @@ use std::sync::{Arc, Mutex};
 use engine::Engine;
 use moves::MoveGenerator;
 
-use crate::{board::consts::PieceNames, consts::Colors};
+use crate::{board::defs::PieceNames, defs::Colors};
 
 fn main() {
     let mut b = board::Board::new();

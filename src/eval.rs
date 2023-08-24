@@ -1,4 +1,4 @@
-use crate::{board::Board, consts::Colors};
+use crate::{board::Board, defs::Colors};
 
 pub fn evaluate(b: &Board) -> i16 {
     let white_mat = b.state.material[Colors::WHITE];

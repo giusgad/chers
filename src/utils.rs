@@ -1,8 +1,8 @@
-use crate::consts::{Bitboard, NrOf, MASK_8};
+use crate::defs::{Bitboard, NrOf, MASK_8};
 
 // find position of ones in binary representation of given u64
 pub mod bit_ops {
-    use crate::consts::{Bitboard, Square};
+    use crate::defs::{Bitboard, Square};
 
     pub fn find_ones(input: u64) -> Vec<usize> {
         let mut res = Vec::new();

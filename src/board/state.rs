@@ -1,6 +1,6 @@
 use crate::{
-    consts::{Color, Colors},
-    moves::consts::Move,
+    defs::{Color, Colors},
+    moves::defs::Move,
 };
 
 #[derive(Debug, Clone, Copy)]

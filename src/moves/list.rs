@@ -1,5 +1,5 @@
-use super::consts::Move;
-use crate::consts::MAX_LEGAL_MOVES;
+use super::defs::Move;
+use crate::defs::MAX_LEGAL_MOVES;
 
 pub struct MoveList {
     pub list: [Move; MAX_LEGAL_MOVES as usize],

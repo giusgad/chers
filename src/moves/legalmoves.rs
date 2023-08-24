@@ -1,15 +1,15 @@
 use crate::{
     board::{
-        consts::{Castling, Files, Pieces, Ranks, Squares, FILE_BBS, RANK_BBS, SQUARE_BBS},
+        defs::{Castling, Files, Pieces, Ranks, Squares, FILE_BBS, RANK_BBS, SQUARE_BBS},
         Board,
     },
-    consts::{Bitboard, Color, Colors, Piece, Square},
-    moves::consts::MoveOffsets,
+    defs::{Bitboard, Color, Colors, Piece, Square},
+    moves::defs::MoveOffsets,
     utils::{add_square_i8, bit_ops},
 };
 
 use super::{
-    consts::{Move, MoveDirection, MoveType},
+    defs::{Move, MoveDirection, MoveType},
     list::MoveList,
     MoveGenerator,
 };

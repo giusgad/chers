@@ -1,5 +1,5 @@
 mod alpha_beta;
-pub mod consts;
+pub mod defs;
 
 use std::{
     sync::{
@@ -9,9 +9,9 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use crate::{board::Board, consts::Info, moves::MoveGenerator};
+use crate::{board::Board, defs::Info, moves::MoveGenerator};
 
-use self::consts::{SearchControl, SearchResult};
+use self::defs::{SearchControl, SearchResult};
 
 pub struct Search {
     pub control_tx: Option<Sender<SearchControl>>, // control tx is used in the engine to send commands
@@ -46,6 +46,7 @@ impl Search {
                         let moves = mg.get_all_legal_moves(&board);
                         let mut rng = rand::thread_rng();
                         let i = rng.gen_range(0..moves.index);
+
                         report_tx.send(Info::Search(SearchResult::BestMove(moves.list[i])));
 
                         /* let a = Self::alpha_beta(&mut *board, &mg, depth, -25000, 25000);

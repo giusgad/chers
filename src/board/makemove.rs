@@ -1,13 +1,13 @@
 use crate::{
-    consts::{Color, Colors, Piece, Square},
+    defs::{Color, Colors, Piece, Square},
     moves::{
-        consts::{Move, MoveType},
+        defs::{Move, MoveType},
         MoveGenerator,
     },
 };
 
 use super::{
-    consts::{Castling, Pieces, Squares, SQUARE_BBS},
+    defs::{Castling, Pieces, Squares, SQUARE_BBS},
     Board,
 };
 

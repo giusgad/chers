@@ -1,4 +1,4 @@
-use crate::moves::consts::Move;
+use crate::moves::defs::Move;
 
 #[derive(Debug)]
 pub enum SearchControl {

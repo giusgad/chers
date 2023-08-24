@@ -1,4 +1,4 @@
-use crate::{search::consts::SearchResult, uci::consts::UciData};
+use crate::{search::defs::SearchResult, uci::defs::UciData};
 
 pub type Bitboard = u64;
 pub type Piece = usize;

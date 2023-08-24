@@ -1,6 +1,6 @@
 use crate::{
-    board::consts::{Files, PieceNames, Pieces, FILE_BBS, SQUARE_BBS, SQUARE_NAMES},
-    consts::{Piece, Square, MASK_3, MASK_6},
+    board::defs::{Files, PieceNames, Pieces, FILE_BBS, SQUARE_BBS, SQUARE_NAMES},
+    defs::{Piece, Square, MASK_3, MASK_6},
     utils::remove_from_vec,
 };
 

@@ -1,4 +1,4 @@
-use crate::consts::MAX_MOVE_COUNT;
+use crate::defs::MAX_MOVE_COUNT;
 
 use super::state::State;
 

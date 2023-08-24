@@ -2,7 +2,7 @@ use super::Search;
 use crate::{
     board::Board,
     eval::evaluate,
-    moves::{consts::Move, MoveGenerator},
+    moves::{defs::Move, MoveGenerator},
 };
 use std::sync::Arc;
 

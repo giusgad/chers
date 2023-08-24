@@ -1,11 +1,11 @@
-pub mod consts;
+pub mod defs;
 mod init_moves;
 mod legalmoves;
 mod list;
 
 use crate::{
     board::Board,
-    consts::{Bitboard, Colors, NrOf},
+    defs::{Bitboard, Colors, NrOf},
 };
 
 use self::list::MoveList;

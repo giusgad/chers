@@ -1,7 +1,7 @@
-pub mod consts;
+pub mod defs;
 mod parser;
 
-use crate::consts::Info;
+use crate::defs::Info;
 
 use std::{
     sync::{mpsc::Sender, Arc},

@@ -1,4 +1,4 @@
-use super::{consts::UciData, Uci};
+use super::{defs::UciData, Uci};
 
 impl Uci {
     pub fn commands_from_string(s: String) -> UciData {
@@ -17,12 +17,36 @@ impl Uci {
     }
 }
 
+enum PosTokens {
+    Fen,
+    Moves,
+    None,
+}
 impl Uci {
     fn parse_position(cmd: &str) -> UciData {
-        todo!();
+        let cmd: Vec<&str> = cmd.split_whitespace().collect();
+        let mut cmd = cmd.iter();
+
+        let mut moves: Vec<String> = Vec::new();
+        let mut token = PosTokens::None;
+        let mut fen_str = "";
+
+        while let Some(part) = cmd.next() {
+            match *part {
+                "fen" | "position" => token = PosTokens::Fen,
+                "moves" => token = PosTokens::Moves,
+                s => match token {
+                    PosTokens::Fen => fen_str = s,
+                    PosTokens::Moves => moves.push(s.to_string()),
+                    PosTokens::None => (),
+                },
+            }
+        }
+
+        UciData::Position(fen_str.to_string(), moves)
     }
 
     fn parse_go(cmd: &str) -> UciData {
-        todo!();
+        UciData::Go(String::new())
     }
 }

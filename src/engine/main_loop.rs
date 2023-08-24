@@ -1,8 +1,8 @@
 use super::Engine;
 use crate::{
-    consts::Info,
-    search::consts::{SearchControl, SearchResult},
-    uci::{consts::UciData, Uci},
+    defs::Info,
+    search::defs::{SearchControl, SearchResult},
+    uci::{defs::UciData, Uci},
 };
 use std::sync::{mpsc, Arc};
 
@@ -19,22 +19,6 @@ impl Engine {
                 Info::Search(info) => self.search_report(info),
                 Info::Uci(info) => self.uci_command(info),
             }
-        }
-    }
-
-    fn uci_command(&self, command: UciData) {
-        match command {
-            UciData::Uci => {
-                // engine identifies and swtiches to uci mode
-                Uci::output("id name Chers");
-                Uci::output("id author Giuseppe Gadola");
-                // NOTE: specify possible options here
-                Uci::output("uciok");
-            }
-
-            UciData::IsReady => Uci::output("readyok"),
-            UciData::Go(_) => self.search.send(SearchControl::Start),
-            _ => (),
         }
     }
 

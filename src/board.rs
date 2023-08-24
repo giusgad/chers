@@ -1,4 +1,4 @@
-pub mod consts;
+pub mod defs;
 mod fen;
 mod history;
 mod makemove;
@@ -6,11 +6,11 @@ mod state;
 
 use crate::{
     board::{
-        consts::{PieceNames, Pieces, SQUARE_BBS, SQUARE_NAMES},
+        defs::{PieceNames, Pieces, SQUARE_BBS, SQUARE_NAMES},
         history::History,
         state::State,
     },
-    consts::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
+    defs::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
     utils::bit_ops::find_ones,
 };
 

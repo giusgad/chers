@@ -1,3 +1,4 @@
+mod commands;
 pub mod main_loop;
 
 use std::sync::{Arc, Mutex};

@@ -1,5 +1,5 @@
 use crate::{
-    consts::{Bitboard, NrOf, Piece, Square, MASK_8},
+    defs::{Bitboard, NrOf, Piece, Square, MASK_8},
     utils::const_str_equal,
 };
 
