@@ -15,7 +15,7 @@ const START_FEN: &'static str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 impl Engine {
     pub fn setup_position(&mut self, fen: String, moves: Vec<String>) {
         // setup fen position
-        let fen = if fen == "startpos" {
+        let fen = if fen.trim() == "startpos" {
             START_FEN
         } else {
             fen.as_str()

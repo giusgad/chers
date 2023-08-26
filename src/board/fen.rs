@@ -23,7 +23,7 @@ pub enum FenError {
 
 impl Board {
     pub fn read_fen(&mut self, fen: &str) -> Result<(), FenError> {
-        let fen_split: Vec<&str> = fen.split(' ').collect();
+        let fen_split: Vec<&str> = fen.trim().split(' ').collect();
         if fen_split.len() != 6 {
             return Err(FenError::Length);
         }
