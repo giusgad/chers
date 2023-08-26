@@ -1,5 +1,5 @@
 use super::Engine;
-use crate::{defs::Info, search::defs::SearchResult};
+use crate::{defs::Info, search::defs::SearchResult, uci::Uci};
 use std::sync::{mpsc, Arc};
 
 impl Engine {
@@ -19,11 +19,14 @@ impl Engine {
     }
 
     fn search_report(&self, info: SearchResult) {
-        dbg!(&info);
+        // dbg!(&info);
         let a = match info {
-            SearchResult::BestMove(m) => self.board.lock().unwrap().make_move(m, &self.mg),
-            _ => true,
+            SearchResult::BestMove(m) => {
+                self.board.lock().unwrap().make_move(m, &self.mg);
+                Uci::output(&format!("bestmove {}", m))
+            }
+            _ => (),
         };
-        println!("{}", self.board.lock().unwrap());
+        // println!("{}", self.board.lock().unwrap());
     }
 }
