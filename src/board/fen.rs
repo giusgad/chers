@@ -1,7 +1,10 @@
-use crate::defs::{Colors, NrOf, Piece};
+use crate::{
+    defs::{Colors, NrOf},
+    utils::piece_from_char,
+};
 
 use super::{
-    defs::{square_by_name, Castling, Pieces},
+    defs::{square_by_name, Castling},
     Board,
 };
 
@@ -16,22 +19,6 @@ pub enum FenError {
     EpSquare,
     HalfMove,
     FullMove,
-}
-
-fn piece_from_char(c: char) -> Result<Piece, ()> {
-    if let Some(c) = c.to_lowercase().next() {
-        match c {
-            'k' => Ok(Pieces::KING),
-            'q' => Ok(Pieces::QUEEN),
-            'r' => Ok(Pieces::ROOK),
-            'b' => Ok(Pieces::BISHOP),
-            'n' => Ok(Pieces::KNIGHT),
-            'p' => Ok(Pieces::PAWN),
-            _ => Err(()),
-        }
-    } else {
-        return Err(());
-    }
 }
 
 impl Board {

@@ -1,4 +1,7 @@
-use crate::defs::{Bitboard, NrOf, MASK_8};
+use crate::{
+    board::defs::Pieces,
+    defs::{Bitboard, NrOf, Piece, MASK_8},
+};
 
 // find position of ones in binary representation of given u64
 pub mod bit_ops {
@@ -72,5 +75,25 @@ pub fn remove_from_vec<T: PartialEq>(v: &mut Vec<T>, r: &[T]) {
         if let Some(i) = v.iter().position(|x| x == val) {
             v.remove(i);
         }
+    }
+}
+
+pub const fn piece_from_char(c: char) -> Result<Piece, ()> {
+    let c = match c {
+        c if c > 'A' && c < 'Z' => char::from_u32(c as u32 + 32),
+        c => Some(c),
+    };
+    if let Some(c) = c {
+        match c {
+            'k' => Ok(Pieces::KING),
+            'q' => Ok(Pieces::QUEEN),
+            'r' => Ok(Pieces::ROOK),
+            'b' => Ok(Pieces::BISHOP),
+            'n' => Ok(Pieces::KNIGHT),
+            'p' => Ok(Pieces::PAWN),
+            _ => Err(()),
+        }
+    } else {
+        return Err(());
     }
 }
