@@ -1,5 +1,6 @@
 mod commands;
 pub mod main_loop;
+mod position;
 
 use std::sync::{Arc, Mutex};
 
@@ -10,7 +11,7 @@ pub struct Engine {
     mg: Arc<MoveGenerator>,
     search: Search,
     uci: Uci,
-    stop: bool,
+    quit: bool,
 }
 
 impl Engine {
@@ -20,7 +21,7 @@ impl Engine {
             mg: Arc::new(MoveGenerator::new()),
             uci: Uci::new(),
             search: Search::new(),
-            stop: false,
+            quit: false,
         }
     }
 }

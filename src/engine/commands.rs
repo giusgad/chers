@@ -5,7 +5,7 @@ use crate::{
 };
 
 impl Engine {
-    pub fn uci_command(&self, command: UciData) {
+    pub fn uci_command(&mut self, command: UciData) {
         match command {
             UciData::Uci => {
                 // engine identifies and swtiches to uci mode
@@ -17,6 +17,12 @@ impl Engine {
 
             UciData::IsReady => Uci::output("readyok"),
             UciData::Go(_) => self.search.send(SearchControl::Start),
+            UciData::Position(fen, moves) => {
+                self.setup_position(fen, moves);
+                println!("{}", self.board.lock().unwrap());
+            }
+
+            UciData::Quit => self.quit = true, // TODO: close threads with handles
             _ => (),
         }
     }

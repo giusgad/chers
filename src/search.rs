@@ -34,7 +34,6 @@ impl Search {
             let mut quit = false;
             let mut stop = false;
 
-            let mut board = board.lock().expect("Error locking board mutex");
             let depth = 12; // TODO: adaptive depth
 
             while !quit && !stop {
@@ -43,11 +42,26 @@ impl Search {
                     // TODO: implement start and stop functionality
                     SearchControl::Start => {
                         use rand::Rng;
-                        let moves = mg.get_all_legal_moves(&board);
+                        let mut board = board.lock().expect("Error locking board mutex");
+                        let mut moves: Vec<crate::moves::defs::Move> =
+                            mg.get_all_legal_moves(&board).iter().map(|s| *s).collect();
                         let mut rng = rand::thread_rng();
-                        let i = rng.gen_range(0..moves.index);
+                        let mut i = 0;
+                        while moves.len() > 0 {
+                            i = rng.gen_range(0..moves.len());
+                            if board.make_move(moves[i], &mg) {
+                                board.unmake();
+                                break;
+                            } else {
+                                moves.remove(i);
+                            }
+                        }
 
-                        report_tx.send(Info::Search(SearchResult::BestMove(moves.list[i])));
+                        if moves.len() == 0 {
+                            report_tx.send(Info::Uci(crate::uci::defs::UciData::Quit));
+                        } else {
+                            report_tx.send(Info::Search(SearchResult::BestMove(moves[i])));
+                        }
 
                         /* let a = Self::alpha_beta(&mut *board, &mg, depth, -25000, 25000);
                         println!("finished:{a}"); */
