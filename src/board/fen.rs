@@ -1,10 +1,10 @@
 use crate::{
-    defs::{Colors, NrOf, Piece},
+    defs::{Colors, NrOf},
     utils::piece_from_char,
 };
 
 use super::{
-    defs::{square_by_name, Castling, Pieces},
+    defs::{square_by_name, Castling},
     Board,
 };
 
@@ -23,7 +23,7 @@ pub enum FenError {
 
 impl Board {
     pub fn read_fen(&mut self, fen: &str) -> Result<(), FenError> {
-        let fen_split: Vec<&str> = fen.split(' ').collect();
+        let fen_split: Vec<&str> = fen.trim().split(' ').collect();
         if fen_split.len() != 6 {
             return Err(FenError::Length);
         }

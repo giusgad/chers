@@ -3,7 +3,7 @@ use crate::{
         defs::{square_by_name, Pieces},
         Board,
     },
-    defs::{Piece, Square},
+    defs::{ErrFatal, Piece, Square},
     moves::{defs::Move, MoveGenerator},
     utils::piece_from_char,
 };
@@ -15,7 +15,7 @@ const START_FEN: &'static str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 impl Engine {
     pub fn setup_position(&mut self, fen: String, moves: Vec<String>) {
         // setup fen position
-        let fen = if fen == "startpos" {
+        let fen = if fen.trim() == "startpos" {
             START_FEN
         } else {
             fen.as_str()
@@ -23,11 +23,11 @@ impl Engine {
         let moves = Self::parse_moves(moves);
 
         // TODO: maybe don't panic here (remove .expect)
-        let mut board = self.board.lock().expect("failed to lock board");
-        board.read_fen(fen).expect("error reading fen");
+        let mut board = self.board.lock().expect(ErrFatal::LOCK);
+        board.read_fen(fen).unwrap();
 
         // play the moves from the gui
-        Self::play_moves(&mut board, &self.mg, moves); // TODO: handle moves error
+        Self::play_moves(&mut board, &self.mg, moves).unwrap();
     }
 }
 

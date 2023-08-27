@@ -70,6 +70,14 @@ pub fn print_bb(bb: &Bitboard) {
     }
 }
 
+pub fn remove_from_vec<T: PartialEq>(v: &mut Vec<T>, r: &[T]) {
+    for val in r.iter() {
+        if let Some(i) = v.iter().position(|x| x == val) {
+            v.remove(i);
+        }
+    }
+}
+
 pub const fn piece_from_char(c: char) -> Result<Piece, ()> {
     let c = match c {
         c if c > 'A' && c < 'Z' => char::from_u32(c as u32 + 32),

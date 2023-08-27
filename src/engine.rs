@@ -4,7 +4,12 @@ mod position;
 
 use std::sync::{Arc, Mutex};
 
-use crate::{board::Board, moves::MoveGenerator, search::Search, uci::Uci};
+use crate::{
+    board::Board,
+    moves::MoveGenerator,
+    search::{defs::SearchControl, Search},
+    uci::Uci,
+};
 
 pub struct Engine {
     pub board: Arc<Mutex<Board>>,
@@ -23,5 +28,10 @@ impl Engine {
             search: Search::new(),
             quit: false,
         }
+    }
+
+    pub fn quit(&mut self) {
+        self.search.send(SearchControl::Quit);
+        self.quit = true;
     }
 }

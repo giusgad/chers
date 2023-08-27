@@ -1,6 +1,7 @@
 use crate::{
     board::defs::{Files, PieceNames, Pieces, FILE_BBS, SQUARE_BBS, SQUARE_NAMES},
     defs::{Piece, Square, MASK_3, MASK_6},
+    utils::remove_from_vec,
 };
 
 // A move is represented as a struct to be able to attach decoding functions
@@ -221,8 +222,8 @@ impl MoveDirection {
         // only keep the possible moves for the specified piece
         use MoveDirection::*;
         match piece {
-            Pieces::BISHOP => res = vec![NE, SE, SW, NW],
-            Pieces::ROOK => res = vec![N, E, S, W],
+            Pieces::BISHOP => remove_from_vec(&mut res, &[N, E, S, W]),
+            Pieces::ROOK => remove_from_vec(&mut res, &[NE, SE, SW, NW]),
             _ => (),
         }
         res

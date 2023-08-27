@@ -42,21 +42,24 @@ impl Uci {
 
         let mut moves: Vec<String> = Vec::new();
         let mut token = PosToken::None;
-        let mut fen_str = "";
+        let mut fen = String::new();
 
         while let Some(part) = cmd.next() {
             match *part {
                 "fen" | "position" => token = PosToken::Fen,
                 "moves" => token = PosToken::Moves,
                 s => match token {
-                    PosToken::Fen => fen_str = s,
+                    PosToken::Fen => {
+                        fen.push_str(s);
+                        fen.push(' ')
+                    }
                     PosToken::Moves => moves.push(s.to_string()),
                     PosToken::None => (),
                 },
             }
         }
 
-        UciData::Position(fen_str.to_string(), moves)
+        UciData::Position(fen, moves)
     }
 
     fn parse_go(cmd: &str) -> SearchTime {
