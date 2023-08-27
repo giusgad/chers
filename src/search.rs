@@ -1,5 +1,6 @@
 mod alpha_beta;
 pub mod defs;
+mod iter_deep;
 
 use std::{
     sync::{
@@ -9,9 +10,9 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use crate::{board::Board, defs::Info, moves::MoveGenerator};
+use crate::{board::Board, defs::Info, moves::MoveGenerator, search::defs::SearchTerminate};
 
-use self::defs::{SearchControl, SearchResult};
+use self::defs::{SearchControl, SearchRefs, SearchResult, SearchTime};
 
 pub struct Search {
     pub control_tx: Option<Sender<SearchControl>>, // control tx is used in the engine to send commands
@@ -34,14 +35,13 @@ impl Search {
             let mut quit = false;
             let mut stop = false;
 
-            let depth = 12; // TODO: adaptive depth
-
-            while !quit && !stop {
+            while !quit {
                 let cmd = rx.recv().expect("Error in search receiving cmd");
+                let mut search_time = SearchTime::Infinite;
+                dbg!(&cmd);
                 match cmd {
-                    // TODO: implement start and stop functionality
-                    SearchControl::Start => {
-                        use rand::Rng;
+                    SearchControl::Start(time) => {
+                        /* use rand::Rng;
                         let mut board = board.lock().expect("Error locking board mutex");
                         let mut moves: Vec<crate::moves::defs::Move> =
                             mg.get_all_legal_moves(&board).iter().map(|s| *s).collect();
@@ -57,17 +57,31 @@ impl Search {
                             }
                         }
 
-                        if moves.len() == 0 {
-                            report_tx.send(Info::Uci(crate::uci::defs::UciData::Quit));
-                        } else {
-                            report_tx.send(Info::Search(SearchResult::BestMove(moves[i])));
-                        }
+                        // if moves.len() == 0 {
+                        //     report_tx.send(Info::Uci(crate::uci::defs::UciData::Quit));
+                        // } else {
+                        report_tx.send(Info::Search(SearchResult::BestMove(moves[i])));
+                        // } */
 
-                        /* let a = Self::alpha_beta(&mut *board, &mg, depth, -25000, 25000);
-                        println!("finished:{a}"); */
+                        search_time = time;
+                        stop = false;
                     }
                     SearchControl::Stop => stop = true,
                     SearchControl::Quit => quit = true,
+                    SearchControl::Nothing => (),
+                }
+                if !quit && !stop {
+                    let mut board = board.lock().expect("Error locking board mutex");
+
+                    let refs = SearchRefs {
+                        board: &mut board,
+                        mg: &mg,
+                        time: search_time,
+                        timer: None,
+                        terminate: SearchTerminate::Nothing,
+                    };
+
+                    let res = Self::iterative_deepening(&refs);
                 }
             }
         });

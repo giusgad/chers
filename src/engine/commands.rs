@@ -16,11 +16,13 @@ impl Engine {
             }
 
             UciData::IsReady => Uci::output("readyok"),
-            UciData::Go(_) => self.search.send(SearchControl::Start),
+            UciData::Go(time) => self.search.send(SearchControl::Start(time)),
             UciData::Position(fen, moves) => {
                 self.setup_position(fen, moves);
-                println!("{}", self.board.lock().unwrap());
+                // println!("{}", self.board.lock().unwrap());
             }
+
+            UciData::Stop => self.search.send(SearchControl::Stop),
 
             UciData::Quit => self.quit = true, // TODO: close threads with handles
             _ => (),

@@ -17,13 +17,7 @@ use moves::MoveGenerator;
 use crate::{board::defs::PieceNames, defs::Colors};
 
 fn main() {
-    let mut b = board::Board::new();
-    b.read_fen("8/8/8/3k4/8/8/8/5RQK w - - 0 1")
-        .expect("error reading fen in main");
-    println!("{b}");
-
     let mut engine = Engine::new();
-    engine.board = Arc::new(Mutex::new(b));
     engine.start();
 }
 
