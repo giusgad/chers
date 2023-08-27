@@ -10,9 +10,14 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use crate::{board::Board, defs::Info, moves::MoveGenerator, search::defs::SearchTerminate};
+use crate::{
+    board::Board,
+    defs::{ErrFatal, Info},
+    moves::MoveGenerator,
+    search::defs::SearchTerminate,
+};
 
-use self::defs::{SearchControl, SearchRefs, SearchResult, SearchTime};
+use self::defs::{SearchControl, SearchRefs, SearchTime};
 
 pub struct Search {
     pub control_tx: Option<Sender<SearchControl>>, // control tx is used in the engine to send commands
@@ -40,7 +45,7 @@ impl Search {
             let mut stop = false;
 
             while !quit {
-                let cmd = rx.recv().expect("Error in search receiving cmd");
+                let cmd = rx.recv().expect(ErrFatal::RX_RECV);
                 let mut search_time = SearchTime::Infinite;
                 match cmd {
                     SearchControl::Start(time) => {
@@ -74,7 +79,7 @@ impl Search {
                     SearchControl::Nothing => (),
                 }
                 if !quit && !stop {
-                    let mut board = board.lock().expect("Error locking board mutex");
+                    let mut board = board.lock().expect(ErrFatal::LOCK);
 
                     let refs = SearchRefs {
                         board: &mut board,
@@ -95,7 +100,7 @@ impl Search {
 
     pub fn send(&self, cmd: SearchControl) {
         match &self.control_tx {
-            Some(tx) => tx.send(cmd).expect("Error sending command to search"),
+            Some(tx) => tx.send(cmd).expect(ErrFatal::TX_SEND),
             None => panic!("No search tx"),
         }
     }

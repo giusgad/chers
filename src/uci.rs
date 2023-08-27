@@ -1,10 +1,10 @@
 pub mod defs;
 mod parser;
 
-use crate::defs::Info;
+use crate::defs::{ErrFatal, Info};
 
 use std::{
-    sync::{mpsc::Sender, Arc},
+    sync::mpsc::Sender,
     thread::{self, JoinHandle},
 };
 
@@ -26,7 +26,7 @@ impl Uci {
             while !quit {
                 let mut buf = String::new();
                 let io = std::io::stdin();
-                io.read_line(&mut buf).expect("Stdin error in uci");
+                io.read_line(&mut buf).expect(ErrFatal::STDIN);
 
                 // parse input
                 let command = Self::commands_from_string(buf);
@@ -35,8 +35,7 @@ impl Uci {
                 quit = command == UciData::Quit;
 
                 // send command to engine
-                tx.send(Info::Uci(command))
-                    .expect("Error sending uci command");
+                tx.send(Info::Uci(command)).expect(ErrFatal::TX_SEND);
             }
         });
 

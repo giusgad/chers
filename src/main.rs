@@ -9,12 +9,7 @@ mod search;
 mod uci;
 mod utils;
 
-use std::sync::{Arc, Mutex};
-
 use engine::Engine;
-use moves::MoveGenerator;
-
-use crate::{board::defs::PieceNames, defs::Colors};
 
 fn main() {
     let mut engine = Engine::new();

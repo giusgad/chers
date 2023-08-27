@@ -33,3 +33,12 @@ pub enum Info {
     Search(SearchResult),
     Uci(UciData),
 }
+
+pub struct ErrFatal;
+impl ErrFatal {
+    pub const THREAD_JOIN: &'static str = "Error joining thread";
+    pub const STDIN: &'static str = "Error reading from stdin";
+    pub const LOCK: &'static str = "Error locking mutex";
+    pub const RX_RECV: &'static str = "Error with channel recv";
+    pub const TX_SEND: &'static str = "Error with channel send";
+}
