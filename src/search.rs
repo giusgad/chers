@@ -16,11 +16,15 @@ use self::defs::{SearchControl, SearchRefs, SearchResult, SearchTime};
 
 pub struct Search {
     pub control_tx: Option<Sender<SearchControl>>, // control tx is used in the engine to send commands
+    pub handle: Option<JoinHandle<()>>,
 }
 
 impl Search {
     pub fn new() -> Self {
-        Self { control_tx: None }
+        Self {
+            control_tx: None,
+            handle: None,
+        }
     }
 
     pub fn init(
@@ -31,14 +35,13 @@ impl Search {
     ) {
         let (tx, rx) = mpsc::channel::<SearchControl>();
 
-        thread::spawn(move || {
+        let h = thread::spawn(move || {
             let mut quit = false;
             let mut stop = false;
 
             while !quit {
                 let cmd = rx.recv().expect("Error in search receiving cmd");
                 let mut search_time = SearchTime::Infinite;
-                dbg!(&cmd);
                 match cmd {
                     SearchControl::Start(time) => {
                         /* use rand::Rng;
@@ -87,6 +90,7 @@ impl Search {
         });
 
         self.control_tx = Some(tx);
+        self.handle = Some(h);
     }
 
     pub fn send(&self, cmd: SearchControl) {

@@ -5,33 +5,42 @@ use crate::defs::Info;
 
 use std::{
     sync::{mpsc::Sender, Arc},
-    thread,
+    thread::{self, JoinHandle},
 };
 
+use self::defs::UciData;
+
+// The Uci module reads input and sends the received commands to the engine which then handles them
 pub struct Uci {
-    pub stop: Arc<bool>,
+    pub handle: Option<JoinHandle<()>>,
 }
 
 impl Uci {
     pub fn new() -> Self {
-        Self {
-            stop: Arc::new(false),
-        }
+        Self { handle: None }
     }
 
     pub fn init(&mut self, tx: Sender<Info>) {
-        // self.tx = Some(tx);
-        let stop = Arc::clone(&self.stop);
-        thread::spawn(move || {
-            while !*stop {
+        let h = thread::spawn(move || {
+            let mut quit = false;
+            while !quit {
                 let mut buf = String::new();
                 let io = std::io::stdin();
                 io.read_line(&mut buf).expect("Stdin error in uci");
+
+                // parse input
                 let command = Self::commands_from_string(buf);
+
+                // update quit condition based on the new input
+                quit = command == UciData::Quit;
+
+                // send command to engine
                 tx.send(Info::Uci(command))
                     .expect("Error sending uci command");
             }
         });
+
+        self.handle = Some(h);
     }
 
     pub fn output(s: impl std::fmt::Display) {

@@ -16,13 +16,20 @@ impl Engine {
                 Info::Uci(info) => self.uci_command(info),
             }
         }
+
+        if let Some(h) = self.search.handle.take() {
+            h.join().expect("Error joining handle");
+        }
+        if let Some(h) = self.uci.handle.take() {
+            h.join().expect("Error joining uci thread");
+        }
     }
 
     fn search_report(&self, info: SearchResult) {
         // dbg!(&info);
         let a = match info {
             SearchResult::BestMove(m) => {
-                self.board.lock().unwrap().make_move(m, &self.mg);
+                self.board.lock().unwrap().make_move(m, &self.mg); // TODO: remove debug
                 Uci::output(&format!("bestmove {}", m))
             }
             _ => (),

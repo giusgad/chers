@@ -24,7 +24,7 @@ impl Engine {
 
             UciData::Stop => self.search.send(SearchControl::Stop),
 
-            UciData::Quit => self.quit = true, // TODO: close threads with handles
+            UciData::Quit => self.quit(), // TODO: close threads with handles
             _ => (),
         }
     }

@@ -29,7 +29,7 @@ pub enum SearchResult {
 }
 
 // GameTime contains the information for the time from the whole game sent by the gui
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct GameTime {
     pub wtime: u128, // in milliseconds
     pub btime: u128,
@@ -50,7 +50,7 @@ impl GameTime {
 }
 
 // Time modes Search can use
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum SearchTime {
     Adaptive(GameTime),
     Depth(u64), // in plys
