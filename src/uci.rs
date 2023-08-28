@@ -1,5 +1,6 @@
 pub mod defs;
 mod parser;
+mod search_info;
 
 use crate::defs::{ErrFatal, Info};
 

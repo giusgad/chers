@@ -25,7 +25,7 @@ use crate::{
 // representation:
 // 000 000 000000 000000 000
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct Move {
     pub data: u32,
 }

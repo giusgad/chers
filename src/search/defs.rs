@@ -1,9 +1,15 @@
-use std::{sync::Arc, time::Instant};
+use std::{
+    sync::{mpsc::Sender, Arc},
+    time::Instant,
+};
 
 use crate::{
     board::Board,
+    defs::Info,
     moves::{defs::Move, MoveGenerator},
 };
+
+pub const MAX_PLY: u8 = 128;
 
 // Searchcontrol is used to receive signals from the gui
 #[derive(Debug)]
@@ -53,19 +59,37 @@ impl GameTime {
 #[derive(Debug, PartialEq)]
 pub enum SearchTime {
     Adaptive(GameTime),
-    Depth(u64), // in plys
-    Nodes(u64),
+    Depth(u8), // in plys
+    Nodes(usize),
     MoveTime(u128), // milliseconds
     Infinite,
+}
+
+// info on the current state of the search
+pub struct SearchInfo {
+    pub depth: u8,
+    pub nodes: usize,
+    pub allocated_time: u128,
+}
+impl SearchInfo {
+    pub fn new() -> Self {
+        Self {
+            depth: 0,
+            nodes: 0,
+            allocated_time: 0,
+        }
+    }
 }
 
 // Refs that are used by the search algorithms and passed into recursion
 pub struct SearchRefs<'a> {
     pub board: &'a mut Board,
     pub mg: &'a Arc<MoveGenerator>,
-    pub time: SearchTime,
+    pub time_control: SearchTime,
+    pub info: &'a mut SearchInfo,
     pub timer: Option<Instant>,
     pub terminate: SearchTerminate,
+    pub report_tx: &'a Sender<Info>,
 }
 
 impl SearchRefs<'_> {

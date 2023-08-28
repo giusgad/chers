@@ -1,49 +1,46 @@
-use super::Search;
+use super::{defs::SearchRefs, Search};
 use crate::{
-    board::Board,
-    eval::evaluate,
-    moves::{defs::Move, MoveGenerator},
+    eval::{defs::Eval, evaluate},
+    moves::defs::Move,
+    search::defs::SearchTerminate,
 };
-use std::sync::Arc;
 
 impl Search {
     pub fn alpha_beta(
-        board: &mut Board,
-        mg: &Arc<MoveGenerator>,
         depth: u8,
         mut alpha: i16,
         beta: i16,
+        pv: &mut Vec<Move>,
+        refs: &mut SearchRefs,
     ) -> i16 {
+        // check if the search has to stop
+        Self::check_termination(refs);
         if depth == 0 {
-            return evaluate(&board);
+            return evaluate(refs.board);
         }
-
         let mut legal_moves = 0;
-        let mut best_move = Move { data: 0 };
-        let mut best_eval = i16::MIN;
+        let mut best_eval = -Eval::INF;
 
-        let moves = mg.get_all_legal_moves(&board);
+        let moves = refs.mg.get_all_legal_moves(refs.board);
 
         for m in moves.iter() {
-            let legal = board.make_move(*m, mg);
-            if format!("{m}") == "d6e5" {
-                println!("eval:{legal}")
-            }
+            println!("move: {m}");
+            let legal = refs.board.make_move(*m, refs.mg);
             if !legal {
                 continue;
             }
             legal_moves += 1;
 
-            let eval = -Self::alpha_beta(board, mg, depth - 1, -beta, -alpha);
+            let eval = -Self::alpha_beta(depth - 1, -beta, -alpha, pv, refs);
 
-            board.unmake();
+            refs.board.unmake();
 
             if eval > best_eval {
                 best_eval = eval;
-                best_move = *m;
+                pv.push(*m);
             }
 
-            if eval > beta {
+            if eval >= beta {
                 return beta;
             }
 
@@ -54,19 +51,43 @@ impl Search {
 
         // finished the loop if there are no legal moves it's either mate or a draw
         if legal_moves == 0 {
-            let color = board.state.active_color;
-            if mg.square_attacked(&board, board.king_square(color), color ^ 1) {
-                return i16::MAX; // TODO: for nicer mate representation use mate_eval-ply to indicate in
-                                 // how many moves the mate occurs. https://www.reddit.com/r/chess/comments/ioldx9/why_do_chess_engines_evaluate_checkmate_at_3180/
+            let color = refs.board.state.active_color;
+            if refs
+                .mg
+                .square_attacked(refs.board, refs.board.king_square(color), color ^ 1)
+            {
+                return Eval::CHECKMATE; // TODO: for nicer mate representation use mate_eval-ply to indicate in
+                                        // how many moves the mate occurs. https://www.reddit.com/r/chess/comments/ioldx9/why_do_chess_engines_evaluate_checkmate_at_3180/
             } else {
-                return 0; // draw
+                return Eval::STALEMATE; // draw
             }
         }
 
+        /* let moves: String = moves.iter().fold(String::new(), |mut s, m| {
+            s.push_str(&format!("{}", m));
+            s.push(' ');
+            s
+        });
         println!(
-            "legal moves found: {legal_moves}, best_move: {best_move}, best_eval: {best_eval}"
-        );
+            "legal moves found: {legal_moves}, pv: {}, best_eval: {best_eval}",
+            moves
+        ); */
 
         alpha
+    }
+
+    fn check_termination(refs: &mut SearchRefs) {
+        use crate::search::defs::SearchTime::*;
+        let elapsed = refs.timer_elapsed();
+        let stop = match refs.time_control {
+            Adaptive(_) => elapsed >= refs.info.allocated_time,
+            Depth(d) => refs.info.depth > d,
+            Nodes(n) => refs.info.nodes > n,
+            MoveTime(t) => elapsed > t,
+            Infinite => false,
+        };
+        if stop {
+            refs.terminate = SearchTerminate::Stop;
+        }
     }
 }

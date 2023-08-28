@@ -17,7 +17,7 @@ use crate::{
     search::defs::SearchTerminate,
 };
 
-use self::defs::{SearchControl, SearchRefs, SearchTime};
+use self::defs::{SearchControl, SearchInfo, SearchRefs, SearchTime};
 
 pub struct Search {
     pub control_tx: Option<Sender<SearchControl>>, // control tx is used in the engine to send commands
@@ -70,26 +70,28 @@ impl Search {
                         } else {
                             report_tx.send(Info::Search(SearchResult::BestMove(moves[i])));
                         }*/
-
-                        search_time = time;
                         stop = false;
+                        search_time = time;
                     }
                     SearchControl::Stop => stop = true,
                     SearchControl::Quit => quit = true,
                     SearchControl::Nothing => (),
                 }
-                if !quit && !stop {
+                if !stop && !quit {
                     let mut board = board.lock().expect(ErrFatal::LOCK);
 
-                    let refs = SearchRefs {
+                    let mut refs = SearchRefs {
                         board: &mut board,
                         mg: &mg,
-                        time: search_time,
+                        time_control: search_time,
                         timer: None,
+                        info: &mut SearchInfo::new(),
                         terminate: SearchTerminate::Nothing,
+                        report_tx: &report_tx,
                     };
 
-                    let res = Self::iterative_deepening(&refs);
+                    let res = Self::iterative_deepening(&mut refs);
+                    report_tx.send(Info::Search(res)).expect(ErrFatal::TX_SEND);
                 }
             }
         });
