@@ -24,10 +24,10 @@ impl NrOf {
     pub const SQUARES: usize = 64;
 }
 
-pub const MAX_MOVE_COUNT: usize = 1024; // TODO: maybe adjust
+pub const MAX_MOVE_COUNT: usize = 1024;
 pub const MAX_LEGAL_MOVES: u8 = u8::MAX; // 255
 
-pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 310, 300, 100];
+pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 330, 320, 100];
 
 pub enum Info {
     Search(SearchResult),

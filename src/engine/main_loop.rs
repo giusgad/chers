@@ -31,13 +31,13 @@ impl Engine {
 
     fn search_report(&self, info: SearchResult) {
         // dbg!(&info);
-        let a = match info {
+        match info {
             SearchResult::BestMove(m) => {
                 self.board.lock().unwrap().make_move(m, &self.mg); // TODO: remove debug
                 Uci::output(format!("bestmove {}", m))
             }
             _ => (),
-        };
+        }
         // println!("{}", self.board.lock().unwrap());
     }
 }

@@ -1,5 +1,7 @@
 use super::{defs::SearchRefs, Search};
 use crate::{
+    board::defs::Pieces,
+    defs::PIECE_VALUES,
     eval::{defs::Eval, evaluate},
     moves::defs::Move,
     search::defs::{SearchControl, SearchTerminate},
@@ -28,12 +30,16 @@ impl Search {
             if !legal {
                 continue;
             }
+
             legal_moves += 1;
+            refs.info.ply += 1;
+
             let mut node_pv = Vec::new();
 
             let eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
 
             refs.board.unmake();
+            refs.info.ply -= 1;
 
             if eval > best_eval {
                 best_eval = eval;
@@ -58,8 +64,10 @@ impl Search {
                 .mg
                 .square_attacked(refs.board, refs.board.king_square(color), color ^ 1)
             {
-                return Eval::CHECKMATE; // TODO: for nicer mate representation use mate_eval-ply to indicate in
-                                        // how many moves the mate occurs. https://www.reddit.com/r/chess/comments/ioldx9/why_do_chess_engines_evaluate_checkmate_at_3180/
+                return -Eval::CHECKMATE
+                    + refs.info.ply as i16 * PIECE_VALUES[Pieces::QUEEN] as i16;
+            // TODO: for nicer mate representation use mate_eval-ply to indicate in
+            // how many moves the mate occurs. https://www.reddit.com/r/chess/comments/ioldx9/why_do_chess_engines_evaluate_checkmate_at_3180/
             } else {
                 return Eval::STALEMATE; // draw
             }

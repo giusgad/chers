@@ -71,6 +71,7 @@ pub enum SearchTime {
 // info on the current state of the search
 pub struct SearchInfo {
     pub depth: u8,
+    pub ply: u8,
     pub nodes: usize,
     pub allocated_time: u128,
 }
@@ -78,6 +79,7 @@ impl SearchInfo {
     pub fn new() -> Self {
         Self {
             depth: 0,
+            ply: 0,
             nodes: 0,
             allocated_time: 0,
         }
@@ -105,9 +107,6 @@ impl SearchRefs<'_> {
             Some(t) => t.elapsed().as_millis(),
             None => 0,
         }
-    }
-    pub fn timer_stop(&mut self) {
-        self.timer = None;
     }
     pub fn stopped(&self) -> bool {
         self.terminate != SearchTerminate::Nothing

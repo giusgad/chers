@@ -7,7 +7,7 @@ use crate::{
 pub mod bit_ops {
     use crate::defs::{Bitboard, Square};
 
-    pub fn find_ones(input: u64) -> Vec<usize> {
+    pub fn find_ones_u8(input: u64) -> Vec<usize> {
         let mut res = Vec::new();
         for i in 0..8 {
             if input >> i & 1 == 1 {

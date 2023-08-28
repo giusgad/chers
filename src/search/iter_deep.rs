@@ -18,9 +18,8 @@ impl Search {
             _ => (),
         } */
         match &refs.time_control {
-            SearchTime::Adaptive(_) | SearchTime::MoveTime(_) => {
-                refs.time_control = SearchTime::Depth(5)
-            }
+            SearchTime::Adaptive(_) => refs.time_control = SearchTime::Depth(5),
+            SearchTime::MoveTime(time) => refs.info.allocated_time = *time,
             _ => (),
         }
 
