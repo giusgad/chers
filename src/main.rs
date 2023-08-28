@@ -1,4 +1,4 @@
-// #![allow(dead_code, unused_variables)]
+#![allow(dead_code, unused_variables)]
 
 mod board;
 mod defs;
@@ -21,8 +21,9 @@ fn main() {
     use board::Board;
 
     let mut b = Board::new();
-    b.read_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        .expect("error reading fen in main");
+    // starting fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    b.read_fen("rnbq1rk1/pp3pp1/3b1n1p/3p2N1/3Pp3/2N5/PPP1BPPP/R1BQ1RK1 b - d3 0 11")
+        .expect("");
     // println!("{b}");
 
     let mg = MoveGenerator::new();
@@ -42,7 +43,8 @@ fn main() {
     loop {
         // LOOP TO MANUALLY INPUT MOVES
         println!("{b}\n");
-        let legal = mg.get_all_legal_moves(&b);
+        let mut legal = mg.get_all_legal_moves(&b);
+        legal.reorder();
         for i in 0..legal.index {
             print!("{}:{}, ", i, legal.list[i]);
         }

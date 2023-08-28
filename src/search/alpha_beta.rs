@@ -1,4 +1,7 @@
-use super::{defs::SearchRefs, Search};
+use super::{
+    defs::{SearchRefs, MAX_PLY},
+    Search,
+};
 use crate::{
     board::defs::Pieces,
     defs::PIECE_VALUES,
@@ -17,14 +20,16 @@ impl Search {
     ) -> i16 {
         // check if the search has to stop
         Self::check_termination(refs);
-        if depth == 0 || refs.stopped() {
+        if depth == 0 || refs.stopped() || refs.info.ply > MAX_PLY {
             return evaluate(refs.board);
         }
         let mut legal_moves = 0;
         let mut best_eval = -Eval::INF;
 
-        let moves = refs.mg.get_all_legal_moves(refs.board);
+        let mut moves = refs.mg.get_all_legal_moves(refs.board);
+        moves.reorder();
 
+        refs.info.nodes += 1;
         for m in moves.iter() {
             let legal = refs.board.make_move(*m, refs.mg);
             if !legal {

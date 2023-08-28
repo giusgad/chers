@@ -57,6 +57,7 @@ pub fn add_square_i8(sq: usize, i: i8) -> Option<usize> {
     }
 }
 
+#[allow(dead_code)]
 pub fn print_bb(bb: &Bitboard) {
     let mut ranks = [0; 8];
     for (i, rank) in ranks.iter_mut().enumerate() {

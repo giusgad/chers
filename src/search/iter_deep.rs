@@ -18,7 +18,7 @@ impl Search {
             _ => (),
         } */
         match &refs.time_control {
-            SearchTime::Adaptive(_) => refs.time_control = SearchTime::Depth(5),
+            SearchTime::Adaptive(_) => refs.time_control = SearchTime::Depth(6),
             SearchTime::MoveTime(time) => refs.info.allocated_time = *time,
             _ => (),
         }
@@ -32,7 +32,7 @@ impl Search {
         while !stop {
             refs.info.depth = depth;
 
-            let eval = Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
+            Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
 
             if !pv.is_empty() {
                 best_move = pv[0];
@@ -42,6 +42,8 @@ impl Search {
             depth += 1;
             stop = refs.stopped();
         }
+
+        dbg!(refs.timer_elapsed());
 
         let null_move = Move { data: 0 };
         if best_move != null_move {
