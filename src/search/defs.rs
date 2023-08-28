@@ -1,5 +1,8 @@
 use std::{
-    sync::{mpsc::Sender, Arc},
+    sync::{
+        mpsc::{Receiver, Sender},
+        Arc,
+    },
     time::Instant,
 };
 
@@ -21,7 +24,7 @@ pub enum SearchControl {
 }
 
 // SearchTerminate is used by Search internally to determine how it should stop
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum SearchTerminate {
     Stop,
     Quit,
@@ -90,6 +93,7 @@ pub struct SearchRefs<'a> {
     pub timer: Option<Instant>,
     pub terminate: SearchTerminate,
     pub report_tx: &'a Sender<Info>,
+    pub control_rx: &'a Receiver<SearchControl>,
 }
 
 impl SearchRefs<'_> {
@@ -107,5 +111,14 @@ impl SearchRefs<'_> {
     }
     pub fn stopped(&self) -> bool {
         self.terminate != SearchTerminate::Nothing
+    }
+}
+
+impl std::fmt::Debug for SearchRefs<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SearchRefs")
+            .field("time_control", &self.time_control)
+            .field("terminate", &self.terminate)
+            .finish()
     }
 }

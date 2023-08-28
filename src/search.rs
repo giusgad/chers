@@ -88,6 +88,7 @@ impl Search {
                         info: &mut SearchInfo::new(),
                         terminate: SearchTerminate::Nothing,
                         report_tx: &report_tx,
+                        control_rx: &rx,
                     };
 
                     let res = Self::iterative_deepening(&mut refs);

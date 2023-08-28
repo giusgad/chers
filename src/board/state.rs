@@ -11,6 +11,7 @@ pub struct State {
     pub halfmove_count: u8,
     pub fullmove_count: u16,
     pub material: [u16; Colors::BOTH],
+    pub psqt: [i16; Colors::BOTH],
     pub next_move: Move,
 }
 
@@ -23,6 +24,7 @@ impl State {
             halfmove_count: 0,
             fullmove_count: 0,
             material: [0; Colors::BOTH],
+            psqt: [0; Colors::BOTH],
             next_move: Move { data: 0 },
         }
     }
@@ -30,13 +32,14 @@ impl State {
 
 impl Into<String> for State {
     fn into(self) -> String {
-        format!("active color: {}\ncastling: {}\nep square: {:?}\nhalfmove clock: {}\nfullmove count: {}\nmaterial: {:?}",
+        format!("active color: {}\ncastling: {}\nep square: {:?}\nhalfmove clock: {}\nfullmove count: {}\nmaterial: {:?}, psqt: {:?}",
             self.active_color,
             self.castling,
             self.ep_square,
             self.halfmove_count,
             self.fullmove_count,
             self.material,
+            self.psqt,
         )
     }
 }

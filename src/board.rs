@@ -11,6 +11,7 @@ use crate::{
         state::State,
     },
     defs::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
+    eval::psqt::{FLIP, PSQTS},
     utils::bit_ops::find_ones,
 };
 
@@ -39,6 +40,12 @@ impl Board {
         self.pieces[color][square] = piece;
 
         self.state.material[color] += PIECE_VALUES[piece];
+        let square = if color == Colors::WHITE {
+            FLIP[square]
+        } else {
+            square
+        };
+        self.state.psqt[color] += PSQTS[piece][square];
     }
 
     fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
@@ -47,6 +54,12 @@ impl Board {
         self.pieces[color][square] = Pieces::NONE;
 
         self.state.material[color] -= PIECE_VALUES[piece];
+        let square = if color == Colors::WHITE {
+            FLIP[square]
+        } else {
+            square
+        };
+        self.state.psqt[color] -= PSQTS[piece][square];
     }
 
     pub fn get_pieces(&self, piece: Piece, color: Color) -> Bitboard {

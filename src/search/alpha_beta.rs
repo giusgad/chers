@@ -2,7 +2,7 @@ use super::{defs::SearchRefs, Search};
 use crate::{
     eval::{defs::Eval, evaluate},
     moves::defs::Move,
-    search::defs::SearchTerminate,
+    search::defs::{SearchControl, SearchTerminate},
 };
 
 impl Search {
@@ -15,7 +15,7 @@ impl Search {
     ) -> i16 {
         // check if the search has to stop
         Self::check_termination(refs);
-        if depth == 0 {
+        if depth == 0 || refs.stopped() {
             return evaluate(refs.board);
         }
         let mut legal_moves = 0;
@@ -24,20 +24,22 @@ impl Search {
         let moves = refs.mg.get_all_legal_moves(refs.board);
 
         for m in moves.iter() {
-            println!("move: {m}");
             let legal = refs.board.make_move(*m, refs.mg);
             if !legal {
                 continue;
             }
             legal_moves += 1;
+            let mut node_pv = Vec::new();
 
-            let eval = -Self::alpha_beta(depth - 1, -beta, -alpha, pv, refs);
+            let eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
 
             refs.board.unmake();
 
             if eval > best_eval {
                 best_eval = eval;
+                pv.clear();
                 pv.push(*m);
+                pv.append(&mut node_pv);
             }
 
             if eval >= beta {
@@ -78,6 +80,21 @@ impl Search {
 
     fn check_termination(refs: &mut SearchRefs) {
         use crate::search::defs::SearchTime::*;
+
+        if let Ok(data) = refs.control_rx.try_recv() {
+            match data {
+                SearchControl::Stop => {
+                    refs.terminate = SearchTerminate::Stop;
+                    return;
+                }
+                SearchControl::Quit => {
+                    refs.terminate = SearchTerminate::Quit;
+                    return;
+                }
+                _ => (),
+            }
+        }
+
         let elapsed = refs.timer_elapsed();
         let stop = match refs.time_control {
             Adaptive(_) => elapsed >= refs.info.allocated_time,

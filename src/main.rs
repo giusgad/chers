@@ -17,8 +17,11 @@ fn main() {
 }
 
 /* fn main() {
-    let mut b = board::Board::new();
-    b.read_fen("r3k2r/pp2qppp/2nb1n2/3Ppb2/N1pQP3/4BP2/PPP1N1PP/R3K2R w KQkq - 5 11")
+    use crate::moves::MoveGenerator;
+    use board::Board;
+
+    let mut b = Board::new();
+    b.read_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         .expect("error reading fen in main");
     // println!("{b}");
 
@@ -57,10 +60,6 @@ fn main() {
             b.unmake()
         }
         dbg!(&b.state);
-        println!(
-            "material:{}",
-            (b.state.material[0] as i16 - b.state.material[1] as i16) / 100
-        )
     }
 
     /* let mut finished = false;
