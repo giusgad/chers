@@ -3,13 +3,15 @@ mod fen;
 mod history;
 mod makemove;
 mod state;
+mod zobrist;
 
+use self::{
+    defs::{PieceNames, Pieces, SQUARE_BBS, SQUARE_NAMES},
+    history::History,
+    state::State,
+    zobrist::Zobrist,
+};
 use crate::{
-    board::{
-        defs::{PieceNames, Pieces, SQUARE_BBS, SQUARE_NAMES},
-        history::History,
-        state::State,
-    },
     defs::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
     eval::psqt::{FLIP, KING_ENDGAME, PSQTS},
     utils::bit_ops::find_ones_u8,
@@ -20,6 +22,7 @@ pub struct Board {
     pub color_bbs: [Bitboard; Colors::BOTH],
     pub state: State,
     history: History,
+    zobrist: Zobrist,
     pub pieces: [[Piece; NrOf::SQUARES]; Colors::BOTH],
 }
 
@@ -30,6 +33,7 @@ impl Board {
             color_bbs: [0; Colors::BOTH],
             state: State::new(),
             history: History::new(),
+            zobrist: Zobrist::new(),
             pieces: [[Pieces::NONE; NrOf::SQUARES]; Colors::BOTH],
         }
     }
@@ -40,17 +44,9 @@ impl Board {
         self.pieces[color][square] = piece;
 
         self.state.material[color] += PIECE_VALUES[piece];
-        let square = if color == Colors::WHITE {
-            FLIP[square]
-        } else {
-            square
-        };
+        self.state.zobrist_hash ^= self.zobrist.piece_hash(color, piece, square);
 
-        if self.is_endgame() && piece == Pieces::KING {
-            self.state.psqt[color] += KING_ENDGAME[square];
-        } else {
-            self.state.psqt[color] += PSQTS[piece][square];
-        }
+        self.state.psqt[color] += self.get_psqt_val(piece, color, square);
     }
 
     fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
@@ -59,16 +55,9 @@ impl Board {
         self.pieces[color][square] = Pieces::NONE;
 
         self.state.material[color] -= PIECE_VALUES[piece];
-        let square = if color == Colors::WHITE {
-            FLIP[square]
-        } else {
-            square
-        };
-        if self.is_endgame() && piece == Pieces::KING {
-            self.state.psqt[color] -= KING_ENDGAME[square];
-        } else {
-            self.state.psqt[color] -= PSQTS[piece][square];
-        }
+        self.state.zobrist_hash ^= self.zobrist.piece_hash(color, piece, square);
+
+        self.state.psqt[color] -= self.get_psqt_val(piece, color, square);
     }
 
     pub fn get_pieces(&self, piece: Piece, color: Color) -> Bitboard {
@@ -77,6 +66,31 @@ impl Board {
 
     pub fn king_square(&self, color: Color) -> Square {
         self.piece_bbs[color][Pieces::KING].trailing_zeros() as Square
+    }
+
+    pub fn set_ep_square(&mut self, sq: Square) {
+        self.state.ep_square = Some(sq);
+        self.state.zobrist_hash ^= self.zobrist.en_passant_hash(sq);
+    }
+
+    pub fn clear_ep_square(&mut self) {
+        if let Some(sq) = self.state.ep_square {
+            self.state.zobrist_hash ^= self.zobrist.en_passant_hash(sq);
+        }
+        self.state.ep_square = None;
+    }
+
+    fn get_psqt_val(&self, piece: Piece, color: Color, square: Square) -> i16 {
+        let square = if color == Colors::WHITE {
+            FLIP[square]
+        } else {
+            square
+        };
+        if self.is_endgame() && piece == Pieces::KING {
+            KING_ENDGAME[square]
+        } else {
+            PSQTS[piece][square]
+        }
     }
 
     fn is_endgame(&self) -> bool {
@@ -99,6 +113,26 @@ impl Board {
 
         (!black_queen || (!black_rook && b_count <= 1))
             && (!white_queen || (!white_rook && w_count <= 1))
+    }
+
+    #[allow(dead_code)]
+    pub fn zobrist_from_scratch(&self) -> u64 {
+        let mut zob = 0;
+        for color in 0..Colors::BOTH {
+            for (sq, piece) in self.pieces[color].into_iter().enumerate() {
+                if piece != Pieces::NONE {
+                    zob ^= self.zobrist.piece_hash(color, piece, sq);
+                }
+            }
+        }
+        zob ^= self.zobrist.castling_hash(self.state.castling);
+        if let Some(sq) = self.state.ep_square {
+            zob ^= self.zobrist.en_passant_hash(sq);
+        }
+        if self.state.active_color == Colors::BLACK {
+            zob ^= self.zobrist.color_hash();
+        }
+        zob
     }
 }
 

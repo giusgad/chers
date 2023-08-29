@@ -55,13 +55,13 @@ impl Board {
 
         // UPDATE STATE
         // set ep_square if there is a pawn doublestep else reset it
+        self.clear_ep_square();
         if m.is_doublestep() {
-            self.state.ep_square = match color {
-                Colors::WHITE => Some(from + 8),
-                _ => Some(from - 8),
+            let sq = match color {
+                Colors::WHITE => from + 8,
+                _ => from - 8,
             };
-        } else {
-            self.state.ep_square = None;
+            self.set_ep_square(sq)
         }
 
         // increment move count if black moved
@@ -79,11 +79,15 @@ impl Board {
         self.update_castling_perms(piece, color, from);
 
         self.state.active_color ^= 1; // switch active color
+        self.state.zobrist_hash ^= self.zobrist.color_hash();
 
         let is_check = mg.square_attacked(self, self.king_square(color), color ^ 1);
         if is_check {
             self.unmake()
         }
+
+        // uncomment this to check zobrist hashing is working
+        // assert_eq!(self.zobrist_from_scratch(), self.state.zobrist_hash);
 
         !is_check
     }
@@ -102,15 +106,16 @@ impl Board {
     }
 
     fn update_castling_perms(&mut self, piece: Piece, color: Color, from: Square) {
+        let before = self.state.castling;
         match piece {
             Pieces::KING => match color {
                 Colors::BLACK => {
                     self.state.castling &= !Castling::BQ;
-                    self.state.castling &= !Castling::BK
+                    self.state.castling &= !Castling::BK;
                 }
                 _ => {
                     self.state.castling &= !Castling::WQ;
-                    self.state.castling &= !Castling::WK
+                    self.state.castling &= !Castling::WK;
                 }
             },
             Pieces::ROOK => match from {
@@ -122,6 +127,7 @@ impl Board {
             },
             _ => (),
         }
+        self.state.zobrist_hash ^= self.zobrist.castling_hash(before ^ self.state.castling);
     }
 }
 

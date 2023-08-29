@@ -68,7 +68,10 @@ impl Board {
         for c in fen_iter.next().unwrap().chars() {
             match c {
                 'w' => board.state.active_color = Colors::WHITE,
-                'b' => board.state.active_color = Colors::BLACK,
+                'b' => {
+                    board.state.active_color = Colors::BLACK;
+                    board.state.zobrist_hash ^= board.zobrist.color_hash()
+                }
                 _ => return Err(FenError::ActiveColor),
             }
         }
@@ -84,13 +87,14 @@ impl Board {
                 _ => return Err(FenError::Castling),
             }
         }
+        board.state.zobrist_hash ^= board.zobrist.castling_hash(board.state.castling);
 
         // EN PASSANT SQUARE
         let ep_square = fen_iter.next().unwrap();
         if *ep_square == "-" {
             board.state.ep_square = None;
         } else if let Ok(square) = square_by_name(ep_square) {
-            board.state.ep_square = Some(square);
+            board.set_ep_square(square);
         } else {
             return Err(FenError::EpSquare);
         }

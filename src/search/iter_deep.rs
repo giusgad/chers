@@ -34,13 +34,13 @@ impl Search {
 
             Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
 
-            if !pv.is_empty() {
+            stop = refs.stopped();
+            if !pv.is_empty() && !stop {
                 best_move = pv[0];
                 Uci::search_info(&refs, &pv);
             }
 
             depth += 1;
-            stop = refs.stopped();
         }
 
         dbg!(refs.timer_elapsed());

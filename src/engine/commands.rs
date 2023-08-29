@@ -24,6 +24,13 @@ impl Engine {
 
             UciData::Stop => self.search.send(SearchControl::Stop),
 
+            UciData::Dbg => {
+                dbg!(self.board.lock().unwrap().state);
+            }
+            UciData::PrintBoard => {
+                println!("{}", self.board.lock().unwrap())
+            }
+
             UciData::Quit => self.quit(), // TODO: close threads with handles
             _ => (),
         }

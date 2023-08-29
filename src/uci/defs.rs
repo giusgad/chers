@@ -11,5 +11,8 @@ pub enum UciData {
     Stop,
     Quit,
 
+    Dbg, // WARN: custom command for debug (not uci)
+    PrintBoard,
+
     Error,
 }
