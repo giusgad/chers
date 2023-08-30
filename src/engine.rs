@@ -1,6 +1,7 @@
 mod commands;
 pub mod main_loop;
 mod position;
+mod transposition_table;
 
 use std::sync::{Arc, Mutex};
 

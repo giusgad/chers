@@ -9,6 +9,9 @@ impl Uci {
             s.push(' ');
             s
         });
-        println!("info depth {} pv {}", refs.info.depth, moves);
+        println!(
+            "info depth {} seldepth {} nodes {} pv {}",
+            refs.info.depth, refs.info.seldepth, refs.info.nodes, moves
+        );
     }
 }

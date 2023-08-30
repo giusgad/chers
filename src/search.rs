@@ -1,6 +1,7 @@
 mod alpha_beta;
 pub mod defs;
 mod iter_deep;
+mod quiescence;
 
 use std::{
     sync::{
@@ -75,7 +76,6 @@ impl Search {
                     }
                     SearchControl::Stop => stop = true,
                     SearchControl::Quit => quit = true,
-                    SearchControl::Nothing => (),
                 }
                 if !stop && !quit {
                     let mut board = board.lock().expect(ErrFatal::LOCK);

@@ -12,7 +12,7 @@ use crate::{
 
 impl Search {
     pub fn alpha_beta(
-        depth: u8,
+        mut depth: u8,
         mut alpha: i16,
         beta: i16,
         pv: &mut Vec<Move>,
@@ -20,16 +20,31 @@ impl Search {
     ) -> i16 {
         // check if the search has to stop
         Self::check_termination(refs);
-        if depth == 0 || refs.stopped() || refs.info.ply > MAX_PLY {
+        if refs.stopped() || refs.info.ply > MAX_PLY {
             return evaluate(refs.board);
         }
+
+        let is_check = refs.mg.square_attacked(
+            refs.board,
+            refs.board.king_square(refs.board.state.active_color),
+            refs.board.state.active_color ^ 1,
+        );
+        if is_check {
+            // if we're in check we can't start quiescence search, so we need to increase depth
+            depth += 1;
+        }
+        if depth <= 0 {
+            return Self::quiescence_search(refs, alpha, beta, pv);
+        }
+
+        refs.info.nodes += 1;
+
         let mut legal_moves = 0;
         let mut best_eval = -Eval::INF;
 
         let mut moves = refs.mg.get_all_legal_moves(refs.board, false);
         moves.reorder();
 
-        refs.info.nodes += 1;
         for m in moves.iter() {
             let legal = refs.board.make_move(*m, refs.mg);
             if !legal {
@@ -38,6 +53,9 @@ impl Search {
 
             legal_moves += 1;
             refs.info.ply += 1;
+            if refs.info.ply >= refs.info.seldepth {
+                refs.info.seldepth = refs.info.ply;
+            }
 
             let mut node_pv = Vec::new();
 
@@ -64,15 +82,9 @@ impl Search {
 
         // finished the loop if there are no legal moves it's either mate or a draw
         if legal_moves == 0 {
-            let color = refs.board.state.active_color;
-            if refs
-                .mg
-                .square_attacked(refs.board, refs.board.king_square(color), color ^ 1)
-            {
+            if is_check {
                 return -Eval::CHECKMATE
                     + refs.info.ply as i16 * PIECE_VALUES[Pieces::QUEEN] as i16;
-            // TODO: for nicer mate representation use mate_eval-ply to indicate in
-            // how many moves the mate occurs. https://www.reddit.com/r/chess/comments/ioldx9/why_do_chess_engines_evaluate_checkmate_at_3180/
             } else {
                 return Eval::STALEMATE; // draw
             }
@@ -91,7 +103,7 @@ impl Search {
         alpha
     }
 
-    fn check_termination(refs: &mut SearchRefs) {
+    pub fn check_termination(refs: &mut SearchRefs) {
         use crate::search::defs::SearchTime::*;
 
         if let Ok(data) = refs.control_rx.try_recv() {

@@ -20,7 +20,6 @@ pub enum SearchControl {
     Start(SearchTime),
     Stop,
     Quit,
-    Nothing,
 }
 
 // SearchTerminate is used by Search internally to determine how it should stop
@@ -71,6 +70,7 @@ pub enum SearchTime {
 // info on the current state of the search
 pub struct SearchInfo {
     pub depth: u8,
+    pub seldepth: u8,
     pub ply: u8,
     pub nodes: usize,
     pub allocated_time: u128,
@@ -79,6 +79,7 @@ impl SearchInfo {
     pub fn new() -> Self {
         Self {
             depth: 0,
+            seldepth: 0,
             ply: 0,
             nodes: 0,
             allocated_time: 0,
