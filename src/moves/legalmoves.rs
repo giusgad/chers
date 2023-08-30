@@ -16,13 +16,21 @@ use super::{
 
 impl MoveGenerator {
     // This function sends to the MoveList all the legal moves for a specified piece
-    pub fn piece_legal_moves(&self, list: &mut MoveList, board: &Board, p: Piece) {
+    pub fn piece_legal_moves(
+        &self,
+        list: &mut MoveList,
+        board: &Board,
+        p: Piece,
+        only_captures: bool,
+    ) {
         match p {
-            p @ (Pieces::KING | Pieces::KNIGHT) => self.non_sliding_moves(p, board, list),
-            p @ (Pieces::QUEEN | Pieces::BISHOP | Pieces::ROOK) => {
-                Self::sliding_moves(p, board, list)
+            p @ (Pieces::KING | Pieces::KNIGHT) => {
+                self.non_sliding_moves(p, board, list, only_captures)
             }
-            Pieces::PAWN => self.pawn_moves(board, list),
+            p @ (Pieces::QUEEN | Pieces::BISHOP | Pieces::ROOK) => {
+                Self::sliding_moves(p, board, list, only_captures)
+            }
+            Pieces::PAWN => self.pawn_moves(board, list, only_captures),
             _ => (),
         }
     }
@@ -56,7 +64,7 @@ impl MoveGenerator {
         // can't castle if there are pieces in the way or one of the squares is under attack
         let (mut ok_q, mut ok_k) = (true, true);
         for sq in to_q..=from {
-            if SQUARE_BBS[sq] > 0 || Self::square_attacked(self, board, sq, color ^ 1) {
+            if self.square_attacked(board, sq, color ^ 1) {
                 ok_q = false;
                 break;
             }
@@ -69,7 +77,7 @@ impl MoveGenerator {
         }
 
         for sq in from..=to_k {
-            if Self::square_attacked(&self, board, sq, color ^ 1) {
+            if self.square_attacked(board, sq, color ^ 1) {
                 ok_k = false;
                 break;
             }
@@ -107,7 +115,7 @@ impl MoveGenerator {
         }
     }
 
-    fn pawn_moves(&self, board: &Board, list: &mut MoveList) {
+    fn pawn_moves(&self, board: &Board, list: &mut MoveList, only_captures: bool) {
         const PROMOTION_PIECES: [Piece; 4] =
             [Pieces::QUEEN, Pieces::BISHOP, Pieces::KNIGHT, Pieces::ROOK];
         let color = board.state.active_color;
@@ -123,51 +131,6 @@ impl MoveGenerator {
             } else {
                 MoveDirection::S
             };
-
-            if let Some(to) = add_square_i8(from, dir.bb_val()) {
-                if SQUARE_BBS[to] & empty > 0 {
-                    if (SQUARE_BBS[from] & RANK_BBS[Ranks::R2] > 0 && color == Colors::WHITE)
-                        || (SQUARE_BBS[from] & RANK_BBS[Ranks::R7] > 0 && color == Colors::BLACK)
-                    {
-                        // DOUBLE STEP
-                        if let Some(to) = add_square_i8(from, dir.bb_val() * 2) {
-                            if SQUARE_BBS[to] & empty > 0 {
-                                let mut m = Move::new(
-                                    Pieces::PAWN,
-                                    from,
-                                    to,
-                                    MoveType::Quiet,
-                                    Pieces::NONE,
-                                    None,
-                                );
-                                m.data |= 1 << MoveOffsets::DOUBLESTEP;
-                                list.push(m);
-                            }
-                        }
-                    }
-                    if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
-                        || ((SQUARE_BBS[to] & RANK_BBS[Ranks::R1] > 0) && color == Colors::BLACK)
-                    {
-                        // PROMOTION
-                        for promote_to in PROMOTION_PIECES {
-                            let m = Move::new(
-                                Pieces::PAWN,
-                                from,
-                                to,
-                                MoveType::Quiet,
-                                Pieces::NONE,
-                                Some(promote_to),
-                            );
-                            list.push(m);
-                        }
-                    } else {
-                        // QUIET
-                        let m =
-                            Move::new(Pieces::PAWN, from, to, MoveType::Quiet, Pieces::NONE, None);
-                        list.push(m);
-                    }
-                }
-            }
 
             // EN PASSANT
             let available_bb = self.pawn_capture[color][from];
@@ -215,11 +178,66 @@ impl MoveGenerator {
                     list.push(m);
                 }
             }
+
+            if only_captures {
+                continue;
+            }
+
+            if let Some(to) = add_square_i8(from, dir.bb_val()) {
+                if SQUARE_BBS[to] & empty > 0 {
+                    if (SQUARE_BBS[from] & RANK_BBS[Ranks::R2] > 0 && color == Colors::WHITE)
+                        || (SQUARE_BBS[from] & RANK_BBS[Ranks::R7] > 0 && color == Colors::BLACK)
+                    {
+                        // DOUBLE STEP
+                        if let Some(to) = add_square_i8(from, dir.bb_val() * 2) {
+                            if SQUARE_BBS[to] & empty > 0 {
+                                let mut m = Move::new(
+                                    Pieces::PAWN,
+                                    from,
+                                    to,
+                                    MoveType::Quiet,
+                                    Pieces::NONE,
+                                    None,
+                                );
+                                m.data |= 1 << MoveOffsets::DOUBLESTEP;
+                                list.push(m);
+                            }
+                        }
+                    }
+                    if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
+                        || ((SQUARE_BBS[to] & RANK_BBS[Ranks::R1] > 0) && color == Colors::BLACK)
+                    {
+                        // PROMOTION
+                        for promote_to in PROMOTION_PIECES {
+                            let m = Move::new(
+                                Pieces::PAWN,
+                                from,
+                                to,
+                                MoveType::Quiet,
+                                Pieces::NONE,
+                                Some(promote_to),
+                            );
+                            list.push(m);
+                        }
+                    } else {
+                        // QUIET
+                        let m =
+                            Move::new(Pieces::PAWN, from, to, MoveType::Quiet, Pieces::NONE, None);
+                        list.push(m);
+                    }
+                }
+            }
         }
     }
 
-    fn non_sliding_moves(&self, piece: Piece, board: &Board, list: &mut MoveList) {
-        if piece == Pieces::KING {
+    fn non_sliding_moves(
+        &self,
+        piece: Piece,
+        board: &Board,
+        list: &mut MoveList,
+        only_captures: bool,
+    ) {
+        if piece == Pieces::KING && !only_captures {
             self.castling(board, list);
         }
         let color = board.state.active_color;
@@ -250,18 +268,20 @@ impl MoveGenerator {
                 list.push(m);
             }
 
-            let mut quiets = available_bb & empty;
-            while quiets > 0 {
-                let to = bit_ops::next_one(&mut quiets);
-                let m = Move::new(piece, from, to, MoveType::Quiet, Pieces::NONE, None);
-                list.push(m);
+            if !only_captures {
+                let mut quiets = available_bb & empty;
+                while quiets > 0 {
+                    let to = bit_ops::next_one(&mut quiets);
+                    let m = Move::new(piece, from, to, MoveType::Quiet, Pieces::NONE, None);
+                    list.push(m);
+                }
             }
         }
     }
 
     // this function follows rays in the directions possible for the given piece and adds to the
     // MoveList all of its possible moves
-    fn sliding_moves(piece: Piece, board: &Board, list: &mut MoveList) {
+    fn sliding_moves(piece: Piece, board: &Board, list: &mut MoveList, only_captures: bool) {
         let color = board.state.active_color;
         let self_pieces = board.color_bbs[color];
         let enemy_pieces = board.color_bbs[color ^ 1];
@@ -288,14 +308,15 @@ impl MoveGenerator {
                         );
                         list.push(m);
                         break;
-                    } else {
+                    } else if !only_captures {
                         // It's a quiet move
+                        // generate it only if requested
                         let m = Move::new(piece, from, to, MoveType::Quiet, Pieces::NONE, None);
                         list.push(m);
-                        if Self::reached_edge(to, &dir) {
-                            // The ray reached the side of the board
-                            break;
-                        }
+                    }
+                    if Self::reached_edge(to, &dir) {
+                        // The ray reached the side of the board
+                        break;
                     }
                     ray_sq = to;
                 }

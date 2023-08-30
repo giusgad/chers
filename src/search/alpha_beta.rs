@@ -26,7 +26,7 @@ impl Search {
         let mut legal_moves = 0;
         let mut best_eval = -Eval::INF;
 
-        let mut moves = refs.mg.get_all_legal_moves(refs.board);
+        let mut moves = refs.mg.get_all_legal_moves(refs.board, false);
         moves.reorder();
 
         refs.info.nodes += 1;

@@ -30,10 +30,10 @@ impl MoveGenerator {
         mg
     }
 
-    pub fn get_all_legal_moves(&self, board: &Board) -> MoveList {
+    pub fn get_all_legal_moves(&self, board: &Board, only_captures: bool) -> MoveList {
         let mut list = MoveList::new();
         for piece in 0..NrOf::PIECE_TYPES {
-            self.piece_legal_moves(&mut list, board, piece)
+            self.piece_legal_moves(&mut list, board, piece, only_captures)
         }
         list
     }
