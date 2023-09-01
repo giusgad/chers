@@ -10,8 +10,12 @@ impl Uci {
             s
         });
         println!(
-            "info depth {} seldepth {} nodes {} pv {}",
-            refs.info.depth, refs.info.seldepth, refs.info.nodes, moves
+            "info depth {} seldepth {} nodes {} time {} pv {}",
+            refs.info.depth,
+            refs.info.seldepth,
+            refs.info.nodes,
+            refs.timer_elapsed(),
+            moves
         );
     }
 }

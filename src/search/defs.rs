@@ -43,7 +43,7 @@ pub struct GameTime {
     pub btime: u128,
     pub winc: u128,
     pub binc: u128,
-    pub moves_to_go: u64,
+    pub moves_to_go: Option<u16>, // value not always provided
 }
 impl GameTime {
     pub fn new() -> Self {
@@ -52,7 +52,7 @@ impl GameTime {
             btime: 0,
             winc: 0,
             binc: 0,
-            moves_to_go: 0,
+            moves_to_go: None,
         }
     }
 }

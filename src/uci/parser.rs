@@ -4,7 +4,7 @@ use super::{defs::UciData, Uci};
 
 impl Uci {
     pub fn commands_from_string(s: String) -> UciData {
-        let s = s.trim_end(); // remove the \n
+        let s = s.trim(); // remove the \n
         match s {
             cmd if cmd == "uci" => UciData::Uci,
             cmd if cmd == "isready" => UciData::IsReady,
@@ -95,7 +95,7 @@ impl Uci {
                     GoToken::BTime => time.btime = t.parse().unwrap_or(0),
                     GoToken::WInc => time.winc = t.parse().unwrap_or(0),
                     GoToken::BInc => time.binc = t.parse().unwrap_or(0),
-                    GoToken::MovesToGo => time.moves_to_go = t.parse().unwrap_or(0),
+                    GoToken::MovesToGo => time.moves_to_go = t.parse().ok(),
                     GoToken::Depth => depth = t.parse().unwrap_or(0),
                     GoToken::Nodes => nodes = t.parse().unwrap_or(0),
                     GoToken::MoveTime => move_time = t.parse().unwrap_or(0),

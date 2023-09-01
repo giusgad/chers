@@ -93,9 +93,23 @@ impl Board {
         }
     }
 
-    fn is_endgame(&self) -> bool {
+    pub fn is_endgame(&self) -> bool {
         // endgame starts when both sides have no queens or the sides that have a queen have at
         // most one more minor piece
+        // also there shouldn't be more than 6 minor+major pieces on the board
+        let mut count = 0; //
+        for color in 0..Colors::BOTH {
+            for piece in 0..NrOf::PIECE_TYPES {
+                if piece == Pieces::PAWN || piece == Pieces::KING {
+                    continue;
+                }
+                count += self.piece_bbs[color][piece].count_ones();
+            }
+        }
+        if count > 6 {
+            return false;
+        }
+
         let black_queen = self.piece_bbs[Colors::BLACK][Pieces::QUEEN] > 0;
         let white_queen = self.piece_bbs[Colors::WHITE][Pieces::QUEEN] > 0;
 

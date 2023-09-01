@@ -26,6 +26,8 @@ impl Engine {
             UciData::Dbg(s) => {
                 if s == "draw" {
                     dbg!(Search::is_draw(&self.board.lock().unwrap()));
+                } else if s == "endgame" {
+                    dbg!(self.board.lock().unwrap().is_endgame());
                 } else {
                     dbg!(self.board.lock().unwrap().state);
                 }

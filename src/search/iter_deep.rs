@@ -12,13 +12,8 @@ use super::{
 
 impl Search {
     pub fn iterative_deepening(refs: &mut SearchRefs) -> SearchResult {
-        /* match &refs.time_control {
-            SearchTime::Adaptive(time) => refs.info.allocated_time = Self::calculate_time(time),
-            SearchTime::MoveTime(time) => refs.info.allocated_time = *time,
-            _ => (),
-        } */
         refs.info.allocated_time = match &refs.time_control {
-            SearchTime::Adaptive(time) => Self::calculate_time(time),
+            SearchTime::Adaptive(_) => Self::calculate_time(&refs),
             SearchTime::MoveTime(time) => *time,
             _ => 0,
         };
@@ -32,12 +27,11 @@ impl Search {
         while !stop {
             refs.info.depth = depth;
 
-            let eval = Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
+            Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
 
             stop = refs.stopped();
             if !pv.is_empty() && !stop {
                 best_move = pv[0];
-                dbg!(eval);
                 Uci::search_info(&refs, &pv);
             }
 
