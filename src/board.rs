@@ -21,7 +21,7 @@ pub struct Board {
     pub piece_bbs: [[Bitboard; NrOf::PIECE_TYPES]; Colors::BOTH],
     pub color_bbs: [Bitboard; Colors::BOTH],
     pub state: State,
-    history: History,
+    pub history: History,
     zobrist: Zobrist,
     pub pieces: [[Piece; NrOf::SQUARES]; Colors::BOTH],
 }

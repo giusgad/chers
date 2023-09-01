@@ -15,7 +15,9 @@ impl Uci {
             cmd if cmd.starts_with("position") => Self::parse_position(cmd),
             cmd if cmd.starts_with("go") => UciData::Go(Self::parse_go(cmd)),
 
-            cmd if cmd == "dbg" => UciData::Dbg,
+            cmd if cmd.starts_with("dbg") => {
+                UciData::Dbg(cmd.strip_prefix("dbg").unwrap_or("").trim().to_string())
+            }
             cmd if cmd == "print board" => UciData::PrintBoard,
             _ => UciData::Error,
         }

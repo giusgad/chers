@@ -1,6 +1,6 @@
 use super::Engine;
 use crate::{
-    search::defs::SearchControl,
+    search::{defs::SearchControl, Search},
     uci::{defs::UciData, Uci},
 };
 
@@ -19,13 +19,16 @@ impl Engine {
             UciData::Go(time) => self.search.send(SearchControl::Start(time)),
             UciData::Position(fen, moves) => {
                 self.setup_position(fen, moves);
-                // println!("{}", self.board.lock().unwrap());
             }
 
             UciData::Stop => self.search.send(SearchControl::Stop),
 
-            UciData::Dbg => {
-                dbg!(self.board.lock().unwrap().state);
+            UciData::Dbg(s) => {
+                if s == "draw" {
+                    dbg!(Search::is_draw(&self.board.lock().unwrap()));
+                } else {
+                    dbg!(self.board.lock().unwrap().state);
+                }
             }
             UciData::PrintBoard => {
                 println!("{}", self.board.lock().unwrap())

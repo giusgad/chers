@@ -1,25 +1,35 @@
+use std::ops::Deref;
+
 use crate::defs::MAX_MOVE_COUNT;
 
 use super::state::State;
 
 pub struct History {
-    moves: [State; MAX_MOVE_COUNT],
+    list: [State; MAX_MOVE_COUNT],
     current: usize,
 }
 
 impl History {
     pub fn new() -> Self {
         Self {
-            moves: [State::new(); MAX_MOVE_COUNT],
+            list: [State::new(); MAX_MOVE_COUNT],
             current: 0,
         }
     }
     pub fn push(&mut self, s: State) {
-        self.moves[self.current] = s;
+        self.list[self.current] = s;
         self.current += 1;
     }
     pub fn pop(&mut self) -> State {
         self.current -= 1;
-        self.moves[self.current]
+        self.list[self.current]
+    }
+}
+
+impl Deref for History {
+    type Target = [State];
+
+    fn deref(&self) -> &Self::Target {
+        &self.list[..self.current]
     }
 }

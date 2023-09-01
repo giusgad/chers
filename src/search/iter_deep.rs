@@ -6,7 +6,7 @@ use crate::{
 };
 
 use super::{
-    defs::{GameTime, SearchRefs, SearchResult, SearchTime},
+    defs::{SearchRefs, SearchResult, SearchTime},
     Search,
 };
 
@@ -17,11 +17,11 @@ impl Search {
             SearchTime::MoveTime(time) => refs.info.allocated_time = *time,
             _ => (),
         } */
-        match &refs.time_control {
-            SearchTime::Adaptive(_) => refs.time_control = SearchTime::Depth(6),
-            SearchTime::MoveTime(time) => refs.info.allocated_time = *time,
-            _ => (),
-        }
+        refs.info.allocated_time = match &refs.time_control {
+            SearchTime::Adaptive(time) => Self::calculate_time(time),
+            SearchTime::MoveTime(time) => *time,
+            _ => 0,
+        };
 
         let mut depth = 1;
         let mut pv: Vec<Move> = Vec::new();
@@ -32,18 +32,17 @@ impl Search {
         while !stop {
             refs.info.depth = depth;
 
-            Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
+            let eval = Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
 
             stop = refs.stopped();
             if !pv.is_empty() && !stop {
                 best_move = pv[0];
+                dbg!(eval);
                 Uci::search_info(&refs, &pv);
             }
 
             depth += 1;
         }
-
-        dbg!(refs.timer_elapsed());
 
         let null_move = Move { data: 0 };
         if best_move != null_move {
@@ -53,11 +52,5 @@ impl Search {
         }
 
         SearchResult::Error
-    }
-}
-
-impl Search {
-    fn calculate_time(time: &GameTime) -> u128 {
-        0
     }
 }

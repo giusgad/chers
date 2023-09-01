@@ -1,7 +1,9 @@
 mod alpha_beta;
 pub mod defs;
+mod draw;
 mod iter_deep;
 mod quiescence;
+mod time;
 
 use std::{
     sync::{

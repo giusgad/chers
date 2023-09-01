@@ -59,7 +59,10 @@ impl Search {
 
             let mut node_pv = Vec::new();
 
-            let eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
+            let mut eval = 0;
+            if !Self::is_draw(&refs.board) {
+                eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
+            }
 
             refs.board.unmake();
             refs.info.ply -= 1;

@@ -12,10 +12,6 @@ pub fn evaluate(b: &Board) -> i16 {
 
     let eval = (w_material as i16 + w_psqt) - (b_material as i16 + b_psqt);
 
-    if b.state.halfmove_count >= 50 {
-        return 0;
-    }
-
     if b.state.active_color == Colors::BLACK {
         -eval
     } else {
