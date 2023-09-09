@@ -86,8 +86,7 @@ impl Board {
             self.unmake()
         }
 
-        // uncomment this to check zobrist hashing is working
-        // assert_eq!(self.zobrist_from_scratch(), self.state.zobrist_hash);
+        debug_assert_eq!(self.zobrist_from_scratch(), self.state.zobrist_hash);
 
         !is_check
     }

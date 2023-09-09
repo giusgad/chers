@@ -3,14 +3,12 @@ use crate::{
         defs::{square_by_name, Pieces},
         Board,
     },
-    defs::{ErrFatal, Piece, Square},
+    defs::{ErrFatal, Piece, Square, START_FEN},
     moves::{defs::Move, MoveGenerator},
     utils::piece_from_char,
 };
 
 use super::Engine;
-
-const START_FEN: &'static str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 impl Engine {
     pub fn setup_position(&mut self, fen: String, moves: Vec<String>) {

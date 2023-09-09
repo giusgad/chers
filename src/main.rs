@@ -6,6 +6,7 @@ mod engine;
 mod eval;
 mod moves;
 mod search;
+mod tests;
 mod uci;
 mod utils;
 
