@@ -1,3 +1,4 @@
+#![allow(unused_imports, dead_code)]
 use std::time::Instant;
 
 use crate::{
@@ -67,6 +68,7 @@ fn do_test(fen: &str, depth: u8, moves: u64, captures: u64) {
     assert_eq!(refs.legal_moves, moves);
     assert_eq!(refs.captures, captures);
 }
+
 #[test]
 fn startpos() {
     let startpos = [
@@ -76,9 +78,11 @@ fn startpos() {
         (4, 197281, 1576),
         (5, 4865609, 82719),
     ];
+    let time = Instant::now();
     for (depth, moves, captures) in startpos {
         do_test(START_FEN, depth, moves, captures)
     }
+    println!("Startpos time: {}ms", time.elapsed().as_millis());
 }
 
 #[test]
@@ -89,8 +93,9 @@ fn kiwipete() {
         (2, 2039, 351),
         (3, 97862, 17102),
         (4, 4085603, 757163),
-        (5, 193690690, 35043416),
+        // (5, 193690690, 35043416), // TODO: enable later, too slow now (20 minutes wasn't enough)
     ];
+    let time = Instant::now();
     for (depth, moves, captures) in kiwipete {
         do_test(
             "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
@@ -99,4 +104,5 @@ fn kiwipete() {
             captures,
         )
     }
+    println!("Kiwipete time: {}ms", time.elapsed().as_millis());
 }

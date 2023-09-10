@@ -76,7 +76,7 @@ impl Board {
             self.state.halfmove_count += 1;
         }
 
-        self.update_castling_perms(piece, color, from);
+        self.update_castling_perms(m, color);
 
         self.state.active_color ^= 1; // switch active color
         self.state.zobrist_hash ^= self.zobrist.color_hash();
@@ -104,9 +104,10 @@ impl Board {
         self.put_piece(Pieces::ROOK, color, rook_to);
     }
 
-    fn update_castling_perms(&mut self, piece: Piece, color: Color, from: Square) {
+    fn update_castling_perms(&mut self, m: Move, color: Color) {
         let before = self.state.castling;
-        match piece {
+        // rook or king move
+        match m.piece() {
             Pieces::KING => match color {
                 Colors::BLACK => {
                     self.state.castling &= !Castling::BQ;
@@ -117,16 +118,25 @@ impl Board {
                     self.state.castling &= !Castling::WK;
                 }
             },
-            Pieces::ROOK => match from {
-                Squares::A1 => self.state.castling &= !Castling::WQ,
-                Squares::H1 => self.state.castling &= !Castling::WK,
-                Squares::A8 => self.state.castling &= !Castling::BQ,
-                Squares::H8 => self.state.castling &= !Castling::BK,
-                _ => (),
-            },
+            Pieces::ROOK => self.rook_perms(m.from()),
             _ => (),
         }
+        // captured rook
+        if m.captured_piece() == Pieces::ROOK {
+            self.rook_perms(m.to());
+        }
         self.state.zobrist_hash ^= self.zobrist.castling_hash(before ^ self.state.castling);
+    }
+
+    fn rook_perms(&mut self, sq: Square) {
+        // remove castling permissions based on where the rook is
+        match sq {
+            Squares::A1 => self.state.castling &= !Castling::WQ,
+            Squares::H1 => self.state.castling &= !Castling::WK,
+            Squares::A8 => self.state.castling &= !Castling::BQ,
+            Squares::H8 => self.state.castling &= !Castling::BK,
+            _ => (),
+        }
     }
 }
 
@@ -179,7 +189,7 @@ impl Board {
         }
 
         put_piece(self, piece, color, from);
-        // debug_assert_eq!(self.zobrist_from_scratch(), self.state.zobrist_hash);
+        debug_assert_eq!(self.zobrist_from_scratch(), self.state.zobrist_hash);
     }
 
     fn uncastle_rook(&mut self, king: Square) {
