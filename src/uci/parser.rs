@@ -1,4 +1,7 @@
-use crate::search::defs::{GameTime, SearchTime};
+use crate::{
+    defs::EngineOption,
+    search::defs::{GameTime, SearchTime},
+};
 
 use super::{defs::UciData, Uci};
 
@@ -14,11 +17,11 @@ impl Uci {
 
             cmd if cmd.starts_with("position") => Self::parse_position(cmd),
             cmd if cmd.starts_with("go") => UciData::Go(Self::parse_go(cmd)),
+            cmd if cmd.starts_with("setoption") => Self::parse_option(cmd),
 
             cmd if cmd.starts_with("dbg") => {
                 UciData::Dbg(cmd.strip_prefix("dbg").unwrap_or("").trim().to_string())
             }
-            cmd if cmd == "print board" => UciData::PrintBoard,
             _ => UciData::Error,
         }
     }
@@ -38,6 +41,11 @@ enum GoToken {
     Depth,
     Nodes,
     MoveTime,
+    None,
+}
+enum OptToken {
+    Name,
+    Value,
     None,
 }
 impl Uci {
@@ -115,5 +123,30 @@ impl Uci {
         }
 
         SearchTime::Infinite
+    }
+    fn parse_option(cmd: &str) -> UciData {
+        let cmd: Vec<&str> = cmd.split_whitespace().collect();
+        let mut cmd = cmd.iter();
+
+        let mut token = OptToken::None;
+        let mut name = "";
+        let mut val = "";
+
+        while let Some(part) = cmd.next() {
+            match *part {
+                "name" => token = OptToken::Name,
+                "value" => token = OptToken::Value,
+                t => match token {
+                    OptToken::Name => name = t,
+                    OptToken::Value => val = t,
+                    OptToken::None => (),
+                },
+            }
+        }
+
+        match name {
+            "HashSize" => UciData::Option(EngineOption::HashSize(val.parse().unwrap_or(16))),
+            _ => UciData::Error,
+        }
     }
 }

@@ -1,5 +1,6 @@
 use super::Engine;
 use crate::{
+    defs::EngineOption,
     search::{defs::SearchControl, Search},
     uci::{defs::UciData, Uci},
 };
@@ -15,29 +16,40 @@ impl Engine {
                 Uci::output("uciok");
             }
 
+            UciData::NewGame => (), // TODO: clear the tt
             UciData::IsReady => Uci::output("readyok"),
             UciData::Go(time) => self.search.send(SearchControl::Start(time)),
             UciData::Position(fen, moves) => {
                 self.setup_position(fen, moves);
             }
+            UciData::Option(opt) => self.set_option(opt),
 
             UciData::Stop => self.search.send(SearchControl::Stop),
 
-            UciData::Dbg(s) => {
-                if s == "draw" {
+            UciData::Dbg(s) => match s.as_str() {
+                "draw" => {
                     dbg!(Search::is_draw(&self.board.lock().unwrap()));
-                } else if s == "endgame" {
+                }
+                "endgame" => {
                     dbg!(self.board.lock().unwrap().is_endgame());
-                } else {
+                }
+                "board" => println!("{}", self.board.lock().unwrap()),
+                _ => {
                     dbg!(self.board.lock().unwrap().state);
                 }
-            }
-            UciData::PrintBoard => {
-                println!("{}", self.board.lock().unwrap())
-            }
+            },
 
             UciData::Quit => self.quit(), // TODO: close threads with handles
-            _ => (),
+            UciData::Error => (),
+        }
+    }
+}
+
+impl Engine {
+    fn set_option(&mut self, opt: EngineOption) {
+        use EngineOption::*;
+        match opt {
+            HashSize(size) => self.options.hash_size = size,
         }
     }
 }

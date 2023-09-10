@@ -25,7 +25,7 @@ impl NrOf {
 }
 
 pub const MAX_MOVE_COUNT: usize = 1024;
-pub const MAX_LEGAL_MOVES: u8 = u8::MAX; // 255
+pub const MAX_LEGAL_MOVES: u8 = 218;
 
 pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 330, 320, 100];
 
@@ -43,4 +43,23 @@ impl ErrFatal {
     pub const LOCK: &'static str = "Error locking mutex";
     pub const RX_RECV: &'static str = "Error with channel recv";
     pub const TX_SEND: &'static str = "Error with channel send";
+}
+
+#[derive(Debug, PartialEq)]
+pub enum EngineOption {
+    HashSize(usize),
+}
+pub struct Options {
+    pub hash_size: usize,
+}
+impl Options {
+    pub fn new() -> Self {
+        Self { hash_size: 64 }
+    }
+    pub fn set(&mut self, opt: EngineOption) {
+        use EngineOption::*;
+        match opt {
+            HashSize(val) => self.hash_size = val,
+        }
+    }
 }

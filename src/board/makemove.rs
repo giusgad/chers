@@ -179,6 +179,7 @@ impl Board {
         }
 
         put_piece(self, piece, color, from);
+        // debug_assert_eq!(self.zobrist_from_scratch(), self.state.zobrist_hash);
     }
 
     fn uncastle_rook(&mut self, king: Square) {
