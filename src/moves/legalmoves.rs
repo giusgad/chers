@@ -123,7 +123,7 @@ impl MoveGenerator {
         let enemy_pieces = board.color_bbs[color ^ 1];
         let empty = !(self_pieces | enemy_pieces);
 
-        let mut pawns_bb = board.get_pieces(Pieces::PAWN, color);
+        let mut pawns_bb = board.get_piece_bb(Pieces::PAWN, color);
         while pawns_bb > 0 {
             let from = bit_ops::next_one(&mut pawns_bb);
             let dir = if color == Colors::WHITE {
@@ -245,7 +245,7 @@ impl MoveGenerator {
         let enemy_pieces = board.color_bbs[color ^ 1];
         let empty = !(self_pieces | enemy_pieces);
 
-        let mut piece_bb = board.get_pieces(piece, color);
+        let mut piece_bb = board.get_piece_bb(piece, color);
         while piece_bb > 0 {
             let from = bit_ops::next_one(&mut piece_bb);
             let available_bb = match piece {
@@ -286,7 +286,7 @@ impl MoveGenerator {
         let self_pieces = board.color_bbs[color];
         let enemy_pieces = board.color_bbs[color ^ 1];
 
-        let mut piece_bb = board.get_pieces(piece, color);
+        let mut piece_bb = board.get_piece_bb(piece, color);
         while piece_bb > 0 {
             let from = bit_ops::next_one(&mut piece_bb);
 

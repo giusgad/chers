@@ -46,4 +46,7 @@ impl Uci {
     pub fn output(s: impl std::fmt::Display) {
         println!("{s}");
     }
+    pub fn output_err(s: impl std::fmt::Display) {
+        println!("info string {s}");
+    }
 }

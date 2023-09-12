@@ -45,34 +45,13 @@ impl Search {
 
         let h = thread::spawn(move || {
             let mut quit = false;
-            let mut stop = false;
+            let mut stop = true;
 
             while !quit {
                 let cmd = rx.recv().expect(ErrFatal::RX_RECV);
                 let mut search_time = SearchTime::Infinite;
                 match cmd {
                     SearchControl::Start(time) => {
-                        /* use rand::Rng;
-                        let mut board = board.lock().expect("Error locking board mutex");
-                        let mut moves: Vec<crate::moves::defs::Move> =
-                            mg.get_all_legal_moves(&board).iter().map(|s| *s).collect();
-                        let mut rng = rand::thread_rng();
-                        let mut i = 0;
-                        while moves.len() > 0 {
-                            i = rng.gen_range(0..moves.len());
-                            if board.make_move(moves[i], &mg) {
-                                board.unmake();
-                                break;
-                            } else {
-                                moves.remove(i);
-                            }
-                        }
-
-                        if moves.len() == 0 {
-                            report_tx.send(Info::Uci(crate::uci::defs::UciData::Quit));
-                        } else {
-                            report_tx.send(Info::Search(SearchResult::BestMove(moves[i])));
-                        }*/
                         stop = false;
                         search_time = time;
                     }

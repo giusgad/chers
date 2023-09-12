@@ -39,7 +39,7 @@ impl Engine {
                 }
             },
 
-            UciData::Quit => self.quit(), // TODO: close threads with handles
+            UciData::Quit => self.quit(),
             UciData::Error => (),
         }
     }

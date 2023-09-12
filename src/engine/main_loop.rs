@@ -21,6 +21,7 @@ impl Engine {
             }
         }
 
+        // main loop is finished, join the threads to quit
         if let Some(h) = self.search.handle.take() {
             h.join().expect(ErrFatal::THREAD_JOIN);
         }
@@ -30,11 +31,9 @@ impl Engine {
     }
 
     fn search_report(&self, info: SearchResult) {
-        // dbg!(&info);
         match info {
             SearchResult::BestMove(m) => Uci::output(format!("bestmove {}", m)),
-            _ => (),
+            SearchResult::Error => Uci::output_err("Something went wrong with the search"),
         }
-        // println!("{}", self.board.lock().unwrap());
     }
 }

@@ -29,22 +29,29 @@ impl Search {
 
             Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
 
+            // update the stop condition before sending search info
             stop = refs.stopped();
+
             if !pv.is_empty() && !stop {
                 best_move = pv[0];
                 Uci::search_info(&refs, &pv);
+            }
+            if pv.len() < depth as usize {
+                // pv length is less than the current depth which means that the games forcibly
+                // ends, so the search finishes early.
+                stop = true;
             }
 
             depth += 1;
         }
 
         let null_move = Move { data: 0 };
-        if best_move != null_move {
-            refs.report_tx
-                .send(Info::Search(SearchResult::BestMove(best_move)))
-                .expect(ErrFatal::TX_SEND);
-        }
 
-        SearchResult::Error
+        // return this and it will be sent to the main loop
+        if best_move != null_move {
+            SearchResult::BestMove(best_move)
+        } else {
+            SearchResult::Error
+        }
     }
 }

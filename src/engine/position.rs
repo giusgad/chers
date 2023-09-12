@@ -1,14 +1,18 @@
 use crate::{
     board::{
-        defs::{square_by_name, Pieces},
+        defs::{square_by_name, PieceNames, Pieces, SQUARE_NAMES},
         Board,
     },
     defs::{ErrFatal, Piece, Square, START_FEN},
     moves::{defs::Move, MoveGenerator},
+    uci::Uci,
     utils::piece_from_char,
 };
 
 use super::Engine;
+
+const ERR_FEN: &'static str = "Error reading fen, board not changed";
+const ERR_MOVE_PARSING: &'static str = "Error parsing moves, board not changed";
 
 impl Engine {
     pub fn setup_position(&mut self, fen: String, moves: Vec<String>) {
@@ -18,14 +22,27 @@ impl Engine {
         } else {
             fen.as_str()
         };
-        let moves = Self::parse_moves(moves);
+        let moves = match Self::parse_moves(moves) {
+            Ok(m) => m,
+            Err(_) => {
+                Uci::output_err(ERR_MOVE_PARSING);
+                return;
+            }
+        };
 
-        // TODO: maybe don't panic here (remove .expect)
         let mut board = self.board.lock().expect(ErrFatal::LOCK);
-        board.read_fen(fen).unwrap();
+        let res = board.read_fen(fen);
+        if res.is_err() {
+            Uci::output_err(ERR_FEN);
+            return;
+        }
 
         // play the moves from the gui
-        Self::play_moves(&mut board, &self.mg, moves).unwrap();
+        let res = Self::play_moves(&mut board, &self.mg, moves);
+        match res {
+            Ok(_) => (),
+            Err(e) => Uci::output_err(format!("Error Move {}, is not legal, board changed.", e)),
+        }
     }
 }
 
@@ -57,6 +74,16 @@ impl TryFrom<String> for SmallMove {
         })
     }
 }
+impl Into<String> for SmallMove {
+    fn into(self) -> String {
+        format!(
+            "{}{}{}",
+            SQUARE_NAMES[self.from],
+            SQUARE_NAMES[self.to],
+            PieceNames::CHAR_LOWERCASE[self.promotion]
+        )
+    }
+}
 impl PartialEq<Move> for SmallMove {
     fn eq(&self, other: &Move) -> bool {
         self.from == other.from() && self.to == other.to() && self.promotion == other.promoted_to()
@@ -64,27 +91,37 @@ impl PartialEq<Move> for SmallMove {
 }
 
 impl Engine {
-    fn parse_moves(strings: Vec<String>) -> Vec<SmallMove> {
+    fn parse_moves(strings: Vec<String>) -> Result<Vec<SmallMove>, ()> {
         let mut moves = Vec::with_capacity(strings.len());
         for s in strings {
             match s.try_into() {
                 Ok(m) => moves.push(m),
-                Err(_) => continue,
+                Err(_) => return Err(()),
             };
         }
-        moves
+        Ok(moves)
     }
 
-    fn play_moves(board: &mut Board, mg: &MoveGenerator, moves: Vec<SmallMove>) -> Result<(), ()> {
+    fn play_moves(
+        board: &mut Board,
+        mg: &MoveGenerator,
+        moves: Vec<SmallMove>,
+    ) -> Result<(), String> {
         // find a legal move where the from and to squares and the promotion piece are the same of the smallmove's
         for small_move in moves {
+            let mut found = false;
             let pseudo_legal = mg.get_all_legal_moves(&board, false);
             for pl_move in pseudo_legal.iter() {
                 if &small_move == pl_move {
+                    found = true;
                     if !board.make_move(*pl_move, mg) {
-                        return Err(());
+                        // the move is found in the pseudo legals but can't be executed
+                        return Err(small_move.into());
                     }
                 }
+            }
+            if !found {
+                return Err(small_move.into());
             }
         }
         Ok(())

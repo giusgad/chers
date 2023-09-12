@@ -60,7 +60,7 @@ impl Board {
         self.state.psqt[color] -= self.get_psqt_val(piece, color, square);
     }
 
-    pub fn get_pieces(&self, piece: Piece, color: Color) -> Bitboard {
+    pub fn get_piece_bb(&self, piece: Piece, color: Color) -> Bitboard {
         self.piece_bbs[color][piece]
     }
 
