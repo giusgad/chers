@@ -1,6 +1,5 @@
 use super::Engine;
 use crate::{
-    defs::EngineOption,
     search::{defs::SearchControl, Search},
     uci::{defs::UciData, Uci},
 };
@@ -34,6 +33,9 @@ impl Engine {
                     dbg!(self.board.lock().unwrap().is_endgame());
                 }
                 "board" => println!("{}", self.board.lock().unwrap()),
+                "tt" => {
+                    dbg!(self.tt.lock().unwrap());
+                }
                 _ => {
                     dbg!(self.board.lock().unwrap().state);
                 }
@@ -41,15 +43,6 @@ impl Engine {
 
             UciData::Quit => self.quit(),
             UciData::Error => (),
-        }
-    }
-}
-
-impl Engine {
-    fn set_option(&mut self, opt: EngineOption) {
-        use EngineOption::*;
-        match opt {
-            HashSize(size) => self.options.hash_size = size,
         }
     }
 }

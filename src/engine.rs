@@ -1,14 +1,14 @@
 mod commands;
 pub mod main_loop;
+pub mod options;
 mod position;
 mod transposition;
 
 use std::sync::{Arc, Mutex};
 
-use self::transposition::TT;
+use self::{options::Options, transposition::TT};
 use crate::{
     board::Board,
-    defs::Options,
     moves::MoveGenerator,
     search::{defs::SearchControl, Search},
     uci::Uci,
@@ -26,12 +26,14 @@ pub struct Engine {
 
 impl Engine {
     pub fn new() -> Self {
+        let options = Options::new();
+        let tt = TT::new(options.hash_size);
         Self {
-            options: Options::new(),
+            options,
             board: Arc::new(Mutex::new(Board::new())),
             mg: Arc::new(MoveGenerator::new()),
             uci: Uci::new(),
-            tt: Arc::new(Mutex::new(TT::new())),
+            tt: Arc::new(Mutex::new(tt)),
             search: Search::new(),
             quit: false,
         }

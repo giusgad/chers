@@ -1,4 +1,4 @@
-use crate::{defs::EngineOption, search::defs::SearchTime};
+use crate::{engine::options::EngineOption, search::defs::SearchTime};
 
 // UCI commands from the gui to which the engine responds:
 #[derive(Debug, PartialEq)]

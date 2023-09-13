@@ -1,5 +1,5 @@
 use crate::{
-    defs::EngineOption,
+    engine::options::EngineOption,
     search::defs::{GameTime, SearchTime},
 };
 
@@ -145,7 +145,7 @@ impl Uci {
         }
 
         match name {
-            "HashSize" => UciData::Option(EngineOption::HashSize(val.parse().unwrap_or(16))),
+            "HashSize" => UciData::Option(EngineOption::HashSize(val.parse().ok())),
             _ => UciData::Error,
         }
     }

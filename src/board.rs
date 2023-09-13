@@ -129,7 +129,6 @@ impl Board {
             && (!white_queen || (!white_rook && w_count <= 1))
     }
 
-    #[allow(dead_code)]
     pub fn zobrist_from_scratch(&self) -> u64 {
         let mut zob = 0;
         for color in 0..Colors::BOTH {

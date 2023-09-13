@@ -1,5 +1,5 @@
 use super::defs::{Castling, FILE_BBS, SQUARE_BBS};
-use crate::defs::{Color, Colors, NrOf, Piece, Square};
+use crate::defs::{Color, Colors, NrOf, Piece, Square, ZobristHash};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 const SEED: [u8; 32] = [213; 32];
@@ -47,11 +47,11 @@ impl Zobrist {
         }
     }
 
-    pub fn piece_hash(&self, color: Color, piece: Piece, sq: Square) -> u64 {
+    pub fn piece_hash(&self, color: Color, piece: Piece, sq: Square) -> ZobristHash {
         self.pieces[color][piece][sq]
     }
 
-    pub fn castling_hash(&self, perms: u8) -> u64 {
+    pub fn castling_hash(&self, perms: u8) -> ZobristHash {
         let mut hash = 0;
         if perms & Castling::WK > 0 {
             hash ^= self.castling[0];
@@ -68,7 +68,7 @@ impl Zobrist {
         hash
     }
 
-    pub fn en_passant_hash(&self, sq: Square) -> u64 {
+    pub fn en_passant_hash(&self, sq: Square) -> ZobristHash {
         let sq = SQUARE_BBS[sq];
         for (i, file) in FILE_BBS.iter().enumerate() {
             if file & sq > 0 {
@@ -78,7 +78,7 @@ impl Zobrist {
         0
     }
 
-    pub fn color_hash(&self) -> u64 {
+    pub fn color_hash(&self) -> ZobristHash {
         self.color
     }
 }

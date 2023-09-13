@@ -1,5 +1,5 @@
 use crate::{
-    defs::{Color, Colors},
+    defs::{Color, Colors, ZobristHash},
     moves::defs::Move,
 };
 
@@ -10,7 +10,7 @@ pub struct State {
     pub ep_square: Option<usize>,
     pub halfmove_count: u8,
     pub fullmove_count: u16,
-    pub zobrist_hash: u64,
+    pub zobrist_hash: ZobristHash,
     pub material: [u16; Colors::BOTH],
     pub psqt: [i16; Colors::BOTH],
     pub next_move: Move,

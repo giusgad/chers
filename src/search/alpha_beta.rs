@@ -3,8 +3,6 @@ use super::{
     Search,
 };
 use crate::{
-    board::defs::Pieces,
-    defs::PIECE_VALUES,
     eval::{defs::Eval, evaluate},
     moves::defs::Move,
     search::defs::{SearchControl, SearchTerminate},

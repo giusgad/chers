@@ -4,6 +4,7 @@ pub type Bitboard = u64;
 pub type Piece = usize;
 pub type Color = usize;
 pub type Square = usize;
+pub type ZobristHash = u64;
 
 pub const MASK_3: u32 = 0b111;
 pub const MASK_6: u32 = 0b111111;
@@ -43,23 +44,4 @@ impl ErrFatal {
     pub const LOCK: &'static str = "Error locking mutex";
     pub const RX_RECV: &'static str = "Error with channel recv";
     pub const TX_SEND: &'static str = "Error with channel send";
-}
-
-#[derive(Debug, PartialEq)]
-pub enum EngineOption {
-    HashSize(usize),
-}
-pub struct Options {
-    pub hash_size: usize,
-}
-impl Options {
-    pub fn new() -> Self {
-        Self { hash_size: 64 }
-    }
-    pub fn set(&mut self, opt: EngineOption) {
-        use EngineOption::*;
-        match opt {
-            HashSize(val) => self.hash_size = val,
-        }
-    }
 }
