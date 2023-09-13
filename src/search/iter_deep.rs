@@ -1,9 +1,4 @@
-use crate::{
-    defs::{ErrFatal, Info},
-    eval::defs::Eval,
-    moves::defs::Move,
-    uci::Uci,
-};
+use crate::{eval::defs::Eval, moves::defs::Move, uci::Uci};
 
 use super::{
     defs::{SearchRefs, SearchResult, SearchTime},
@@ -27,14 +22,14 @@ impl Search {
         while !stop {
             refs.info.depth = depth;
 
-            Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
+            let eval = Self::alpha_beta(depth, -Eval::INF, Eval::INF, &mut pv, refs);
 
             // update the stop condition before sending search info
             stop = refs.stopped();
 
             if !pv.is_empty() && !stop {
                 best_move = pv[0];
-                Uci::search_info(&refs, &pv);
+                Uci::search_info(&refs, &pv, eval);
             }
             if pv.len() < depth as usize {
                 // pv length is less than the current depth which means that the games forcibly

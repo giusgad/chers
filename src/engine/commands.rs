@@ -25,6 +25,7 @@ impl Engine {
 
             UciData::Stop => self.search.send(SearchControl::Stop),
 
+            #[allow(unused_must_use)]
             UciData::Dbg(s) => match s.as_str() {
                 "draw" => {
                     dbg!(Search::is_draw(&self.board.lock().unwrap()));
