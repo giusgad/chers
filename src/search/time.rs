@@ -6,8 +6,8 @@ use crate::defs::Colors;
 
 const GAME_MOVES: u16 = 45;
 const EXTRA_MOVES: u16 = 5;
-const LOW_TIME: u128 = 2000;
-const CRIT_TIME: u128 = 500;
+const LOW_TIME: u128 = 5000;
+const CRIT_TIME: u128 = 1000;
 
 impl Search {
     pub fn calculate_time(refs: &SearchRefs) -> u128 {
@@ -23,9 +23,9 @@ impl Search {
         let moves = Self::moves_to_go(refs);
 
         if time < LOW_TIME && time > CRIT_TIME {
-            CRIT_TIME / 2
+            CRIT_TIME
         } else if time < CRIT_TIME {
-            100
+            200
         } else {
             (time / moves as u128) + inc
         }
