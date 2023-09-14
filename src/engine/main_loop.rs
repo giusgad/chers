@@ -11,8 +11,12 @@ impl Engine {
         let (tx, rx) = mpsc::channel::<Info>();
 
         self.uci.init(tx.clone());
-        self.search
-            .init(tx, Arc::clone(&self.board), Arc::clone(&self.mg));
+        self.search.init(
+            tx,
+            Arc::clone(&self.board),
+            Arc::clone(&self.mg),
+            Arc::clone(&self.tt),
+        );
 
         while !self.quit {
             match rx.recv().expect(ErrFatal::RX_RECV) {

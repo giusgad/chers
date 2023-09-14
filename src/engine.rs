@@ -2,7 +2,7 @@ mod commands;
 pub mod main_loop;
 pub mod options;
 mod position;
-mod transposition;
+pub mod transposition;
 
 use std::sync::{Arc, Mutex};
 

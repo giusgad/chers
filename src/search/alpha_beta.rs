@@ -3,6 +3,7 @@ use super::{
     Search,
 };
 use crate::{
+    engine::transposition::{EvalType, SearchData},
     eval::{defs::Eval, evaluate},
     moves::defs::Move,
     search::defs::{SearchControl, SearchTerminate},
@@ -37,14 +38,31 @@ impl Search {
 
         refs.info.nodes += 1;
 
+        let mut tt_eval = None;
+        // try to get value from the transposition table
+        if let Some(data) = refs.tt.get(refs.board.state.zobrist_hash) {
+            // TODO: tt first move ordering;
+            (tt_eval, _) = data.get_values(alpha, beta, refs.info.ply, depth);
+        }
+
+        if let Some(eval) = tt_eval {
+            if refs.info.ply != 0 {
+                refs.tt_loads += 1;
+                return eval;
+            }
+        }
+
         let mut legal_moves = 0;
+        let mut eval_type = EvalType::Alpha;
+
         let mut best_eval = -Eval::INF;
+        let mut best_move = Move { data: 0 };
 
         let mut moves = refs.mg.get_all_legal_moves(refs.board, false);
         moves.reorder();
 
-        for m in moves.iter() {
-            let legal = refs.board.make_move(*m, refs.mg);
+        for &m in moves.iter() {
+            let legal = refs.board.make_move(m, refs.mg);
             if !legal {
                 continue;
             }
@@ -67,16 +85,27 @@ impl Search {
 
             if eval > best_eval {
                 best_eval = eval;
-                pv.clear();
-                pv.push(*m);
-                pv.append(&mut node_pv);
+                best_move = m;
             }
 
             if eval >= beta {
+                refs.tt.insert(SearchData::create(
+                    depth,
+                    refs.info.ply,
+                    beta,
+                    EvalType::Beta,
+                    refs.board.state.zobrist_hash,
+                    best_move,
+                ));
                 return beta;
             }
 
             if eval > alpha {
+                eval_type = EvalType::Exact;
+
+                pv.clear();
+                pv.push(m);
+                pv.append(&mut node_pv);
                 alpha = eval;
             }
         }
@@ -90,16 +119,16 @@ impl Search {
             }
         }
 
-        /* let moves: String = moves.iter().fold(String::new(), |mut s, m| {
-            s.push_str(&format!("{}", m));
-            s.push(' ');
-            s
-        });
-        println!(
-            "legal moves found: {legal_moves}, pv: {}, best_eval: {best_eval}",
-            moves
-        ); */
+        refs.tt.insert(SearchData::create(
+            depth,
+            refs.info.ply,
+            alpha,
+            eval_type,
+            refs.board.state.zobrist_hash,
+            best_move,
+        ));
 
+        // didn't beat alpha
         alpha
     }
 

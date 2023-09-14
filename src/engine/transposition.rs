@@ -1,9 +1,10 @@
-use crate::{defs::ZobristHash, moves::defs::Move};
+use crate::{defs::ZobristHash, eval::defs::Eval, moves::defs::Move};
 
 const BUCKET_ENTIRES: usize = 4;
+const CHECKMATE_TRESHOLD: i16 = Eval::CHECKMATE - 1000;
 
 #[derive(Clone, Copy)]
-enum EvalType {
+pub enum EvalType {
     Exact,
     Alpha,
     Beta,
@@ -11,11 +12,11 @@ enum EvalType {
 
 #[derive(Clone, Copy)]
 pub struct SearchData {
-    best_move: Move,
-    depth: u8,
-    eval: i16,
-    eval_type: EvalType,
-    zobrist_hash: ZobristHash,
+    pub best_move: Move,
+    pub depth: u8,
+    pub eval: i16,
+    pub eval_type: EvalType,
+    pub zobrist_hash: ZobristHash,
 }
 
 impl SearchData {
@@ -27,6 +28,54 @@ impl SearchData {
             eval_type: EvalType::Exact,
             zobrist_hash: 0,
         }
+    }
+
+    pub fn create(
+        depth: u8,
+        ply: u8,
+        mut eval: i16,
+        eval_type: EvalType,
+        zobrist_hash: ZobristHash,
+        best_move: Move,
+    ) -> Self {
+        if eval >= CHECKMATE_TRESHOLD {
+            eval += ply as i16;
+        } else if eval <= CHECKMATE_TRESHOLD {
+            eval -= ply as i16;
+        }
+        Self {
+            depth,
+            eval,
+            eval_type,
+            zobrist_hash,
+            best_move,
+        }
+    }
+
+    pub fn get_values(&self, alpha: i16, beta: i16, ply: u8, depth: u8) -> (Option<i16>, Move) {
+        let mut eval = None;
+        if self.depth >= depth {
+            match self.eval_type {
+                EvalType::Exact => {
+                    if self.eval >= CHECKMATE_TRESHOLD {
+                        eval = Some(self.eval - ply as i16)
+                    } else if self.eval <= CHECKMATE_TRESHOLD {
+                        eval = Some(self.eval + ply as i16)
+                    }
+                }
+                EvalType::Alpha => {
+                    if self.eval <= alpha {
+                        eval = Some(alpha)
+                    }
+                }
+                EvalType::Beta => {
+                    if self.eval >= beta {
+                        eval = Some(beta)
+                    }
+                }
+            }
+        }
+        (eval, self.best_move)
     }
 }
 
@@ -108,7 +157,7 @@ impl TT {
         self.total_entries = total_entries;
     }
 
-    pub fn save(&mut self, data: SearchData) {
+    pub fn insert(&mut self, data: SearchData) {
         let index = self.calculate_index(data.zobrist_hash);
         debug_assert!(index < self.total_buckets);
         let new_entry = self.data[index].insert(data);

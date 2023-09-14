@@ -16,6 +16,7 @@ use std::{
 use crate::{
     board::Board,
     defs::{ErrFatal, Info},
+    engine::transposition::TT,
     moves::MoveGenerator,
     search::defs::SearchTerminate,
 };
@@ -40,6 +41,7 @@ impl Search {
         report_tx: Sender<Info>,
         board: Arc<Mutex<Board>>,
         mg: Arc<MoveGenerator>,
+        tt: Arc<Mutex<TT>>,
     ) {
         let (tx, rx) = mpsc::channel::<SearchControl>();
 
@@ -60,9 +62,12 @@ impl Search {
                 }
                 if !stop && !quit {
                     let mut board = board.lock().expect(ErrFatal::LOCK);
+                    let mut tt = tt.lock().expect(ErrFatal::LOCK);
 
                     let mut refs = SearchRefs {
                         board: &mut board,
+                        tt: &mut tt,
+                        tt_loads: 0,
                         mg: &mg,
                         time_control: search_time,
                         timer: None,

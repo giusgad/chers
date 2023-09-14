@@ -31,11 +31,7 @@ impl Search {
                 best_move = pv[0];
                 Uci::search_info(&refs, &pv, eval);
             }
-            if pv.len() < depth as usize {
-                // pv length is less than the current depth which means that the games forcibly
-                // ends, so the search finishes early.
-                stop = true;
-            }
+            // TODO:if possible finish early when there is only one legal move
 
             depth += 1;
         }
