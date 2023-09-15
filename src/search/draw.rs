@@ -1,7 +1,7 @@
 use super::Search;
 use crate::{
     board::{defs::Pieces, Board},
-    defs::{Colors, NrOf},
+    defs::Colors,
 };
 
 impl Search {
@@ -30,16 +30,7 @@ impl Search {
         if only_kings {
             return true;
         }
-
-        // count the pieces
-        let mut pieces = [[0u8; NrOf::PIECE_TYPES]; Colors::BOTH];
-        for (color, color_pieces) in board.pieces.iter().enumerate() {
-            for &piece in color_pieces {
-                if piece != Pieces::NONE {
-                    pieces[color][piece] += 1;
-                }
-            }
-        }
+        let pieces = board.piece_bbs;
 
         // it's not a draw if there is at least a queen, rook or pawn
         let pawns =

@@ -99,12 +99,10 @@ impl Board {
         // also there shouldn't be more than 6 minor+major pieces on the board
         let mut count = 0; //
         for color in 0..Colors::BOTH {
-            for piece in 0..NrOf::PIECE_TYPES {
-                if piece == Pieces::PAWN || piece == Pieces::KING {
-                    continue;
-                }
-                count += self.piece_bbs[color][piece].count_ones();
-            }
+            count += self.piece_bbs[color][Pieces::KNIGHT].count_ones();
+            count += self.piece_bbs[color][Pieces::BISHOP].count_ones();
+            count += self.piece_bbs[color][Pieces::QUEEN].count_ones();
+            count += self.piece_bbs[color][Pieces::ROOK].count_ones();
         }
         if count > 6 {
             return false;
@@ -118,15 +116,15 @@ impl Board {
 
         let minors = [Pieces::KNIGHT, Pieces::BISHOP];
 
-        let mut b_count = 0;
-        let mut w_count = 0;
+        let mut b_minors = 0;
+        let mut w_minors = 0;
         for p in minors {
-            b_count += self.piece_bbs[Colors::BLACK][p].count_ones();
-            w_count += self.piece_bbs[Colors::WHITE][p].count_ones();
+            b_minors += self.piece_bbs[Colors::BLACK][p].count_ones();
+            w_minors += self.piece_bbs[Colors::WHITE][p].count_ones();
         }
 
-        (!black_queen || (!black_rook && b_count <= 1))
-            && (!white_queen || (!white_rook && w_count <= 1))
+        (!black_queen || (!black_rook && b_minors <= 1))
+            && (!white_queen || (!white_rook && w_minors <= 1))
     }
 
     pub fn zobrist_from_scratch(&self) -> u64 {
