@@ -63,7 +63,7 @@ impl GameTime {
 pub enum SearchTime {
     Adaptive(GameTime),
     Depth(u8), // in plys
-    Nodes(usize),
+    Nodes(u64),
     MoveTime(u128), // milliseconds
     Infinite,
 }
@@ -73,7 +73,7 @@ pub struct SearchInfo {
     pub depth: u8,
     pub seldepth: u8,
     pub ply: u8,
-    pub nodes: usize,
+    pub nodes: u64,
     pub allocated_time: u128,
 }
 impl SearchInfo {

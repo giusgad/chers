@@ -29,7 +29,8 @@ impl Search {
 
             if !pv.is_empty() && !stop {
                 best_move = pv[0];
-                Uci::search_info(&refs, &pv, eval);
+                let hash_full = refs.tt.hash_full();
+                Uci::search_info(&refs, &pv, eval, hash_full);
             }
             // TODO:if possible finish early when there is only one legal move
 

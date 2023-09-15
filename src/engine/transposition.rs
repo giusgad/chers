@@ -185,6 +185,11 @@ impl TT {
         let entries = buckets * BUCKET_ENTIRES;
         (buckets, entries)
     }
+
+    pub fn hash_full(&self) -> u16 {
+        let permil = (self.used_entries as f64 / self.total_entries as f64) * 1000f64;
+        permil.round() as u16
+    }
 }
 
 impl std::fmt::Debug for TT {
