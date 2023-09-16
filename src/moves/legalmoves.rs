@@ -292,11 +292,17 @@ impl MoveGenerator {
             let from = bit_ops::next_one(&mut piece_bb);
             let bishop = self
                 .bishop_dict
-                .get(&(from, blocker & self.bishop_masks[from]))
+                .get(&(
+                    from,
+                    Self::simplify_blocker(blocker & self.bishop_masks[from], from),
+                ))
                 .unwrap();
             let rook = self
                 .rook_dict
-                .get(&(from, blocker & self.rook_masks[from]))
+                .get(&(
+                    from,
+                    Self::simplify_blocker(blocker & self.rook_masks[from], from),
+                ))
                 .unwrap();
 
             let mut legal_bb = match piece {
@@ -305,14 +311,12 @@ impl MoveGenerator {
                 Pieces::QUEEN => rook | bishop,
                 _ => panic!("Invalid piece"),
             };
+            legal_bb &= !self_pieces;
 
             // generate the moves
             while legal_bb > 0 {
                 let to = bit_ops::next_one(&mut legal_bb);
                 let to_bb = SQUARE_BBS[to];
-                if to_bb & self_pieces > 0 {
-                    continue;
-                }
 
                 // it's a capture
                 if to_bb & enemy_pieces > 0 {

@@ -1,5 +1,5 @@
 use crate::{
-    board::defs::{Files, Pieces, FILE_BBS, SQUARE_BBS},
+    board::defs::{Files, Pieces, Ranks, FILE_BBS, RANK_BBS, SQUARE_BBS},
     defs::{Bitboard, Colors, NrOf, Piece, Square},
     utils::{add_square_i8, bit_ops},
 };
@@ -93,7 +93,7 @@ impl MoveGenerator {
             (Pieces::BISHOP, &self.bishop_masks, &mut self.bishop_dict),
         ] {
             for sq in 0..NrOf::SQUARES {
-                let bb = masks[sq];
+                let bb = Self::simplify_blocker(masks[sq], sq);
                 for blocker in Self::generate_blockers(bb) {
                     let legal = Self::piece_rays_bb(piece, sq, blocker);
                     dict.insert((sq, blocker), legal);
@@ -116,6 +116,25 @@ impl MoveGenerator {
             }
         }
         blocker_bbs
+    }
+
+    // This function simplifies the blocker Bitboard by removing the edges when possible
+    // since the last square of the blocker is indifferent for the move generation
+    // see explanation for this and more in this video: https://www.youtube.com/watch?v=_vqlIPDR2TU&t=1725s
+    pub fn simplify_blocker(bb: Bitboard, sq: Square) -> u64 {
+        let mut res = bb;
+        let sq_bb = SQUARE_BBS[sq];
+        for zone in [
+            FILE_BBS[Files::H],
+            FILE_BBS[Files::A],
+            RANK_BBS[Ranks::R1],
+            RANK_BBS[Ranks::R8],
+        ] {
+            if !(sq_bb & zone > 0) {
+                res &= !zone;
+            }
+        }
+        res
     }
 
     pub fn piece_rays_bb(piece: Piece, sq: Square, blocker: Bitboard) -> Bitboard {
