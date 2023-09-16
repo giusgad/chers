@@ -12,6 +12,7 @@ impl Engine {
                 Uci::output("id name Chers");
                 Uci::output("id author Giuseppe Gadola");
                 // NOTE: specify possible options here
+                Uci::show_options();
                 Uci::output("uciok");
             }
 

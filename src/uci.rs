@@ -49,4 +49,8 @@ impl Uci {
     pub fn output_err(s: impl std::fmt::Display) {
         println!("info string {s}");
     }
+
+    pub fn show_options() {
+        println!("option name Hash type spin default 32 min 1 max 8192")
+    }
 }

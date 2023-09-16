@@ -145,7 +145,7 @@ impl Uci {
         }
 
         match name {
-            "HashSize" => UciData::Option(EngineOption::HashSize(val.parse().ok())),
+            "Hash" => UciData::Option(EngineOption::Hash(val.parse().ok())),
             _ => UciData::Error,
         }
     }
