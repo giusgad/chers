@@ -1,7 +1,7 @@
 use crate::{
     board::defs::{Files, Pieces, FILE_BBS, SQUARE_BBS},
-    defs::{Colors, NrOf, Square},
-    utils::add_square_i8,
+    defs::{Bitboard, Colors, NrOf, Piece, Square},
+    utils::{add_square_i8, bit_ops},
 };
 
 use super::{defs::MoveDirection, MoveGenerator};
@@ -73,6 +73,75 @@ impl MoveGenerator {
                     self.pawn_capture[Colors::BLACK][sq] |= 1 << i;
                 }
             }
+        }
+    }
+
+    pub fn init_masks(&mut self) {
+        for (piece, arr) in [
+            (Pieces::ROOK, &mut self.rook_masks),
+            (Pieces::BISHOP, &mut self.bishop_masks),
+        ] {
+            for sq in 0..NrOf::SQUARES {
+                arr[sq] = Self::piece_rays_bb(piece, sq, 0);
+            }
+        }
+    }
+
+    pub fn init_sliding(&mut self) {
+        for (piece, masks, dict) in [
+            (Pieces::ROOK, &self.rook_masks, &mut self.rook_dict),
+            (Pieces::BISHOP, &self.bishop_masks, &mut self.bishop_dict),
+        ] {
+            for sq in 0..NrOf::SQUARES {
+                let bb = masks[sq];
+                for blocker in Self::generate_blockers(bb) {
+                    let legal = Self::piece_rays_bb(piece, sq, blocker);
+                    dict.insert((sq, blocker), legal);
+                }
+            }
+        }
+    }
+
+    fn generate_blockers(bb: Bitboard) -> Vec<u64> {
+        let bb_ones = bit_ops::one_indexes(bb);
+        // the possible blocker bits are in the n bits that are 1 in the original Bitboard
+        // so the maximum number of blockers is 2^n
+        let n_blockers = 1 << bb_ones.len();
+
+        let mut blocker_bbs = vec![0; n_blockers];
+        for blocker_index in 0..n_blockers {
+            for bit_index in 0..bb_ones.len() {
+                let bit = ((blocker_index >> bit_index) & 1) as u64;
+                blocker_bbs[blocker_index] |= bit << bb_ones[bit_index];
+            }
+        }
+        blocker_bbs
+    }
+
+    pub fn piece_rays_bb(piece: Piece, sq: Square, blocker: Bitboard) -> Bitboard {
+        let mut res = 0;
+        for dir in MoveDirection::from_pos(sq, piece) {
+            let mut ray_sq = sq;
+            while let Some(i) = add_square_i8(ray_sq, dir.bb_val()) {
+                res |= SQUARE_BBS[i];
+                if Self::reached_edge(i, &dir) || blocker & SQUARE_BBS[i] > 0 {
+                    break;
+                }
+                ray_sq = i;
+            }
+        }
+        res
+    }
+
+    // This function returns true if the ray reached the side of the board in the given direction
+    pub fn reached_edge(sq: Square, dir: &MoveDirection) -> bool {
+        use MoveDirection::*;
+        let bishop =
+            SQUARE_BBS[sq] & FILE_BBS[Files::A] > 0 || SQUARE_BBS[sq] & FILE_BBS[Files::H] > 0;
+        let rook = bishop && (dir == &E || dir == &W);
+        match dir {
+            N | E | S | W => rook,
+            _ => bishop,
         }
     }
 }

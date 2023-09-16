@@ -1,6 +1,6 @@
 use crate::{
     board::{
-        defs::{Castling, Files, Pieces, Ranks, Squares, FILE_BBS, RANK_BBS, SQUARE_BBS},
+        defs::{Castling, Pieces, Ranks, Squares, RANK_BBS, SQUARE_BBS},
         Board,
     },
     defs::{Bitboard, Color, Colors, Piece, Square},
@@ -28,7 +28,7 @@ impl MoveGenerator {
                 self.non_sliding_moves(p, board, list, only_captures)
             }
             p @ (Pieces::QUEEN | Pieces::BISHOP | Pieces::ROOK) => {
-                Self::sliding_moves(p, board, list, only_captures)
+                self.sliding_moves(p, board, list, only_captures)
             }
             Pieces::PAWN => self.pawn_moves(board, list, only_captures),
             _ => (),
@@ -281,58 +281,56 @@ impl MoveGenerator {
 
     // this function follows rays in the directions possible for the given piece and adds to the
     // MoveList all of its possible moves
-    fn sliding_moves(piece: Piece, board: &Board, list: &mut MoveList, only_captures: bool) {
+    fn sliding_moves(&self, piece: Piece, board: &Board, list: &mut MoveList, only_captures: bool) {
         let color = board.state.active_color;
         let self_pieces = board.color_bbs[color];
         let enemy_pieces = board.color_bbs[color ^ 1];
+        let blocker = self_pieces | enemy_pieces;
 
         let mut piece_bb = board.get_piece_bb(piece, color);
         while piece_bb > 0 {
             let from = bit_ops::next_one(&mut piece_bb);
+            let bishop = self
+                .bishop_dict
+                .get(&(from, blocker & self.bishop_masks[from]))
+                .unwrap();
+            let rook = self
+                .rook_dict
+                .get(&(from, blocker & self.rook_masks[from]))
+                .unwrap();
 
-            for dir in MoveDirection::from_pos(from, piece) {
-                let mut ray_sq = from;
-                while let Some(to) = add_square_i8(ray_sq, dir.bb_val()) {
-                    if ((self_pieces >> to) & 1) == 1 {
-                        // The ray reached an ally piece
-                        break;
-                    } else if (enemy_pieces >> to) & 1 == 1 {
-                        // It's a capture
-                        let m = Move::new(
-                            piece,
-                            from,
-                            to,
-                            MoveType::Capture,
-                            board.pieces[color ^ 1][to],
-                            None,
-                        );
-                        list.push(m);
-                        break;
-                    } else if !only_captures {
-                        // It's a quiet move
-                        // generate it only if requested
-                        let m = Move::new(piece, from, to, MoveType::Quiet, Pieces::NONE, None);
-                        list.push(m);
-                    }
-                    if Self::reached_edge(to, &dir) {
-                        // The ray reached the side of the board
-                        break;
-                    }
-                    ray_sq = to;
+            let mut legal_bb = match piece {
+                Pieces::ROOK => *rook,
+                Pieces::BISHOP => *bishop,
+                Pieces::QUEEN => rook | bishop,
+                _ => panic!("Invalid piece"),
+            };
+
+            // generate the moves
+            while legal_bb > 0 {
+                let to = bit_ops::next_one(&mut legal_bb);
+                let to_bb = SQUARE_BBS[to];
+                if to_bb & self_pieces > 0 {
+                    continue;
+                }
+
+                // it's a capture
+                if to_bb & enemy_pieces > 0 {
+                    let m = Move::new(
+                        piece,
+                        from,
+                        to,
+                        MoveType::Capture,
+                        board.pieces[color ^ 1][to],
+                        None,
+                    );
+                    list.push(m);
+                } else if !only_captures {
+                    // it 's quiet
+                    let m = Move::new(piece, from, to, MoveType::Quiet, Pieces::NONE, None);
+                    list.push(m);
                 }
             }
-        }
-    }
-
-    // This function returns true if the ray reached the side of the board in the given direction
-    fn reached_edge(sq: Square, dir: &MoveDirection) -> bool {
-        use MoveDirection::*;
-        let bishop =
-            SQUARE_BBS[sq] & FILE_BBS[Files::A] > 0 || SQUARE_BBS[sq] & FILE_BBS[Files::H] > 0;
-        let rook = bishop && (dir == &E || dir == &W);
-        match dir {
-            N | E | S | W => rook,
-            _ => bishop,
         }
     }
 }

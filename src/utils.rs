@@ -22,6 +22,16 @@ pub mod bit_ops {
         *bb ^= 1 << sq;
         sq as Square
     }
+
+    pub fn one_indexes(bb: u64) -> Vec<u64> {
+        let mut res = Vec::new();
+        for i in 0..64 {
+            if (bb >> i) & 1 == 1 {
+                res.push(i);
+            }
+        }
+        res
+    }
 }
 
 // used to compare bytes in const
