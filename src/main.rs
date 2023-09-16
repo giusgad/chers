@@ -9,6 +9,7 @@ mod search;
 mod tests;
 mod uci;
 mod utils;
+mod find_magics;
 
 use engine::Engine;
 
