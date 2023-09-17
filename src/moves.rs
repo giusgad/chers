@@ -2,24 +2,25 @@ pub mod defs;
 mod init_moves;
 mod legalmoves;
 mod list;
+pub mod magics;
 
-use std::collections::HashMap;
-
+use self::list::MoveList;
 use crate::{
     board::Board,
     defs::{Bitboard, Colors, NrOf},
 };
 
-use self::list::MoveList;
+pub const BISHOP_TABLE_SIZE: usize = 5248;
+pub const ROOK_TABLE_SIZE: usize = 102400;
 
 pub struct MoveGenerator {
     king: [Bitboard; NrOf::SQUARES],
     knight: [Bitboard; NrOf::SQUARES],
     pawn_capture: [[Bitboard; NrOf::SQUARES]; Colors::BOTH],
-    bishop_dict: HashMap<(usize, Bitboard), Bitboard>,
-    rook_dict: HashMap<(usize, Bitboard), Bitboard>,
-    rook_masks: [Bitboard; NrOf::SQUARES],
-    bishop_masks: [Bitboard; NrOf::SQUARES],
+    bishop: [Bitboard; BISHOP_TABLE_SIZE],
+    rook: [Bitboard; ROOK_TABLE_SIZE],
+    pub rook_masks: [Bitboard; NrOf::SQUARES],
+    pub bishop_masks: [Bitboard; NrOf::SQUARES],
 }
 
 impl MoveGenerator {
@@ -28,8 +29,8 @@ impl MoveGenerator {
             king: [0; NrOf::SQUARES],
             knight: [0; NrOf::SQUARES],
             pawn_capture: [[0; NrOf::SQUARES]; Colors::BOTH],
-            bishop_dict: HashMap::new(),
-            rook_dict: HashMap::new(),
+            bishop: [0; BISHOP_TABLE_SIZE],
+            rook: [0; ROOK_TABLE_SIZE],
             rook_masks: [0; NrOf::SQUARES],
             bishop_masks: [0; NrOf::SQUARES],
         };

@@ -11,6 +11,7 @@ use crate::{
 use super::{
     defs::{Move, MoveDirection, MoveType},
     list::MoveList,
+    magics::{BISHOP_MAGICS, ROOK_MAGICS},
     MoveGenerator,
 };
 
@@ -290,24 +291,21 @@ impl MoveGenerator {
         let mut piece_bb = board.get_piece_bb(piece, color);
         while piece_bb > 0 {
             let from = bit_ops::next_one(&mut piece_bb);
-            let bishop = self
-                .bishop_dict
-                .get(&(
-                    from,
-                    Self::simplify_blocker(blocker & self.bishop_masks[from], from),
-                ))
-                .unwrap();
-            let rook = self
-                .rook_dict
-                .get(&(
-                    from,
-                    Self::simplify_blocker(blocker & self.rook_masks[from], from),
-                ))
-                .unwrap();
+            let bishop_idx = BISHOP_MAGICS[from].get_index(Self::simplify_blocker(
+                blocker & self.bishop_masks[from],
+                from,
+            ));
+            let bishop = self.bishop[bishop_idx];
+
+            let rook_idx = ROOK_MAGICS[from].get_index(Self::simplify_blocker(
+                blocker & self.rook_masks[from],
+                from,
+            ));
+            let rook = self.rook[rook_idx];
 
             let mut legal_bb = match piece {
-                Pieces::ROOK => *rook,
-                Pieces::BISHOP => *bishop,
+                Pieces::ROOK => rook,
+                Pieces::BISHOP => bishop,
                 Pieces::QUEEN => rook | bishop,
                 _ => panic!("Invalid piece"),
             };
@@ -360,6 +358,9 @@ impl MoveGenerator {
     pub fn square_attacked(&self, board: &Board, sq: Square, attacker: Color) -> bool {
         let attacker_pieces = board.piece_bbs[attacker];
 
+        if sq == 64 {
+            println!("{board}");
+        }
         let pawn_bb = self.pawn_capture[attacker ^ 1][sq];
         let king_bb = self.king[sq];
         let knight_bb = self.knight[sq];

@@ -4,7 +4,11 @@ use crate::{
     utils::{add_square_i8, bit_ops},
 };
 
-use super::{defs::MoveDirection, MoveGenerator};
+use super::{
+    defs::MoveDirection,
+    magics::{BISHOP_MAGICS, ROOK_MAGICS},
+    MoveGenerator,
+};
 
 // The init functions create bitboards with all the possible moves for every
 // piece starting from every square. These can then be used to find legal moves
@@ -88,21 +92,36 @@ impl MoveGenerator {
     }
 
     pub fn init_sliding(&mut self) {
-        for (piece, masks, dict) in [
-            (Pieces::ROOK, &self.rook_masks, &mut self.rook_dict),
-            (Pieces::BISHOP, &self.bishop_masks, &mut self.bishop_dict),
-        ] {
-            for sq in 0..NrOf::SQUARES {
-                let bb = Self::simplify_blocker(masks[sq], sq);
-                for blocker in Self::generate_blockers(bb) {
-                    let legal = Self::piece_rays_bb(piece, sq, blocker);
-                    dict.insert((sq, blocker), legal);
+        let (piece, masks, table) = (Pieces::ROOK, &self.rook_masks, &mut self.rook);
+        for sq in 0..NrOf::SQUARES {
+            let bb = Self::simplify_blocker(masks[sq], sq);
+            for blocker in Self::generate_blockers(bb) {
+                let legal = Self::piece_rays_bb(piece, sq, blocker);
+                let magic = ROOK_MAGICS[sq];
+                let i = magic.get_index(blocker);
+                if table[i] != 0 {
+                    panic!("Magic indexing error.");
                 }
+                table[i] = legal;
+            }
+        }
+
+        let (piece, masks, table) = (Pieces::BISHOP, &self.bishop_masks, &mut self.bishop);
+        for sq in 0..NrOf::SQUARES {
+            let bb = Self::simplify_blocker(masks[sq], sq);
+            for blocker in Self::generate_blockers(bb) {
+                let legal = Self::piece_rays_bb(piece, sq, blocker);
+                let magic = BISHOP_MAGICS[sq];
+                let i = magic.get_index(blocker);
+                if table[i] != 0 {
+                    panic!("Magic indexing error.");
+                }
+                table[i] = legal;
             }
         }
     }
 
-    fn generate_blockers(bb: Bitboard) -> Vec<u64> {
+    pub fn generate_blockers(bb: Bitboard) -> Vec<u64> {
         let bb_ones = bit_ops::one_indexes(bb);
         // the possible blocker bits are in the n bits that are 1 in the original Bitboard
         // so the maximum number of blockers is 2^n
