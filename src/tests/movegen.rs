@@ -7,6 +7,9 @@ use crate::{
     moves::{defs::MoveType, MoveGenerator},
 };
 
+// tests need to be run with RUST_MIN_STACK=8388608 since because of the stack limitations
+// in new threads the MoveGenerator's magic tables don't fit in the stack
+
 // positions and results are from https://www.chessprogramming.org/Perft_Results
 
 struct DbgRefs<'a> {
