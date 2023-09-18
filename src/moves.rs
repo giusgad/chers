@@ -17,8 +17,8 @@ pub struct MoveGenerator {
     king: [Bitboard; NrOf::SQUARES],
     knight: [Bitboard; NrOf::SQUARES],
     pawn_capture: [[Bitboard; NrOf::SQUARES]; Colors::BOTH],
-    bishop: [Bitboard; BISHOP_TABLE_SIZE],
-    rook: [Bitboard; ROOK_TABLE_SIZE],
+    bishop: Vec<Bitboard>,
+    rook: Vec<Bitboard>,
     pub rook_masks: [Bitboard; NrOf::SQUARES],
     pub bishop_masks: [Bitboard; NrOf::SQUARES],
 }
@@ -29,8 +29,8 @@ impl MoveGenerator {
             king: [0; NrOf::SQUARES],
             knight: [0; NrOf::SQUARES],
             pawn_capture: [[0; NrOf::SQUARES]; Colors::BOTH],
-            bishop: [0; BISHOP_TABLE_SIZE],
-            rook: [0; ROOK_TABLE_SIZE],
+            bishop: vec![0; BISHOP_TABLE_SIZE],
+            rook: vec![0; ROOK_TABLE_SIZE],
             rook_masks: [0; NrOf::SQUARES],
             bishop_masks: [0; NrOf::SQUARES],
         };
