@@ -33,6 +33,10 @@ impl Search {
                 Uci::search_info(&refs, &pv, eval, hash_full);
             }
             // TODO:if possible finish early when there is only one legal move
+            if eval > Eval::CHECKMATE_TRESHOLD {
+                // if a checkmate is found finish early
+                stop = true;
+            }
 
             depth += 1;
         }

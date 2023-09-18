@@ -1,7 +1,6 @@
-use crate::{defs::ZobristHash, eval::defs::Eval, moves::defs::Move};
+use crate::{defs::ZobristHash, moves::defs::Move};
 
 const BUCKET_ENTIRES: usize = 4;
-const CHECKMATE_TRESHOLD: i16 = Eval::CHECKMATE - 1000;
 
 #[derive(Clone, Copy)]
 pub enum EvalType {
@@ -30,39 +29,11 @@ impl SearchData {
         }
     }
 
-    pub fn create(
-        depth: u8,
-        ply: u8,
-        mut eval: i16,
-        eval_type: EvalType,
-        zobrist_hash: ZobristHash,
-        best_move: Move,
-    ) -> Self {
-        if eval >= CHECKMATE_TRESHOLD {
-            eval += ply as i16;
-        } else if eval <= CHECKMATE_TRESHOLD {
-            eval -= ply as i16;
-        }
-        Self {
-            depth,
-            eval,
-            eval_type,
-            zobrist_hash,
-            best_move,
-        }
-    }
-
-    pub fn get_values(&self, alpha: i16, beta: i16, ply: u8, depth: u8) -> (Option<i16>, Move) {
+    pub fn get_values(&self, alpha: i16, beta: i16, depth: u8) -> (Option<i16>, Move) {
         let mut eval = None;
         if self.depth >= depth {
             match self.eval_type {
-                EvalType::Exact => {
-                    if self.eval >= CHECKMATE_TRESHOLD {
-                        eval = Some(self.eval - ply as i16)
-                    } else if self.eval <= CHECKMATE_TRESHOLD {
-                        eval = Some(self.eval + ply as i16)
-                    }
-                }
+                EvalType::Exact => eval = Some(self.eval),
                 EvalType::Alpha => {
                     if self.eval <= alpha {
                         eval = Some(alpha)

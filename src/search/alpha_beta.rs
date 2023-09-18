@@ -42,7 +42,7 @@ impl Search {
         // try to get value from the transposition table
         if let Some(data) = refs.tt.get(refs.board.state.zobrist_hash) {
             // TODO: tt first move ordering;
-            (tt_eval, _) = data.get_values(alpha, beta, refs.info.ply, depth);
+            (tt_eval, _) = data.get_values(alpha, beta, depth);
         }
 
         if let Some(eval) = tt_eval {
@@ -88,25 +88,26 @@ impl Search {
                 best_move = m;
             }
 
+            // the move is too good for the opponent, stop searching
             if eval >= beta {
-                refs.tt.insert(SearchData::create(
+                refs.tt.insert(SearchData {
                     depth,
-                    refs.info.ply,
-                    beta,
-                    EvalType::Beta,
-                    refs.board.state.zobrist_hash,
+                    eval: beta,
+                    eval_type: EvalType::Beta,
+                    zobrist_hash: refs.board.state.zobrist_hash,
                     best_move,
-                ));
+                });
                 return beta;
             }
 
+            // the move is great for us
             if eval > alpha {
                 eval_type = EvalType::Exact;
+                alpha = eval;
 
                 pv.clear();
                 pv.push(m);
                 pv.append(&mut node_pv);
-                alpha = eval;
             }
         }
 
@@ -119,14 +120,13 @@ impl Search {
             }
         }
 
-        refs.tt.insert(SearchData::create(
+        refs.tt.insert(SearchData {
             depth,
-            refs.info.ply,
-            alpha,
+            eval: alpha,
             eval_type,
-            refs.board.state.zobrist_hash,
+            zobrist_hash: refs.board.state.zobrist_hash,
             best_move,
-        ));
+        });
 
         // didn't beat alpha
         alpha
