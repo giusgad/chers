@@ -1,4 +1,4 @@
-use crate::{eval::defs::Eval, moves::defs::Move, uci::Uci};
+use crate::{defs::ErrFatal, eval::defs::Eval, moves::defs::Move, uci::Uci};
 
 use super::{
     defs::{SearchRefs, SearchResult, SearchTime},
@@ -32,8 +32,11 @@ impl Search {
                 let hash_full = refs.tt.hash_full();
                 Uci::search_info(&refs, &pv, eval, hash_full);
             }
+
             // TODO:if possible finish early when there is only one legal move
-            if eval > Eval::CHECKMATE_TRESHOLD {
+            if refs.options.lock().expect(ErrFatal::LOCK).early_stop
+                && eval > Eval::CHECKMATE_TRESHOLD
+            {
                 // if a checkmate is found finish early
                 stop = true;
             }

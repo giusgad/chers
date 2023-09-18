@@ -16,7 +16,7 @@ use std::{
 use crate::{
     board::Board,
     defs::{ErrFatal, Info},
-    engine::transposition::TT,
+    engine::{options::Options, transposition::TT},
     moves::MoveGenerator,
     search::defs::SearchTerminate,
 };
@@ -42,6 +42,7 @@ impl Search {
         board: Arc<Mutex<Board>>,
         mg: Arc<MoveGenerator>,
         tt: Arc<Mutex<TT>>,
+        options: Arc<Mutex<Options>>,
     ) {
         let (tx, rx) = mpsc::channel::<SearchControl>();
 
@@ -75,6 +76,7 @@ impl Search {
                         terminate: SearchTerminate::Nothing,
                         report_tx: &report_tx,
                         control_rx: &rx,
+                        options: &options,
                     };
 
                     let res = Self::iterative_deepening(&mut refs);

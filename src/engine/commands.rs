@@ -38,6 +38,9 @@ impl Engine {
                 "tt" => {
                     dbg!(self.tt.lock().unwrap());
                 }
+                "opts" => {
+                    dbg!(self.options.lock().unwrap());
+                }
                 _ => {
                     dbg!(self.board.lock().unwrap().state);
                 }

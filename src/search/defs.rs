@@ -1,7 +1,7 @@
 use std::{
     sync::{
         mpsc::{Receiver, Sender},
-        Arc,
+        Arc, Mutex,
     },
     time::Instant,
 };
@@ -9,7 +9,7 @@ use std::{
 use crate::{
     board::Board,
     defs::Info,
-    engine::transposition::TT,
+    engine::{options::Options, transposition::TT},
     moves::{defs::Move, MoveGenerator},
 };
 
@@ -100,6 +100,7 @@ pub struct SearchRefs<'a> {
     pub terminate: SearchTerminate,
     pub report_tx: &'a Sender<Info>,
     pub control_rx: &'a Receiver<SearchControl>,
+    pub options: &'a Arc<Mutex<Options>>,
 }
 
 impl SearchRefs<'_> {

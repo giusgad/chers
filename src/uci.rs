@@ -51,6 +51,7 @@ impl Uci {
     }
 
     pub fn show_options() {
-        println!("option name Hash type spin default 32 min 1 max 8192")
+        println!("option name Hash type spin default 32 min 1 max 8192");
+        println!("option name EarlyStop type check default true");
     }
 }

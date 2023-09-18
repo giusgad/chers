@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub struct Engine {
-    options: Options,
+    options: Arc<Mutex<Options>>,
     pub board: Arc<Mutex<Board>>,
     mg: Arc<MoveGenerator>,
     tt: Arc<Mutex<TT>>,
@@ -29,7 +29,7 @@ impl Engine {
         let options = Options::new();
         let tt = TT::new(options.hash_size);
         Self {
-            options,
+            options: Arc::new(Mutex::new(options)),
             board: Arc::new(Mutex::new(Board::new())),
             mg: Arc::new(MoveGenerator::new()),
             uci: Uci::new(),

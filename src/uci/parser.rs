@@ -146,6 +146,7 @@ impl Uci {
 
         match name {
             "Hash" => UciData::Option(EngineOption::Hash(val.parse().ok())),
+            "EarlyStop" => UciData::Option(EngineOption::EarlyStop(val.to_lowercase() == "true")),
             _ => UciData::Error,
         }
     }

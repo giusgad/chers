@@ -16,6 +16,7 @@ impl Engine {
             Arc::clone(&self.board),
             Arc::clone(&self.mg),
             Arc::clone(&self.tt),
+            Arc::clone(&self.options),
         );
 
         while !self.quit {
