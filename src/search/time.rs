@@ -37,7 +37,7 @@ impl Search {
             _ => panic!(),
         };
         if let Some(moves) = moves {
-            return moves;
+            moves
         } else {
             let tot_moves = refs.board.state.fullmove_count;
             GAME_MOVES.saturating_sub(tot_moves) + EXTRA_MOVES

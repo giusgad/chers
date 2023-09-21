@@ -35,7 +35,7 @@ pub enum Info {
     Uci(UciData),
 }
 
-pub const START_FEN: &'static str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+pub const START_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 pub struct ErrFatal;
 impl ErrFatal {

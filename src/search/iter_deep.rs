@@ -8,7 +8,7 @@ use super::{
 impl Search {
     pub fn iterative_deepening(refs: &mut SearchRefs) -> SearchResult {
         refs.info.allocated_time = match &refs.time_control {
-            SearchTime::Adaptive(_) => Self::calculate_time(&refs),
+            SearchTime::Adaptive(_) => Self::calculate_time(refs),
             SearchTime::MoveTime(time) => *time,
             _ => 0,
         };
@@ -30,7 +30,7 @@ impl Search {
             if !pv.is_empty() && !stop {
                 best_move = pv[0];
                 let hash_full = refs.tt.hash_full();
-                Uci::search_info(&refs, &pv, eval, hash_full);
+                Uci::search_info(refs, &pv, eval, hash_full);
             }
 
             // TODO:if possible finish early when there is only one legal move

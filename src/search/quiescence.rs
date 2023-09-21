@@ -15,7 +15,7 @@ impl Search {
         refs.info.nodes += 1;
 
         // standing pat
-        let stand_pat = evaluate(&refs.board);
+        let stand_pat = evaluate(refs.board);
         if stand_pat >= beta {
             return beta;
         }
@@ -28,10 +28,10 @@ impl Search {
             return stand_pat;
         }
 
-        let moves = refs.mg.get_all_legal_moves(&refs.board, true);
+        let moves = refs.mg.get_all_legal_moves(refs.board, true);
 
         for m in moves.iter() {
-            let legal = refs.board.make_move(*m, &refs.mg);
+            let legal = refs.board.make_move(*m, refs.mg);
             if !legal {
                 continue;
             }

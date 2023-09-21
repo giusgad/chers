@@ -1,11 +1,11 @@
 use crate::defs::NrOf;
 
-type PSQT = [i16; NrOf::SQUARES];
+type Psqt = [i16; NrOf::SQUARES];
 
 // the values for the psqts are from https://www.chessprogramming.org/Simplified_Evaluation_Function#Piece-Square_Tables
 
 #[rustfmt::skip]
-const KING: PSQT = [
+const KING: Psqt = [
     -30,-40,-40,-50,-50,-40,-40,-30,
     -30,-40,-40,-50,-50,-40,-40,-30,
     -30,-40,-40,-50,-50,-40,-40,-30,
@@ -17,7 +17,7 @@ const KING: PSQT = [
 ];
 
 #[rustfmt::skip]
-pub const KING_ENDGAME: PSQT = [
+pub const KING_ENDGAME: Psqt = [
     -50,-40,-30,-20,-20,-30,-40,-50,
     -30,-20,-10,  0,  0,-10,-20,-30,
     -30,-10, 20, 30, 30, 20,-10,-30,
@@ -29,7 +29,7 @@ pub const KING_ENDGAME: PSQT = [
 ];
 
 #[rustfmt::skip]
-const QUEEN: PSQT = [
+const QUEEN: Psqt = [
     -20,-10,-10, -5, -5,-10,-10,-20,
     -10,  0,  0,  0,  0,  0,  0,-10,
     -10,  0,  5,  5,  5,  5,  0,-10,
@@ -41,7 +41,7 @@ const QUEEN: PSQT = [
 ];
 
 #[rustfmt::skip]
-const ROOK: PSQT = [
+const ROOK: Psqt = [
      0,  0,  0,  0,  0,  0,  0,  0,
      5, 10, 10, 10, 10, 10, 10,  5,
     -5,  0,  0,  0,  0,  0,  0, -5,
@@ -53,7 +53,7 @@ const ROOK: PSQT = [
 ];
 
 #[rustfmt::skip]
-const BISHOP: PSQT = [
+const BISHOP: Psqt = [
     -20,-10,-10,-10,-10,-10,-10,-20,
     -10,  0,  0,  0,  0,  0,  0,-10,
     -10,  0,  5, 10, 10,  5,  0,-10,
@@ -65,7 +65,7 @@ const BISHOP: PSQT = [
 ];
 
 #[rustfmt::skip]
-const KNIGHT: PSQT = [
+const KNIGHT: Psqt = [
     -50,-40,-30,-30,-30,-30,-40,-50,
     -40,-20,  0,  0,  0,  0,-20,-40,
     -30,  0, 10, 15, 15, 10,  0,-30,
@@ -77,7 +77,7 @@ const KNIGHT: PSQT = [
 ];
 
 #[rustfmt::skip]
-const PAWN: PSQT = [
+const PAWN: Psqt = [
      0,  0,  0,  0,  0,  0,  0,  0,
     50, 50, 50, 50, 50, 50, 50, 50,
     10, 10, 20, 30, 30, 20, 10, 10,
@@ -88,7 +88,7 @@ const PAWN: PSQT = [
      0,  0,  0,  0,  0,  0,  0,  0
 ];
 
-pub const PSQTS: [PSQT; NrOf::PIECE_TYPES] = [KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN];
+pub const PSQTS: [Psqt; NrOf::PIECE_TYPES] = [KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN];
 
 #[rustfmt::skip]
 pub const FLIP: [usize; 64] = [

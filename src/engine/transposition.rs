@@ -90,12 +90,9 @@ impl Bucket {
     }
 
     fn get(&self, hash: ZobristHash) -> Option<SearchData> {
-        for entry in self.data {
-            if entry.zobrist_hash == hash {
-                return Some(entry);
-            }
-        }
-        None
+        self.data
+            .into_iter()
+            .find(|entry| entry.zobrist_hash == hash)
     }
 }
 

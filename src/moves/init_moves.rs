@@ -1,3 +1,4 @@
+#![allow(clippy::nonminimal_bool)]
 use crate::{
     board::defs::{Files, Pieces, Ranks, FILE_BBS, RANK_BBS, SQUARE_BBS},
     defs::{Bitboard, Colors, NrOf, Piece, Square},

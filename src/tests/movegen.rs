@@ -18,7 +18,7 @@ struct DbgRefs<'a> {
 }
 // search function with no optimizations for testing the move generation
 fn search(refs: &mut DbgRefs, depth: u8) {
-    if depth <= 0 {
+    if depth == 0 {
         return;
     }
 
@@ -43,9 +43,6 @@ fn search(refs: &mut DbgRefs, depth: u8) {
     if depth == 1 {
         refs.legal_moves += legal_moves;
         refs.captures += captures;
-    }
-    if legal_moves == 0 {
-        return;
     }
 }
 

@@ -105,6 +105,6 @@ pub const fn piece_from_char(c: char) -> Result<Piece, ()> {
             _ => Err(()),
         }
     } else {
-        return Err(());
+        Err(())
     }
 }

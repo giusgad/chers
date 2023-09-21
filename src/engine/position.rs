@@ -11,8 +11,8 @@ use crate::{
 
 use super::Engine;
 
-const ERR_FEN: &'static str = "Error reading fen, board not changed";
-const ERR_MOVE_PARSING: &'static str = "Error parsing moves, board not changed";
+const ERR_FEN: &str = "Error reading fen, board not changed";
+const ERR_MOVE_PARSING: &str = "Error parsing moves, board not changed";
 
 impl Engine {
     pub fn setup_position(&mut self, fen: String, moves: Vec<String>) {
@@ -110,7 +110,7 @@ impl Engine {
         // find a legal move where the from and to squares and the promotion piece are the same of the smallmove's
         for small_move in moves {
             let mut found = false;
-            let pseudo_legal = mg.get_all_legal_moves(&board, false);
+            let pseudo_legal = mg.get_all_legal_moves(board, false);
             for pl_move in pseudo_legal.iter() {
                 if &small_move == pl_move {
                     found = true;

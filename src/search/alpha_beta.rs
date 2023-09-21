@@ -32,21 +32,21 @@ impl Search {
             // if we're in check we can't start quiescence search, so we need to increase depth
             depth += 1;
         }
-        if depth <= 0 {
+        if depth == 0 {
             return Self::quiescence_search(refs, alpha, beta, pv);
         }
 
         refs.info.nodes += 1;
 
-        let mut tt_eval = None;
-        // try to get value from the transposition table
-        if let Some(data) = refs.tt.get(refs.board.state.zobrist_hash) {
-            // TODO: tt first move ordering;
-            (tt_eval, _) = data.get_values(alpha, beta, depth);
-        }
-
-        if let Some(eval) = tt_eval {
-            if refs.info.ply != 0 {
+        // only try to load from the tt if it's not the first move
+        if refs.info.ply != 0 {
+            let mut tt_eval = None;
+            // try to get value from the transposition table
+            if let Some(data) = refs.tt.get(refs.board.state.zobrist_hash) {
+                // TODO: tt first move ordering;
+                (tt_eval, _) = data.get_values(alpha, beta, depth);
+            }
+            if let Some(eval) = tt_eval {
                 refs.tt_loads += 1;
                 return eval;
             }
@@ -76,7 +76,7 @@ impl Search {
             let mut node_pv = Vec::new();
 
             let mut eval = 0;
-            if !Self::is_draw(&refs.board) {
+            if !Self::is_draw(refs.board) {
                 eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
             }
 

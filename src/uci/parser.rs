@@ -51,13 +51,12 @@ enum OptToken {
 impl Uci {
     fn parse_position(cmd: &str) -> UciData {
         let cmd: Vec<&str> = cmd.split_whitespace().collect();
-        let mut cmd = cmd.iter();
 
         let mut moves: Vec<String> = Vec::new();
         let mut token = PosToken::None;
         let mut fen = String::new();
 
-        while let Some(part) = cmd.next() {
+        for part in cmd.iter() {
             match *part {
                 "fen" | "position" => token = PosToken::Fen,
                 "moves" => token = PosToken::Moves,
@@ -77,7 +76,6 @@ impl Uci {
 
     fn parse_go(cmd: &str) -> SearchTime {
         let cmd: Vec<&str> = cmd.split_whitespace().collect();
-        let mut cmd = cmd.iter();
 
         let mut token = GoToken::None;
         let mut time = GameTime::new();
@@ -85,7 +83,7 @@ impl Uci {
         let mut nodes = 0;
         let mut move_time = 0;
 
-        while let Some(part) = cmd.next() {
+        for part in cmd.iter() {
             match *part {
                 "wtime" => token = GoToken::WTime,
                 "btime" => token = GoToken::BTime,
@@ -126,13 +124,12 @@ impl Uci {
     }
     fn parse_option(cmd: &str) -> UciData {
         let cmd: Vec<&str> = cmd.split_whitespace().collect();
-        let mut cmd = cmd.iter();
 
         let mut token = OptToken::None;
         let mut name = "";
         let mut val = "";
 
-        while let Some(part) = cmd.next() {
+        for part in cmd.iter() {
             match *part {
                 "name" => token = OptToken::Name,
                 "value" => token = OptToken::Value,
