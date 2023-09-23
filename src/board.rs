@@ -147,9 +147,14 @@ impl Board {
     }
 }
 
-impl std::fmt::Display for Board {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Board {
+    pub fn to_string(&self, unicode: bool) -> String {
         let mut board_chars = [' '; 64];
+        let (black_chars, white_chars) = if unicode {
+            (PieceNames::UNICODE_BLACK, PieceNames::UNICODE_WHITE)
+        } else {
+            (PieceNames::CHAR_LOWERCASE, PieceNames::CHAR_UPPERCASE)
+        };
         for (piecetype, bb) in self.piece_bbs[Colors::WHITE].iter().enumerate() {
             for rank_nr in 0..8 {
                 // shift the bitboard to the right to align the rank and mask it to preserve 8 bits
@@ -159,7 +164,7 @@ impl std::fmt::Display for Board {
                     if board_chars[i] != ' ' {
                         panic!("two pieces on {} printing board", SQUARE_NAMES[i])
                     }
-                    board_chars[i] = PieceNames::CHAR_UPPERCASE[piecetype];
+                    board_chars[i] = white_chars[piecetype];
                 }
             }
         }
@@ -172,7 +177,7 @@ impl std::fmt::Display for Board {
                     if board_chars[i] != ' ' {
                         panic!("two pieces on {} printing board", SQUARE_NAMES[i])
                     }
-                    board_chars[i] = PieceNames::CHAR_LOWERCASE[piecetype];
+                    board_chars[i] = black_chars[piecetype];
                 }
             }
         }
@@ -186,6 +191,6 @@ impl std::fmt::Display for Board {
             ranks[rank_nr].push(*c);
             ranks[rank_nr].push('|');
         }
-        write!(f, "{}", ranks.join("\n"))
+        ranks.join("\n")
     }
 }

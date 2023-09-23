@@ -340,9 +340,6 @@ impl MoveGenerator {
         let attacker_pieces = board.piece_bbs[attacker];
         let occupied = board.color_bbs[Colors::WHITE] | board.color_bbs[Colors::BLACK];
 
-        if sq == 64 {
-            println!("{board}");
-        }
         let pawn_bb = self.pawn_capture[attacker ^ 1][sq];
         let king_bb = self.king[sq];
         let knight_bb = self.knight[sq];

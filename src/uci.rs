@@ -51,7 +51,12 @@ impl Uci {
     }
 
     pub fn show_options() {
-        println!("option name Hash type spin default 32 min 1 max 8192");
-        println!("option name EarlyStop type check default true");
+        for option in [
+            ("Hash", "spin default 32 min 1 max 8192"),
+            ("EarlyStop", "check default true"),
+            ("DbgUnicode", "check default true"),
+        ] {
+            println!("option name {} type {}", option.0, option.1);
+        }
     }
 }

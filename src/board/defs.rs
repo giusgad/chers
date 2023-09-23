@@ -20,6 +20,9 @@ impl PieceNames {
         ["King", "Queen", "Rook", "Bishop", "Knight", "Pawn", ""];
     pub const CHAR_UPPERCASE: [char; NrOf::PIECE_TYPES + 1] = ['K', 'Q', 'R', 'B', 'N', 'P', ' '];
     pub const CHAR_LOWERCASE: [char; NrOf::PIECE_TYPES + 1] = ['k', 'q', 'r', 'b', 'n', 'p', ' '];
+    pub const UNICODE_WHITE: [char; NrOf::PIECE_TYPES + 1] = ['♔', '♕', '♖', '♗', '♘', '♙', ' '];
+    pub const UNICODE_BLACK: [char; NrOf::PIECE_TYPES + 1] =
+        ['♚', '♛', '♜', '♝', '♞', '\u{265F}', ' '];
 }
 
 pub struct Castling;

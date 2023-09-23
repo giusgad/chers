@@ -1,5 +1,6 @@
 use super::Engine;
 use crate::{
+    defs::ErrFatal,
     search::{defs::SearchControl, Search},
     uci::{defs::UciData, Uci},
 };
@@ -34,7 +35,13 @@ impl Engine {
                 "endgame" => {
                     dbg!(self.board.lock().unwrap().is_endgame());
                 }
-                "board" => println!("{}", self.board.lock().unwrap()),
+                "board" => println!(
+                    "{}",
+                    self.board
+                        .lock()
+                        .unwrap()
+                        .to_string(self.options.lock().expect(ErrFatal::LOCK).dbg_unicode)
+                ),
                 "tt" => {
                     dbg!(self.tt.lock().unwrap());
                 }

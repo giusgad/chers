@@ -9,12 +9,14 @@ use super::Engine;
 pub enum EngineOption {
     Hash(Option<usize>),
     EarlyStop(bool),
+    DbgUnicode(bool),
 }
 
 #[derive(Debug)]
 pub struct Options {
     pub hash_size: usize,
     pub early_stop: bool,
+    pub dbg_unicode: bool,
 }
 
 impl Options {
@@ -23,6 +25,7 @@ impl Options {
             // default values
             hash_size: 32,
             early_stop: true,
+            dbg_unicode: true,
         }
     }
 }
@@ -39,6 +42,7 @@ impl Engine {
                 }
             }
             EarlyStop(val) => opts.early_stop = val,
+            DbgUnicode(val) => opts.dbg_unicode = val,
         }
     }
 }
