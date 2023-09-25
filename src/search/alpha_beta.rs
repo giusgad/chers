@@ -44,7 +44,6 @@ impl Search {
             let mut tt_eval = None;
             // try to get value from the transposition table
             if let Some(data) = refs.tt.get(refs.board.state.zobrist_hash) {
-                // TODO: tt first move ordering;
                 let (eval, m) = data.get_values(alpha, beta, depth);
                 tt_eval = eval;
                 tt_move = Some(m);
