@@ -13,7 +13,7 @@ use self::{
 };
 use crate::{
     defs::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
-    eval::psqt::{FLIP, KING_ENDGAME, PSQTS},
+    eval::psqt::{FLIP, PSQTS},
     utils::bit_ops::find_ones_u8,
 };
 
@@ -86,11 +86,7 @@ impl Board {
         } else {
             square
         };
-        if self.is_endgame() && piece == Pieces::KING {
-            KING_ENDGAME[square]
-        } else {
-            PSQTS[piece][square]
-        }
+        PSQTS[piece][square]
     }
 
     pub fn is_endgame(&self) -> bool {
