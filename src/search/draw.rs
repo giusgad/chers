@@ -53,3 +53,33 @@ impl Search {
         !(w_bishop_knight || b_bishop_knight)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::defs::START_FEN;
+
+    #[test]
+    fn is_draw() {
+        let mut b = Board::new();
+        let draws = &[
+            "5Qqk/8/6p1/2p1r3/pp2P3/1P4P1/P5B1/6K1 w - - 61 77",
+            "8/8/8/8/3k4/8/3K4/8 w - - 0 1",
+            "8/2k1b3/8/8/8/8/5N2/2K5 w - - 0 1",
+        ];
+        let not_draws = &[
+            START_FEN,
+            "8/2k1b3/8/8/8/8/5N2/2K1R3 w - - 0 1",
+            "8/8/8/8/2k5/Q3K3/8/8 w - - 0 1",
+        ];
+
+        for fen in draws {
+            b.read_fen(fen).unwrap();
+            assert!(Search::is_draw(&b));
+        }
+        for fen in not_draws {
+            b.read_fen(fen).unwrap();
+            assert!(!Search::is_draw(&b));
+        }
+    }
+}

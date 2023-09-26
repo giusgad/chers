@@ -2,14 +2,14 @@ use crate::{defs::ZobristHash, moves::defs::Move};
 
 const BUCKET_ENTIRES: usize = 4;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum EvalType {
     Exact,
     Alpha,
     Beta,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SearchData {
     pub best_move: Move,
     pub depth: u8,
@@ -57,14 +57,14 @@ impl TTData for SearchData {
         self.zobrist_hash
     }
 
-    fn priority(&self) -> u8 {
+    fn depth(&self) -> u8 {
         self.depth
     }
 }
 
 pub trait TTData {
     fn key(&self) -> u64;
-    fn priority(&self) -> u8;
+    fn depth(&self) -> u8;
 }
 
 // A Bucket contains BUCKET_SIZE entires that would be mapped to the same index in the tt
@@ -83,13 +83,13 @@ impl<T: TTData + Default + Copy + Clone> Bucket<T> {
     // insert the data in the bucket and return whether the count of used entries needs to be increased.
     // If the data is not inserted there was higher quality data in the bucket
     fn insert(&mut self, data: T) -> bool {
-        let mut min_priority = data.priority();
+        let mut min_priority = data.depth();
         let mut min_priority_i: Option<usize> = None;
 
         // search for the entry with the smallest depth that will be replaced
         for (i, entry) in self.data.iter().enumerate() {
-            if entry.priority() < min_priority {
-                min_priority = entry.priority();
+            if entry.depth() <= min_priority {
+                min_priority = entry.depth();
                 min_priority_i = Some(i);
             }
         }
@@ -149,7 +149,7 @@ impl<T: TTData + Default + Copy + Clone> TT<T> {
         }
     }
 
-    pub fn get(&self, hash: ZobristHash) -> Option<T> {
+    pub fn get(&self, hash: u64) -> Option<T> {
         let index = self.calculate_index(hash);
         self.data[index].get(hash)
     }
@@ -172,5 +172,58 @@ impl<T: TTData + Default + Copy + Clone> TT<T> {
     pub fn hash_full(&self) -> u16 {
         let permil = (self.used_entries as f64 / self.total_entries as f64) * 1000f64;
         permil.round() as u16
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::board::Board;
+
+    #[test]
+    fn tt_dbg_test() {
+        #[derive(Clone, Copy, Default, PartialEq, Debug)]
+        struct DbgData {
+            content: u64,
+            key: u64,
+        }
+        impl TTData for DbgData {
+            fn key(&self) -> u64 {
+                self.key
+            }
+
+            fn depth(&self) -> u8 {
+                3
+            }
+        }
+        let mut tt: TT<DbgData> = TT::new(16);
+        let data_in = DbgData {
+            content: 392,
+            key: 32,
+        };
+        tt.insert(data_in);
+        let data_out = tt.get(data_in.key());
+
+        assert_eq!(data_in, data_out.unwrap());
+    }
+
+    #[test]
+    fn tt_search_test() {
+        let mut tt: TT<SearchData> = TT::new(32);
+        let mut b = Board::new();
+        b.read_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
+            .unwrap();
+        let data_in = SearchData {
+            best_move: Move { data: 0 },
+            depth: 5,
+            eval: 58,
+            eval_type: EvalType::Beta,
+            zobrist_hash: b.state.zobrist_hash,
+        };
+
+        tt.insert(data_in);
+        let data_out = tt.get(b.state.zobrist_hash);
+
+        assert_eq!(data_in, data_out.unwrap());
     }
 }

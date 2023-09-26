@@ -8,9 +8,11 @@ mod eval;
 mod find_magics;
 mod moves;
 mod search;
-mod tests;
 mod uci;
 mod utils;
+
+#[cfg(test)]
+mod tests;
 
 use engine::Engine;
 

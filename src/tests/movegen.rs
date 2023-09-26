@@ -71,7 +71,7 @@ fn do_test(fen: &str, depth: u8, moves: u64, captures: Option<u64>) {
 }
 
 #[test]
-fn startpos() {
+fn movegen_startpos() {
     let startpos = [
         (1, 20, 0),
         (2, 400, 0),
@@ -87,14 +87,13 @@ fn startpos() {
 }
 
 #[test]
-fn kiwipete() {
+fn movegen_kiwipete() {
     // depth, moves, captures
     let kiwipete = [
         (1, 48, 8),
         (2, 2039, 351),
         (3, 97862, 17102),
         (4, 4085603, 757163),
-        // (5, 193690690, 35043416), // TODO: enable later, too slow now (20 minutes wasn't enough)
     ];
     let time = Instant::now();
     for (depth, moves, captures) in kiwipete {
@@ -109,7 +108,7 @@ fn kiwipete() {
 }
 
 #[test]
-fn other_positions() {
+fn movegen_other_positions() {
     let time = Instant::now();
     let fen = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8";
     do_test(fen, 3, 62379, None);
