@@ -18,8 +18,8 @@ pub struct SearchData {
     pub zobrist_hash: ZobristHash,
 }
 
-impl SearchData {
-    fn new() -> Self {
+impl Default for SearchData {
+    fn default() -> Self {
         Self {
             best_move: Move { data: 0 },
             depth: 0,
@@ -28,7 +28,9 @@ impl SearchData {
             zobrist_hash: 0,
         }
     }
+}
 
+impl SearchData {
     pub fn get_values(&self, alpha: i16, beta: i16, depth: u8) -> (Option<i16>, Move) {
         let mut eval = None;
         if self.depth >= depth {
@@ -50,37 +52,52 @@ impl SearchData {
     }
 }
 
-// A Bucket contains BUCKET_SIZE entires that would be mapped to the same index in the tt
-#[derive(Clone, Copy)]
-pub struct Bucket {
-    data: [SearchData; BUCKET_ENTIRES],
+impl TTData for SearchData {
+    fn key(&self) -> u64 {
+        self.zobrist_hash
+    }
+
+    fn priority(&self) -> u8 {
+        self.depth
+    }
 }
 
-impl Bucket {
+pub trait TTData {
+    fn key(&self) -> u64;
+    fn priority(&self) -> u8;
+}
+
+// A Bucket contains BUCKET_SIZE entires that would be mapped to the same index in the tt
+#[derive(Clone, Copy)]
+pub struct Bucket<T: TTData + Default + Copy + Clone> {
+    data: [T; BUCKET_ENTIRES],
+}
+
+impl<T: TTData + Default + Copy + Clone> Bucket<T> {
     fn new() -> Self {
         Self {
-            data: [SearchData::new(); BUCKET_ENTIRES],
+            data: [T::default(); BUCKET_ENTIRES],
         }
     }
 
     // insert the data in the bucket and return whether the count of used entries needs to be increased.
     // If the data is not inserted there was higher quality data in the bucket
-    fn insert(&mut self, data: SearchData) -> bool {
-        let mut min_depth = data.depth;
-        let mut min_depth_i: Option<usize> = None;
+    fn insert(&mut self, data: T) -> bool {
+        let mut min_priority = data.priority();
+        let mut min_priority_i: Option<usize> = None;
 
         // search for the entry with the smallest depth that will be replaced
         for (i, entry) in self.data.iter().enumerate() {
-            if entry.depth < min_depth {
-                min_depth = entry.depth;
-                min_depth_i = Some(i);
+            if entry.priority() < min_priority {
+                min_priority = entry.priority();
+                min_priority_i = Some(i);
             }
         }
 
         // if all entries had higher depth than the new data's then it doesn't get inserted
-        if let Some(i) = min_depth_i {
+        if let Some(i) = min_priority_i {
             // if the hash is 0 the entry was never used so the counter has to be increased
-            let new = self.data[i].zobrist_hash == 0;
+            let new = self.data[i].key() == 0;
 
             self.data[i] = data;
 
@@ -89,22 +106,20 @@ impl Bucket {
         false
     }
 
-    fn get(&self, hash: ZobristHash) -> Option<SearchData> {
-        self.data
-            .into_iter()
-            .find(|entry| entry.zobrist_hash == hash)
+    fn get(&self, key: u64) -> Option<T> {
+        self.data.into_iter().find(|entry| entry.key() == key)
     }
 }
 
-pub struct TT {
-    data: Vec<Bucket>,
+pub struct TT<T: TTData + Default + Copy + Clone> {
+    data: Vec<Bucket<T>>,
     megabytes: usize,
     total_entries: usize,
     total_buckets: usize,
     used_entries: usize,
 }
 
-impl TT {
+impl<T: TTData + Default + Copy + Clone> TT<T> {
     pub fn new(megabytes: usize) -> Self {
         let (total_buckets, total_entries) = Self::calculate_sizes(megabytes);
         TT {
@@ -125,8 +140,8 @@ impl TT {
         self.total_entries = total_entries;
     }
 
-    pub fn insert(&mut self, data: SearchData) {
-        let index = self.calculate_index(data.zobrist_hash);
+    pub fn insert(&mut self, data: T) {
+        let index = self.calculate_index(data.key());
         debug_assert!(index < self.total_buckets);
         let new_entry = self.data[index].insert(data);
         if new_entry {
@@ -134,7 +149,7 @@ impl TT {
         }
     }
 
-    pub fn get(&self, hash: ZobristHash) -> Option<SearchData> {
+    pub fn get(&self, hash: ZobristHash) -> Option<T> {
         let index = self.calculate_index(hash);
         self.data[index].get(hash)
     }
@@ -142,13 +157,13 @@ impl TT {
 
 // utility functions
 const MB: usize = 1048576;
-impl TT {
-    fn calculate_index(&self, hash: ZobristHash) -> usize {
-        (hash as usize) % self.total_buckets
+impl<T: TTData + Default + Copy + Clone> TT<T> {
+    fn calculate_index(&self, key: u64) -> usize {
+        (key as usize) % self.total_buckets
     }
 
     fn calculate_sizes(megabytes: usize) -> (usize, usize) {
-        let bucket_size = std::mem::size_of::<Bucket>();
+        let bucket_size = std::mem::size_of::<Bucket<T>>();
         let buckets = MB / bucket_size * megabytes;
         let entries = buckets * BUCKET_ENTIRES;
         (buckets, entries)
@@ -157,16 +172,5 @@ impl TT {
     pub fn hash_full(&self) -> u16 {
         let permil = (self.used_entries as f64 / self.total_entries as f64) * 1000f64;
         permil.round() as u16
-    }
-}
-
-impl std::fmt::Debug for TT {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TT")
-            .field("megabytes", &self.megabytes)
-            .field("total_entries", &self.total_entries)
-            .field("total_buckets", &self.total_buckets)
-            .field("used_entries", &self.used_entries)
-            .finish()
     }
 }

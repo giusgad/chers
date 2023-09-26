@@ -16,7 +16,10 @@ use std::{
 use crate::{
     board::Board,
     defs::{ErrFatal, Info},
-    engine::{options::Options, transposition::TT},
+    engine::{
+        options::Options,
+        transposition::{SearchData, TT},
+    },
     moves::MoveGenerator,
     search::defs::SearchTerminate,
 };
@@ -41,7 +44,7 @@ impl Search {
         report_tx: Sender<Info>,
         board: Arc<Mutex<Board>>,
         mg: Arc<MoveGenerator>,
-        tt: Arc<Mutex<TT>>,
+        tt: Arc<Mutex<TT<SearchData>>>,
         options: Arc<Mutex<Options>>,
     ) {
         let (tx, rx) = mpsc::channel::<SearchControl>();

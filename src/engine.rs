@@ -6,7 +6,10 @@ pub mod transposition;
 
 use std::sync::{Arc, Mutex};
 
-use self::{options::Options, transposition::TT};
+use self::{
+    options::Options,
+    transposition::{SearchData, TT},
+};
 use crate::{
     board::Board,
     moves::MoveGenerator,
@@ -18,7 +21,7 @@ pub struct Engine {
     options: Arc<Mutex<Options>>,
     pub board: Arc<Mutex<Board>>,
     mg: Arc<MoveGenerator>,
-    tt: Arc<Mutex<TT>>,
+    tt: Arc<Mutex<TT<SearchData>>>,
     search: Search,
     uci: Uci,
     quit: bool,

@@ -42,9 +42,6 @@ impl Engine {
                         .unwrap()
                         .to_string(self.options.lock().expect(ErrFatal::LOCK).dbg_unicode)
                 ),
-                "tt" => {
-                    dbg!(self.tt.lock().unwrap());
-                }
                 "opts" => {
                     dbg!(self.options.lock().unwrap());
                 }

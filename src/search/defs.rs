@@ -9,7 +9,7 @@ use std::{
 use crate::{
     board::Board,
     defs::Info,
-    engine::{options::Options, transposition::TT},
+    engine::{options::Options, transposition::{TT, SearchData}},
     moves::{defs::Move, MoveGenerator},
 };
 
@@ -91,7 +91,7 @@ impl SearchInfo {
 // Refs that are used by the search algorithms and passed into recursion
 pub struct SearchRefs<'a> {
     pub board: &'a mut Board,
-    pub tt: &'a mut TT,
+    pub tt: &'a mut TT<SearchData>,
     pub tt_loads: u64,
     pub mg: &'a Arc<MoveGenerator>,
     pub time_control: SearchTime,
