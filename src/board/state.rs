@@ -16,8 +16,8 @@ pub struct State {
     pub next_move: Move,
 }
 
-impl State {
-    pub fn new() -> Self {
+impl Default for State {
+    fn default() -> Self {
         Self {
             castling: 0,
             active_color: Colors::WHITE,
@@ -27,7 +27,7 @@ impl State {
             zobrist_hash: 0,
             material: [0; Colors::BOTH],
             psqt: [0; Colors::BOTH],
-            next_move: Move { data: 0 },
+            next_move: Move::default(),
         }
     }
 }

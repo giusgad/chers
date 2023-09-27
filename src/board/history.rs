@@ -9,13 +9,16 @@ pub struct History {
     current: usize,
 }
 
-impl History {
-    pub fn new() -> Self {
+impl Default for History {
+    fn default() -> Self {
         Self {
-            list: [State::new(); MAX_MOVE_COUNT],
-            current: 0,
+            list: [State::default(); MAX_MOVE_COUNT],
+            current: Default::default(),
         }
     }
+}
+
+impl History {
     pub fn push(&mut self, s: State) {
         self.list[self.current] = s;
         self.current += 1;

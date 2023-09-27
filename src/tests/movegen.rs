@@ -50,7 +50,8 @@ fn search(refs: &mut DbgRefs, depth: u8) {
 // if the number of legal moves found is different from the argument one
 fn do_test(fen: &str, depth: u8, moves: u64, captures: Option<u64>) {
     let mut b = Board::new();
-    let mg = MoveGenerator::new();
+    let mut mg = MoveGenerator::default();
+    mg.init();
     b.read_fen(fen).unwrap();
     let mut refs = DbgRefs {
         board: &mut b,

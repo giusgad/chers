@@ -19,8 +19,8 @@ pub struct Options {
     pub dbg_unicode: bool,
 }
 
-impl Options {
-    pub fn new() -> Self {
+impl Default for Options {
+    fn default() -> Self {
         Self {
             // default values
             hash_size: 32,

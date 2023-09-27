@@ -58,7 +58,7 @@ impl Search {
         let mut eval_type = EvalType::Alpha;
 
         let mut best_eval = -Eval::INF;
-        let mut best_move = Move { data: 0 };
+        let mut best_move = Move::default();
 
         let mut moves = refs.mg.get_all_legal_moves(refs.board, false);
         moves.reorder(tt_move);

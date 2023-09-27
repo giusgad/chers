@@ -16,20 +16,19 @@ pub struct Zobrist {
     en_passant: [u64; 8],
 }
 
-impl Zobrist {
-    // the new function also sets up the random numbers
-    pub fn new() -> Self {
-        let mut zb = Self {
+impl Default for Zobrist {
+    fn default() -> Self {
+        Self {
             pieces: [[[0; NrOf::SQUARES]; NrOf::PIECE_TYPES]; Colors::BOTH],
             color: 0,
             castling: [0; 4],
             en_passant: [0; 8],
-        };
-        zb.init_randoms();
-        zb
+        }
     }
+}
 
-    fn init_randoms(&mut self) {
+impl Zobrist {
+    pub fn init(&mut self) {
         let mut rng = StdRng::from_seed(SEED);
         for col in 0..Colors::BOTH {
             for piece in 0..NrOf::PIECE_TYPES {

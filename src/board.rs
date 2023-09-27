@@ -28,12 +28,14 @@ pub struct Board {
 
 impl Board {
     pub fn new() -> Self {
+        let mut zb = Zobrist::default();
+        zb.init();
         Self {
             piece_bbs: [[0u64; NrOf::PIECE_TYPES]; Colors::BOTH],
             color_bbs: [0; Colors::BOTH],
-            state: State::new(),
-            history: History::new(),
-            zobrist: Zobrist::new(),
+            state: State::default(),
+            history: History::default(),
+            zobrist: zb,
             pieces: [[Pieces::NONE; NrOf::SQUARES]; Colors::BOTH],
         }
     }

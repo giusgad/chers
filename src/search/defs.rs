@@ -9,7 +9,10 @@ use std::{
 use crate::{
     board::Board,
     defs::Info,
-    engine::{options::Options, transposition::{TT, SearchData}},
+    engine::{
+        options::Options,
+        transposition::{SearchData, TT},
+    },
     moves::{defs::Move, MoveGenerator},
 };
 
@@ -38,24 +41,13 @@ pub enum SearchResult {
 }
 
 // GameTime contains the information for the time from the whole game sent by the gui
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct GameTime {
     pub wtime: u128, // in milliseconds
     pub btime: u128,
     pub winc: u128,
     pub binc: u128,
     pub moves_to_go: Option<u16>, // value not always provided
-}
-impl GameTime {
-    pub fn new() -> Self {
-        Self {
-            wtime: 0,
-            btime: 0,
-            winc: 0,
-            binc: 0,
-            moves_to_go: None,
-        }
-    }
 }
 
 // Time modes Search can use
@@ -69,23 +61,13 @@ pub enum SearchTime {
 }
 
 // info on the current state of the search
+#[derive(Default)]
 pub struct SearchInfo {
     pub depth: u8,
     pub seldepth: u8,
     pub ply: u8,
     pub nodes: u64,
     pub allocated_time: u128,
-}
-impl SearchInfo {
-    pub fn new() -> Self {
-        Self {
-            depth: 0,
-            seldepth: 0,
-            ply: 0,
-            nodes: 0,
-            allocated_time: 0,
-        }
-    }
 }
 
 // Refs that are used by the search algorithms and passed into recursion

@@ -29,15 +29,17 @@ pub struct Engine {
 
 impl Engine {
     pub fn new() -> Self {
-        let options = Options::new();
+        let options = Options::default();
         let tt = TT::new(options.hash_size);
+        let mut mg = MoveGenerator::default();
+        mg.init();
         Self {
             options: Arc::new(Mutex::new(options)),
             board: Arc::new(Mutex::new(Board::new())),
-            mg: Arc::new(MoveGenerator::new()),
-            uci: Uci::new(),
+            mg: Arc::new(mg),
+            uci: Uci::default(),
             tt: Arc::new(Mutex::new(tt)),
-            search: Search::new(),
+            search: Search::default(),
             quit: false,
         }
     }

@@ -12,15 +12,12 @@ use std::{
 use self::defs::UciData;
 
 // The Uci module reads input and sends the received commands to the engine which then handles them
+#[derive(Default)]
 pub struct Uci {
     pub handle: Option<JoinHandle<()>>,
 }
 
 impl Uci {
-    pub fn new() -> Self {
-        Self { handle: None }
-    }
-
     pub fn init(&mut self, tx: Sender<Info>) {
         let h = thread::spawn(move || {
             let mut quit = false;

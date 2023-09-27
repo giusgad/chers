@@ -21,7 +21,7 @@ pub struct SearchData {
 impl Default for SearchData {
     fn default() -> Self {
         Self {
-            best_move: Move { data: 0 },
+            best_move: Move::default(),
             depth: 0,
             eval: 0,
             eval_type: EvalType::Exact,
@@ -68,18 +68,12 @@ pub trait TTData {
 }
 
 // A Bucket contains BUCKET_SIZE entires that would be mapped to the same index in the tt
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Bucket<T: TTData + Default + Copy + Clone> {
     data: [T; BUCKET_ENTIRES],
 }
 
 impl<T: TTData + Default + Copy + Clone> Bucket<T> {
-    fn new() -> Self {
-        Self {
-            data: [T::default(); BUCKET_ENTIRES],
-        }
-    }
-
     // insert the data in the bucket and return whether the count of used entries needs to be increased.
     // If the data is not inserted there was higher quality data in the bucket
     fn insert(&mut self, data: T) -> bool {
@@ -124,7 +118,7 @@ impl<T: TTData + Default + Copy + Clone> TT<T> {
         let (total_buckets, total_entries) = Self::calculate_sizes(megabytes);
         TT {
             megabytes,
-            data: vec![Bucket::new(); total_buckets],
+            data: vec![Bucket::default(); total_buckets],
             total_entries,
             total_buckets,
             used_entries: 0,
@@ -133,7 +127,7 @@ impl<T: TTData + Default + Copy + Clone> TT<T> {
 
     pub fn resize(&mut self, megabytes: usize) {
         let (total_buckets, total_entries) = Self::calculate_sizes(megabytes);
-        self.data = vec![Bucket::new(); total_buckets];
+        self.data = vec![Bucket::default(); total_buckets];
         self.megabytes = megabytes;
         self.used_entries = 0;
         self.total_buckets = total_buckets;
@@ -214,7 +208,7 @@ mod tests {
         b.read_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
             .unwrap();
         let data_in = SearchData {
-            best_move: Move { data: 0 },
+            best_move: Move::default(),
             depth: 5,
             eval: 58,
             eval_type: EvalType::Beta,

@@ -78,7 +78,7 @@ impl Uci {
         let cmd: Vec<&str> = cmd.split_whitespace().collect();
 
         let mut token = GoToken::None;
-        let mut time = GameTime::new();
+        let mut time = GameTime::default();
         let mut depth = 0;
         let mut nodes = 0;
         let mut move_time = 0;

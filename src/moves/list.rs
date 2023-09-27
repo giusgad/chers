@@ -6,14 +6,16 @@ pub struct MoveList {
     pub index: usize,
 }
 
-impl MoveList {
-    pub fn new() -> Self {
+impl Default for MoveList {
+    fn default() -> Self {
         Self {
-            list: [Move { data: 0 }; MAX_LEGAL_MOVES as usize],
+            list: [Move::default(); MAX_LEGAL_MOVES as usize],
             index: 0,
         }
     }
+}
 
+impl MoveList {
     pub fn push(&mut self, m: Move) {
         self.list[self.index] = m;
         self.index += 1;

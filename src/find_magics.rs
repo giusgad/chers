@@ -7,13 +7,14 @@ use rand::{thread_rng, Rng};
 
 #[allow(dead_code)]
 pub fn find_magics(piece: Piece) {
-    let mg = MoveGenerator::new();
+    let mut mg = MoveGenerator::default();
+    mg.init();
     let (masks, size) = match piece {
         Pieces::BISHOP => (mg.bishop_masks, BISHOP_TABLE_SIZE),
         Pieces::ROOK => (mg.rook_masks, ROOK_TABLE_SIZE),
         _ => panic!(),
     };
-    let mut magics = [Magic::new(); NrOf::SQUARES];
+    let mut magics = [Magic::default(); NrOf::SQUARES];
     let mut rng = thread_rng();
     let mut end = 0;
     let mut table = vec![0; size]; // the table that will contain all the blocker-legal
@@ -30,9 +31,11 @@ pub fn find_magics(piece: Piece) {
         let offset = end;
         end = offset + (1 << mask.count_ones());
 
-        let mut magic = Magic::new();
-        magic.shift = shift;
-        magic.offset = offset;
+        let mut magic = Magic {
+            shift,
+            offset,
+            ..Default::default()
+        };
 
         let mut found = false;
         let mut attempts = 0;

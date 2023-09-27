@@ -1,6 +1,6 @@
 use crate::defs::{Bitboard, NrOf};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Magic {
     pub nr: u64,
     pub shift: usize,
@@ -8,13 +8,6 @@ pub struct Magic {
 }
 
 impl Magic {
-    pub fn new() -> Self {
-        Self {
-            nr: 0,
-            shift: 0,
-            offset: 0,
-        }
-    }
     pub fn get_index(&self, blockers: Bitboard) -> usize {
         (blockers.wrapping_mul(self.nr) as usize >> self.shift) + self.offset
     }

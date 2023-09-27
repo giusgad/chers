@@ -26,19 +26,13 @@ use crate::{
 
 use self::defs::{SearchControl, SearchInfo, SearchRefs, SearchTime};
 
+#[derive(Default)]
 pub struct Search {
     pub control_tx: Option<Sender<SearchControl>>, // control tx is used in the engine to send commands
     pub handle: Option<JoinHandle<()>>,
 }
 
 impl Search {
-    pub fn new() -> Self {
-        Self {
-            control_tx: None,
-            handle: None,
-        }
-    }
-
     pub fn init(
         &mut self,
         report_tx: Sender<Info>,
@@ -75,7 +69,7 @@ impl Search {
                         mg: &mg,
                         time_control: search_time,
                         timer: None,
-                        info: &mut SearchInfo::new(),
+                        info: &mut SearchInfo::default(),
                         terminate: SearchTerminate::Nothing,
                         report_tx: &report_tx,
                         control_rx: &rx,

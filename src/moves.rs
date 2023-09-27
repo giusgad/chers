@@ -23,9 +23,9 @@ pub struct MoveGenerator {
     pub bishop_masks: [Bitboard; NrOf::SQUARES],
 }
 
-impl MoveGenerator {
-    pub fn new() -> Self {
-        let mut mg = Self {
+impl Default for MoveGenerator {
+    fn default() -> Self {
+        Self {
             king: [0; NrOf::SQUARES],
             knight: [0; NrOf::SQUARES],
             pawn_capture: [[0; NrOf::SQUARES]; Colors::BOTH],
@@ -33,17 +33,21 @@ impl MoveGenerator {
             rook: vec![0; ROOK_TABLE_SIZE],
             rook_masks: [0; NrOf::SQUARES],
             bishop_masks: [0; NrOf::SQUARES],
-        };
-        mg.init_king();
-        mg.init_knight();
-        mg.init_pawn_captures();
-        mg.init_masks(); // masks for sliding pieces
-        mg.init_sliding();
-        mg
+        }
+    }
+}
+
+impl MoveGenerator {
+    pub fn init(&mut self) {
+        self.init_king();
+        self.init_knight();
+        self.init_pawn_captures();
+        self.init_masks(); // masks for sliding pieces
+        self.init_sliding();
     }
 
     pub fn get_all_legal_moves(&self, board: &Board, only_captures: bool) -> MoveList {
-        let mut list = MoveList::new();
+        let mut list = MoveList::default();
         for piece in 0..NrOf::PIECE_TYPES {
             self.piece_legal_moves(&mut list, board, piece, only_captures)
         }

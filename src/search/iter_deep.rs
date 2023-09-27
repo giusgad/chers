@@ -17,7 +17,7 @@ impl Search {
 
         let mut depth = 1;
         let mut pv: Vec<Move> = Vec::new();
-        let mut best_move = Move { data: 0 };
+        let mut best_move = Move::default();
         let mut stop = false;
 
         refs.timer_start();
@@ -65,8 +65,7 @@ impl Search {
             depth += 1;
         }
 
-        let null_move = Move { data: 0 };
-
+        let null_move = Move::default();
         // return this and it will be sent to the main loop
         if best_move != null_move {
             SearchResult::BestMove(best_move)
