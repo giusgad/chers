@@ -1,6 +1,7 @@
 use super::Engine;
 use crate::{
     defs::ErrFatal,
+    eval::{evaluate, game_phase},
     search::{defs::SearchControl, Search},
     uci::{defs::UciData, Uci},
 };
@@ -32,8 +33,11 @@ impl Engine {
                 "draw" => {
                     dbg!(Search::is_draw(&self.board.lock().unwrap()));
                 }
-                "endgame" => {
-                    dbg!(self.board.lock().unwrap().is_endgame());
+                "phase" => {
+                    dbg!(game_phase(&self.board.lock().unwrap()));
+                }
+                "eval" => {
+                    dbg!(evaluate(&self.board.lock().unwrap()));
                 }
                 "board" => println!(
                     "{}",

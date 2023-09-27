@@ -1,6 +1,6 @@
 [package]
 name = "chers"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 authors = ["Giuseppe Gadola"]
 description = "Chess engine written in rust"

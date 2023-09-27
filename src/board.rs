@@ -13,7 +13,7 @@ use self::{
 };
 use crate::{
     defs::{Bitboard, Color, Colors, NrOf, Piece, Square, PIECE_VALUES},
-    eval::psqt::{FLIP, PSQTS},
+    eval::psqt::{FLIP, PSQTS_EG, PSQTS_MG},
     utils::bit_ops::find_ones_u8,
 };
 
@@ -48,7 +48,8 @@ impl Board {
         self.state.material[color] += PIECE_VALUES[piece];
         self.state.zobrist_hash ^= self.zobrist.piece_hash(color, piece, square);
 
-        self.state.psqt[color] += self.get_psqt_val(piece, color, square);
+        self.state.psqt_mg[color] += self.get_psqt_val(piece, color, square, false);
+        self.state.psqt_eg[color] += self.get_psqt_val(piece, color, square, true);
     }
 
     fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
@@ -59,7 +60,8 @@ impl Board {
         self.state.material[color] -= PIECE_VALUES[piece];
         self.state.zobrist_hash ^= self.zobrist.piece_hash(color, piece, square);
 
-        self.state.psqt[color] -= self.get_psqt_val(piece, color, square);
+        self.state.psqt_mg[color] -= self.get_psqt_val(piece, color, square, false);
+        self.state.psqt_mg[color] -= self.get_psqt_val(piece, color, square, true);
     }
 
     pub fn get_piece_bb(&self, piece: Piece, color: Color) -> Bitboard {
@@ -82,47 +84,17 @@ impl Board {
         self.state.ep_square = None;
     }
 
-    fn get_psqt_val(&self, piece: Piece, color: Color, square: Square) -> i16 {
+    fn get_psqt_val(&self, piece: Piece, color: Color, square: Square, is_endgame: bool) -> i16 {
         let square = if color == Colors::WHITE {
             FLIP[square]
         } else {
             square
         };
-        PSQTS[piece][square]
-    }
-
-    pub fn is_endgame(&self) -> bool {
-        // endgame starts when both sides have no queens or the sides that have a queen have at
-        // most one more minor piece
-        // also there shouldn't be more than 6 minor+major pieces on the board
-        let mut count = 0; //
-        for color in 0..Colors::BOTH {
-            count += self.piece_bbs[color][Pieces::KNIGHT].count_ones();
-            count += self.piece_bbs[color][Pieces::BISHOP].count_ones();
-            count += self.piece_bbs[color][Pieces::QUEEN].count_ones();
-            count += self.piece_bbs[color][Pieces::ROOK].count_ones();
+        if is_endgame {
+            PSQTS_EG[piece][square]
+        } else {
+            PSQTS_MG[piece][square]
         }
-        if count > 6 {
-            return false;
-        }
-
-        let black_queen = self.piece_bbs[Colors::BLACK][Pieces::QUEEN] > 0;
-        let white_queen = self.piece_bbs[Colors::WHITE][Pieces::QUEEN] > 0;
-
-        let black_rook = self.piece_bbs[Colors::BLACK][Pieces::ROOK] > 0;
-        let white_rook = self.piece_bbs[Colors::WHITE][Pieces::ROOK] > 0;
-
-        let minors = [Pieces::KNIGHT, Pieces::BISHOP];
-
-        let mut b_minors = 0;
-        let mut w_minors = 0;
-        for p in minors {
-            b_minors += self.piece_bbs[Colors::BLACK][p].count_ones();
-            w_minors += self.piece_bbs[Colors::WHITE][p].count_ones();
-        }
-
-        (!black_queen || (!black_rook && b_minors <= 1))
-            && (!white_queen || (!white_rook && w_minors <= 1))
     }
 
     pub fn zobrist_from_scratch(&self) -> u64 {

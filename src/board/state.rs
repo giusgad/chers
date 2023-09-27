@@ -12,7 +12,8 @@ pub struct State {
     pub fullmove_count: u16,
     pub zobrist_hash: ZobristHash,
     pub material: [u16; Colors::BOTH],
-    pub psqt: [i16; Colors::BOTH],
+    pub psqt_mg: [i16; Colors::BOTH],
+    pub psqt_eg: [i16; Colors::BOTH],
     pub next_move: Move,
 }
 
@@ -26,7 +27,8 @@ impl Default for State {
             fullmove_count: 0,
             zobrist_hash: 0,
             material: [0; Colors::BOTH],
-            psqt: [0; Colors::BOTH],
+            psqt_mg: [0; Colors::BOTH],
+            psqt_eg: [0; Colors::BOTH],
             next_move: Move::default(),
         }
     }
@@ -42,7 +44,7 @@ impl Into<String> for State {
             self.halfmove_count,
             self.fullmove_count,
             self.material,
-            self.psqt,
+            self.psqt_mg,
         )
     }
 }
