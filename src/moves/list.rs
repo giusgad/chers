@@ -2,14 +2,14 @@ use super::defs::{Move, MoveType};
 use crate::defs::MAX_LEGAL_MOVES;
 
 pub struct MoveList {
-    pub list: [Move; MAX_LEGAL_MOVES as usize],
+    pub list: [Move; MAX_LEGAL_MOVES],
     pub index: usize,
 }
 
 impl Default for MoveList {
     fn default() -> Self {
         Self {
-            list: [Move::default(); MAX_LEGAL_MOVES as usize],
+            list: [Move::default(); MAX_LEGAL_MOVES],
             index: 0,
         }
     }

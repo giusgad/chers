@@ -1,4 +1,3 @@
-// #![allow(dead_code, unused_variables)]
 #![allow(clippy::from_over_into, clippy::needless_range_loop)]
 
 mod board;

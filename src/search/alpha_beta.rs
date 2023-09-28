@@ -18,7 +18,12 @@ impl Search {
         refs: &mut SearchRefs,
     ) -> i16 {
         // check if the search has to stop
-        Self::check_termination(refs);
+        // only perform the check every 2048 nodes for efficency,
+        // since the calculation of the elapsed time is expensive
+        if refs.info.nodes & 2048 == 0 {
+            Self::check_termination(refs);
+        }
+
         if refs.stopped() || refs.info.ply > MAX_PLY {
             return evaluate(refs.board);
         }

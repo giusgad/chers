@@ -26,6 +26,8 @@ impl Search {
             CRIT_TIME
         } else if time < CRIT_TIME {
             200
+        } else if time == 0 {
+            time
         } else {
             (time / moves as u128) + inc
         }

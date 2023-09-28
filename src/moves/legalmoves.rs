@@ -320,18 +320,28 @@ impl MoveGenerator {
     }
 
     fn get_bb_from_magics(&self, sq: Square, blocker: Bitboard, piece: Piece) -> Bitboard {
-        let rook_idx =
-            ROOK_MAGICS[sq].get_index(Self::simplify_blocker(blocker & self.rook_masks[sq], sq));
-        let rook = self.rook[rook_idx];
-        let bishop_idx = BISHOP_MAGICS[sq]
-            .get_index(Self::simplify_blocker(blocker & self.bishop_masks[sq], sq));
-        let bishop = self.bishop[bishop_idx];
-        match piece {
-            Pieces::ROOK => rook,
-            Pieces::BISHOP => bishop,
-            Pieces::QUEEN => rook | bishop,
-            _ => panic!("Invalid piece"),
+    match piece {
+        Pieces::ROOK => {
+            let rook_idx = ROOK_MAGICS[sq]
+                .get_index(Self::simplify_blocker(blocker & self.rook_masks[sq], sq));
+            self.rook[rook_idx]
         }
+        Pieces::BISHOP => {
+            let bishop_idx = BISHOP_MAGICS[sq]
+                .get_index(Self::simplify_blocker(blocker & self.bishop_masks[sq], sq));
+            self.bishop[bishop_idx]
+        }
+        Pieces::QUEEN => {
+            let bishop_idx = BISHOP_MAGICS[sq]
+                .get_index(Self::simplify_blocker(blocker & self.bishop_masks[sq], sq));
+            let bishop = self.bishop[bishop_idx];
+            let rook_idx = ROOK_MAGICS[sq]
+                .get_index(Self::simplify_blocker(blocker & self.rook_masks[sq], sq));
+            let rook = self.rook[rook_idx];
+            bishop | rook
+        }
+        _ => panic!("Invalid piece"),
+    }
     }
 }
 

@@ -26,7 +26,7 @@ impl NrOf {
 }
 
 pub const MAX_MOVE_COUNT: usize = 1024;
-pub const MAX_LEGAL_MOVES: u8 = 218;
+pub const MAX_LEGAL_MOVES: usize = 218;
 
 pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 330, 320, 100];
 
