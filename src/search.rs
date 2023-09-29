@@ -6,12 +6,11 @@ mod quiescence;
 mod time;
 
 use std::{
-    sync::{
-        mpsc::{self, Sender},
-        Arc, Mutex,
-    },
+    sync::{Arc, Mutex},
     thread::{self, JoinHandle},
 };
+
+use crossbeam_channel::Sender;
 
 use crate::{
     board::Board,
@@ -41,7 +40,7 @@ impl Search {
         tt: Arc<Mutex<TT<SearchData>>>,
         options: Arc<Mutex<Options>>,
     ) {
-        let (tx, rx) = mpsc::channel::<SearchControl>();
+        let (tx, rx) = crossbeam_channel::unbounded();
 
         let h = thread::spawn(move || {
             let mut quit = false;

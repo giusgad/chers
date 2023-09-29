@@ -2,12 +2,11 @@ pub mod defs;
 mod parser;
 mod search_info;
 
+use crossbeam_channel::Sender;
+
 use crate::defs::{ErrFatal, Info};
 
-use std::{
-    sync::mpsc::Sender,
-    thread::{self, JoinHandle},
-};
+use std::thread::{self, JoinHandle};
 
 use self::defs::UciData;
 

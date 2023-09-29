@@ -4,11 +4,11 @@ use crate::{
     search::defs::SearchResult,
     uci::Uci,
 };
-use std::sync::{mpsc, Arc};
+use std::sync::Arc;
 
 impl Engine {
     pub fn start(&mut self) {
-        let (tx, rx) = mpsc::channel::<Info>();
+        let (tx, rx) = crossbeam_channel::unbounded();
 
         self.uci.init(tx.clone());
         self.search.init(

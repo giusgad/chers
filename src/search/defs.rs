@@ -1,10 +1,9 @@
 use std::{
-    sync::{
-        mpsc::{Receiver, Sender},
-        Arc, Mutex,
-    },
+    sync::{Arc, Mutex},
     time::Instant,
 };
+
+use crossbeam_channel::{Receiver, Sender};
 
 use crate::{
     board::Board,
