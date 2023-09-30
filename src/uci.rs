@@ -45,14 +45,4 @@ impl Uci {
     pub fn output_err(s: impl std::fmt::Display) {
         println!("info string {s}");
     }
-
-    pub fn show_options() {
-        for option in [
-            ("Hash", "spin default 32 min 1 max 8192"),
-            ("EarlyStop", "check default true"),
-            ("DbgUnicode", "check default true"),
-        ] {
-            println!("option name {} type {}", option.0, option.1);
-        }
-    }
 }
