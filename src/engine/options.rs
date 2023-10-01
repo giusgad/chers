@@ -22,12 +22,24 @@ impl UciType for usize {
         String::from("spin")
     }
 }
+impl UciType for u128 {
+    fn uci_type() -> String {
+        String::from("spin")
+    }
+}
 
 // this simple macro extracts a value from a string given the type
 // and it's used to parse option values into rust types
 macro_rules! extract_val {
     (usize, $s:expr) => {{
         if let Ok(val) = $s.parse::<usize>() {
+            Ok(val)
+        } else {
+            Err(())
+        }
+    }};
+    (u128, $s:expr) => {{
+        if let Ok(val) = $s.parse::<u128>() {
             Ok(val)
         } else {
             Err(())
@@ -120,4 +132,5 @@ define_options! {
     Hash,hash_size,usize,32,|tt:&mut MutexGuard<TT<SearchData>>,val| {tt.resize(val);},"min 1 max 32768"
     EarlyStop,early_stop,bool,true
     DbgUnicode,dbg_unicode,bool,true
+    Overhead,move_overhead,u128,200
 }

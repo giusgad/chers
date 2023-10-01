@@ -54,7 +54,7 @@ impl Search {
             }
 
             if refs.options.lock().expect(ErrFatal::LOCK).early_stop
-                && eval > Eval::CHECKMATE_TRESHOLD
+                && !(-Eval::CHECKMATE_TRESHOLD..Eval::CHECKMATE_TRESHOLD).contains(&eval)
             {
                 // if a checkmate is found finish early
                 stop = true;
