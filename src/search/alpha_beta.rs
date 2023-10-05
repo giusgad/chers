@@ -1,3 +1,5 @@
+use std::thread;
+
 use super::{
     defs::{SearchRefs, MAX_PLY},
     Search,
@@ -48,9 +50,10 @@ impl Search {
         }
         refs.info.lock().expect(ErrFatal::LOCK).nodes += 1;
 
+        let is_root = refs.info.lock().expect(ErrFatal::LOCK).ply == 0;
         // only try to load from the tt if it's not the first move
         let mut tt_move = None;
-        if refs.info.lock().expect(ErrFatal::LOCK).ply != 0 {
+        if !is_root {
             let mut tt_eval = None;
             // try to get value from the transposition table
             if let Some(data) = refs
@@ -97,12 +100,19 @@ impl Search {
                     info.seldepth = info.ply;
                 }
             }
-
             let mut node_pv = Vec::new();
 
             let mut eval = 0;
             if !Self::is_draw(&refs.board.lock().expect(ErrFatal::LOCK)) {
-                eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
+                if is_root {
+                    thread::scope(|s| {
+                        s.spawn(|| {
+                            eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
+                        });
+                    });
+                } else {
+                    eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
+                }
             }
 
             refs.board.lock().expect(ErrFatal::LOCK).unmake();
