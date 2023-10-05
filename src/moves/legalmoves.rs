@@ -5,7 +5,7 @@ use crate::{
     },
     defs::{Bitboard, Color, Colors, Piece, Square},
     moves::defs::MoveOffsets,
-    utils::{add_square_i8, bit_ops},
+    utils::{add_square_i8, bit_ops::BitIterator},
 };
 
 use super::{
@@ -41,8 +41,8 @@ impl MoveGenerator {
         let color = board.state.active_color;
         let occupied = board.color_bbs[Colors::BLACK] | board.color_bbs[Colors::WHITE];
 
-        let mut piece_bb = board.piece_bbs[color][Pieces::KING];
-        let from = bit_ops::next_one(&mut piece_bb);
+        let piece_bb = board.piece_bbs[color][Pieces::KING];
+        let from = piece_bb.trailing_zeros() as Square;
 
         let (queenside_perm, kingside_perm): (bool, bool) = match color {
             Colors::WHITE => (perms & Castling::WQ > 0, perms & Castling::WK > 0),
@@ -124,9 +124,8 @@ impl MoveGenerator {
         let enemy_pieces = board.color_bbs[color ^ 1];
         let empty = !(self_pieces | enemy_pieces);
 
-        let mut pawns_bb = board.get_piece_bb(Pieces::PAWN, color);
-        while pawns_bb > 0 {
-            let from = bit_ops::next_one(&mut pawns_bb);
+        let pawns_bb = board.get_piece_bb(Pieces::PAWN, color);
+        for from in pawns_bb.bit_iter() {
             let dir = if color == Colors::WHITE {
                 MoveDirection::N
             } else {
@@ -135,7 +134,7 @@ impl MoveGenerator {
 
             // EN PASSANT
             let available_bb = self.pawn_capture[color][from];
-            let mut captures = available_bb & enemy_pieces;
+            let captures = available_bb & enemy_pieces;
             if let Some(ep_square) = board.state.ep_square {
                 if SQUARE_BBS[ep_square] & available_bb > 0 {
                     let mut m = Move::new(
@@ -151,8 +150,7 @@ impl MoveGenerator {
                 }
             }
 
-            while captures > 0 {
-                let to = bit_ops::next_one(&mut captures);
+            for to in captures.bit_iter() {
                 if ((SQUARE_BBS[to] & RANK_BBS[Ranks::R8] > 0) && color == Colors::WHITE)
                     || ((SQUARE_BBS[to] & RANK_BBS[Ranks::R1] > 0) && color == Colors::BLACK)
                 {
@@ -246,18 +244,16 @@ impl MoveGenerator {
         let enemy_pieces = board.color_bbs[color ^ 1];
         let empty = !(self_pieces | enemy_pieces);
 
-        let mut piece_bb = board.get_piece_bb(piece, color);
-        while piece_bb > 0 {
-            let from = bit_ops::next_one(&mut piece_bb);
+        let piece_bb = board.get_piece_bb(piece, color);
+        for from in piece_bb.bit_iter() {
             let available_bb = match piece {
                 Pieces::KING => self.king[from],
                 Pieces::KNIGHT => self.knight[from],
                 p => panic!("Invalid piece for non_sliding_moves: {p}"),
             };
 
-            let mut captures = available_bb & enemy_pieces;
-            while captures > 0 {
-                let to = bit_ops::next_one(&mut captures);
+            let captures = available_bb & enemy_pieces;
+            for to in captures.bit_iter() {
                 let m = Move::new(
                     piece,
                     from,
@@ -270,9 +266,8 @@ impl MoveGenerator {
             }
 
             if !only_captures {
-                let mut quiets = available_bb & empty;
-                while quiets > 0 {
-                    let to = bit_ops::next_one(&mut quiets);
+                let quiets = available_bb & empty;
+                for to in quiets.bit_iter() {
                     let m = Move::new(piece, from, to, MoveType::Quiet, Pieces::NONE, None);
                     list.push(m);
                 }
@@ -288,15 +283,13 @@ impl MoveGenerator {
         let enemy_pieces = board.color_bbs[color ^ 1];
         let blocker = self_pieces | enemy_pieces;
 
-        let mut piece_bb = board.get_piece_bb(piece, color);
-        while piece_bb > 0 {
-            let from = bit_ops::next_one(&mut piece_bb);
+        let piece_bb = board.get_piece_bb(piece, color);
+        for from in piece_bb.bit_iter() {
             let mut legal_bb = self.get_bb_from_magics(from, blocker, piece);
             legal_bb &= !self_pieces;
 
             // generate the moves
-            while legal_bb > 0 {
-                let to = bit_ops::next_one(&mut legal_bb);
+            for to in legal_bb.bit_iter() {
                 let to_bb = SQUARE_BBS[to];
 
                 // it's a capture
@@ -320,28 +313,28 @@ impl MoveGenerator {
     }
 
     fn get_bb_from_magics(&self, sq: Square, blocker: Bitboard, piece: Piece) -> Bitboard {
-    match piece {
-        Pieces::ROOK => {
-            let rook_idx = ROOK_MAGICS[sq]
-                .get_index(Self::simplify_blocker(blocker & self.rook_masks[sq], sq));
-            self.rook[rook_idx]
+        match piece {
+            Pieces::ROOK => {
+                let rook_idx = ROOK_MAGICS[sq]
+                    .get_index(Self::simplify_blocker(blocker & self.rook_masks[sq], sq));
+                self.rook[rook_idx]
+            }
+            Pieces::BISHOP => {
+                let bishop_idx = BISHOP_MAGICS[sq]
+                    .get_index(Self::simplify_blocker(blocker & self.bishop_masks[sq], sq));
+                self.bishop[bishop_idx]
+            }
+            Pieces::QUEEN => {
+                let bishop_idx = BISHOP_MAGICS[sq]
+                    .get_index(Self::simplify_blocker(blocker & self.bishop_masks[sq], sq));
+                let bishop = self.bishop[bishop_idx];
+                let rook_idx = ROOK_MAGICS[sq]
+                    .get_index(Self::simplify_blocker(blocker & self.rook_masks[sq], sq));
+                let rook = self.rook[rook_idx];
+                bishop | rook
+            }
+            _ => panic!("Invalid piece"),
         }
-        Pieces::BISHOP => {
-            let bishop_idx = BISHOP_MAGICS[sq]
-                .get_index(Self::simplify_blocker(blocker & self.bishop_masks[sq], sq));
-            self.bishop[bishop_idx]
-        }
-        Pieces::QUEEN => {
-            let bishop_idx = BISHOP_MAGICS[sq]
-                .get_index(Self::simplify_blocker(blocker & self.bishop_masks[sq], sq));
-            let bishop = self.bishop[bishop_idx];
-            let rook_idx = ROOK_MAGICS[sq]
-                .get_index(Self::simplify_blocker(blocker & self.rook_masks[sq], sq));
-            let rook = self.rook[rook_idx];
-            bishop | rook
-        }
-        _ => panic!("Invalid piece"),
-    }
     }
 }
 

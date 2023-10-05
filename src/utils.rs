@@ -5,8 +5,6 @@ use crate::{
 
 // find position of ones in binary representation of given u64
 pub mod bit_ops {
-    use crate::defs::{Bitboard, Square};
-
     pub fn find_ones_u8(input: u64) -> Vec<usize> {
         let mut res = Vec::new();
         for i in 0..8 {
@@ -17,12 +15,6 @@ pub mod bit_ops {
         res
     }
 
-    pub fn next_one(bb: &mut Bitboard) -> Square {
-        let sq = bb.trailing_zeros();
-        *bb ^= 1 << sq;
-        sq as Square
-    }
-
     pub fn one_indexes(bb: u64) -> Vec<u64> {
         let mut res = Vec::new();
         for i in 0..64 {
@@ -31,6 +23,34 @@ pub mod bit_ops {
             }
         }
         res
+    }
+
+    pub struct BitIterHelper {
+        num: u64,
+    }
+
+    impl Iterator for BitIterHelper {
+        type Item = usize;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            let pos = self.num.trailing_zeros() as usize;
+            if pos < 64 {
+                self.num ^= 1 << pos;
+                Some(pos)
+            } else {
+                None
+            }
+        }
+    }
+
+    pub trait BitIterator {
+        fn bit_iter(&self) -> BitIterHelper;
+    }
+
+    impl BitIterator for u64 {
+        fn bit_iter(&self) -> BitIterHelper {
+            BitIterHelper { num: *self }
+        }
     }
 }
 
