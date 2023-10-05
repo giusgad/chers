@@ -16,7 +16,7 @@ impl Search {
             SearchTime::Adaptive(gt) => gt,
             _ => panic!(),
         };
-        let (mut time, inc) = match refs.board.state.active_color {
+        let (mut time, inc) = match refs.board.lock().expect(ErrFatal::LOCK).state.active_color {
             Colors::WHITE => (gt.wtime, gt.winc),
             Colors::BLACK => (gt.btime, gt.binc),
             _ => panic!("Invalid active color"),
@@ -43,7 +43,12 @@ impl Search {
         if let Some(moves) = moves {
             moves
         } else {
-            let tot_moves = refs.board.state.fullmove_count;
+            let tot_moves = refs
+                .board
+                .lock()
+                .expect(ErrFatal::LOCK)
+                .state
+                .fullmove_count;
             GAME_MOVES.saturating_sub(tot_moves) + EXTRA_MOVES
         }
     }

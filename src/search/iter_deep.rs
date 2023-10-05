@@ -8,8 +8,8 @@ use super::{
 const WINDOW: i16 = 50;
 
 impl Search {
-    pub fn iterative_deepening(refs: &mut SearchRefs) -> SearchResult {
-        refs.info.allocated_time = match &refs.time_control {
+    pub fn iterative_deepening(refs: &SearchRefs) -> SearchResult {
+        refs.info.lock().expect(ErrFatal::LOCK).allocated_time = match &refs.time_control {
             SearchTime::Adaptive(_) => Self::calculate_time(refs),
             SearchTime::MoveTime(time) => *time,
             _ => 0,
@@ -25,7 +25,7 @@ impl Search {
         let (mut alpha, mut beta) = (-Eval::INF, Eval::INF);
 
         while !stop {
-            refs.info.depth = depth;
+            refs.info.lock().expect(ErrFatal::LOCK).depth = depth;
 
             let eval = Self::alpha_beta(depth, alpha, beta, &mut pv, refs);
 
@@ -49,8 +49,7 @@ impl Search {
             if !pv.is_empty() && !stop {
                 // set the new best move and send stats to the gui
                 best_move = pv[0];
-                let hash_full = refs.tt.hash_full();
-                Uci::search_info(refs, &pv, eval, hash_full);
+                Uci::search_info(refs, &pv, eval);
             }
 
             if refs.options.lock().expect(ErrFatal::LOCK).early_stop

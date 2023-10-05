@@ -1,9 +1,9 @@
-use crate::{moves::defs::Move, search::defs::SearchRefs};
+use crate::{defs::ErrFatal, moves::defs::Move, search::defs::SearchRefs};
 
 use super::Uci;
 
 impl Uci {
-    pub fn search_info(refs: &SearchRefs, moves: &[Move], eval: i16, hash_full: u16) {
+    pub fn search_info(refs: &SearchRefs, moves: &[Move], eval: i16) {
         let moves: String = moves.iter().fold(String::new(), |mut s, m| {
             s.push_str(&format!("{}", m));
             s.push(' ');
@@ -11,17 +11,18 @@ impl Uci {
         });
         let mut nps = 0;
         let time = refs.timer_elapsed() as f64 / 1000f64;
+        let info = refs.info.lock().expect(ErrFatal::LOCK);
         if time > 0f64 {
-            nps = (refs.info.nodes as f64 / time).round() as u64;
+            nps = (info.nodes as f64 / time).round() as u64;
         }
         println!(
             "info depth {} seldepth {} score cp {} nodes {} nps {} hashfull {} time {} pv {}",
-            refs.info.depth,
-            refs.info.seldepth,
+            info.depth,
+            info.seldepth,
             eval,
-            refs.info.nodes,
+            info.nodes,
             nps,
-            hash_full,
+            refs.tt.lock().expect(ErrFatal::LOCK).hash_full(),
             refs.timer_elapsed(),
             moves
         );

@@ -58,24 +58,20 @@ impl Search {
                     SearchControl::Quit => quit = true,
                 }
                 if !stop && !quit {
-                    let mut board = board.lock().expect(ErrFatal::LOCK);
-                    let mut tt = tt.lock().expect(ErrFatal::LOCK);
-
-                    let mut refs = SearchRefs {
-                        board: &mut board,
-                        tt: &mut tt,
-                        tt_loads: 0,
-                        mg: &mg,
+                    let refs = SearchRefs {
+                        board: Arc::clone(&board),
+                        tt: Arc::clone(&tt),
                         time_control: search_time,
-                        timer: None,
-                        info: &mut SearchInfo::default(),
-                        terminate: SearchTerminate::Nothing,
-                        report_tx: &report_tx,
-                        control_rx: &rx,
-                        options: &options,
+                        timer: Arc::new(Mutex::new(None)),
+                        info: Arc::new(Mutex::new(SearchInfo::default())),
+                        terminate: Arc::new(Mutex::new(SearchTerminate::Nothing)),
+                        report_tx: Arc::new(report_tx.clone()),
+                        control_rx: Arc::new(rx.clone()),
+                        mg: Arc::clone(&mg),
+                        options: Arc::clone(&options),
                     };
 
-                    let res = Self::iterative_deepening(&mut refs);
+                    let res = Self::iterative_deepening(&refs);
                     report_tx.send(Info::Search(res)).expect(ErrFatal::TX_SEND);
                 }
             }

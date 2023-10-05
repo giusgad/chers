@@ -7,7 +7,7 @@ use crossbeam_channel::{Receiver, Sender};
 
 use crate::{
     board::Board,
-    defs::Info,
+    defs::{ErrFatal, Info},
     engine::{
         options::Options,
         transposition::{SearchData, TT},
@@ -70,36 +70,35 @@ pub struct SearchInfo {
 }
 
 // Refs that are used by the search algorithms and passed into recursion
-pub struct SearchRefs<'a> {
-    pub board: &'a mut Board,
-    pub tt: &'a mut TT<SearchData>,
-    pub tt_loads: u64,
-    pub mg: &'a Arc<MoveGenerator>,
+pub struct SearchRefs {
+    pub board: Arc<Mutex<Board>>,
+    pub tt: Arc<Mutex<TT<SearchData>>>,
+    pub mg: Arc<MoveGenerator>,
     pub time_control: SearchTime,
-    pub info: &'a mut SearchInfo,
-    pub timer: Option<Instant>,
-    pub terminate: SearchTerminate,
-    pub report_tx: &'a Sender<Info>,
-    pub control_rx: &'a Receiver<SearchControl>,
-    pub options: &'a Arc<Mutex<Options>>,
+    pub info: Arc<Mutex<SearchInfo>>,
+    pub timer: Arc<Mutex<Option<Instant>>>,
+    pub terminate: Arc<Mutex<SearchTerminate>>,
+    pub report_tx: Arc<Sender<Info>>,
+    pub control_rx: Arc<Receiver<SearchControl>>,
+    pub options: Arc<Mutex<Options>>,
 }
 
-impl SearchRefs<'_> {
-    pub fn timer_start(&mut self) {
-        self.timer = Some(Instant::now())
+impl SearchRefs {
+    pub fn timer_start(&self) {
+        *self.timer.lock().expect(ErrFatal::LOCK) = Some(Instant::now())
     }
     pub fn timer_elapsed(&self) -> u128 {
-        match self.timer {
+        match *self.timer.lock().expect(ErrFatal::LOCK) {
             Some(t) => t.elapsed().as_millis(),
             None => 0,
         }
     }
     pub fn stopped(&self) -> bool {
-        self.terminate != SearchTerminate::Nothing
+        *self.terminate.lock().expect(ErrFatal::LOCK) != SearchTerminate::Nothing
     }
 }
 
-impl std::fmt::Debug for SearchRefs<'_> {
+impl std::fmt::Debug for SearchRefs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SearchRefs")
             .field("time_control", &self.time_control)
