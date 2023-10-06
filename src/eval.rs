@@ -48,3 +48,30 @@ pub fn evaluate(b: &Board) -> i16 {
         eval
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::evaluate;
+    use crate::board::Board;
+
+    #[test]
+    fn evaluation_simmetry() {
+        let mut b = Board::new();
+        for (w_fen, b_fen) in [
+            (
+                "r1k2b2/ppp2pp1/4qn2/8/8/2NQ4/1PP2PP1/2B2K1R w - - 0 1",
+                "r1k2b2/ppp2pp1/4qn2/8/8/2NQ4/1PP2PP1/2B2K1R b - - 0 1",
+            ),
+            (
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1",
+            ),
+        ] {
+            b.read_fen(w_fen).unwrap();
+            let w_eval = evaluate(&b);
+            b.read_fen(b_fen).unwrap();
+            let b_eval = evaluate(&b);
+            assert_eq!(w_eval, -b_eval);
+        }
+    }
+}
