@@ -76,6 +76,7 @@ impl Search {
                     };
 
                     let res = Self::iterative_deepening(&mut refs);
+                    quit = refs.terminate == SearchTerminate::Quit;
                     report_tx.send(Info::Search(res)).expect(ErrFatal::TX_SEND);
                 }
             }
