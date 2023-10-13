@@ -9,11 +9,11 @@ impl Uci {
     pub fn commands_from_string(s: String) -> UciData {
         let s = s.trim(); // remove the \n
         match s {
-            cmd if cmd == "uci" => UciData::Uci,
-            cmd if cmd == "isready" => UciData::IsReady,
-            cmd if cmd == "newgame" => UciData::NewGame,
-            cmd if cmd == "stop" => UciData::Stop,
-            cmd if cmd == "quit" => UciData::Quit,
+            "uci" => UciData::Uci,
+            "isready" => UciData::IsReady,
+            "newgame" => UciData::NewGame,
+            "stop" => UciData::Stop,
+            "quit" => UciData::Quit,
 
             cmd if cmd.starts_with("position") => Self::parse_position(cmd),
             cmd if cmd.starts_with("go") => UciData::Go(Self::parse_go(cmd)),

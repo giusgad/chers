@@ -30,6 +30,7 @@ pub const MAX_LEGAL_MOVES: usize = 218;
 
 pub const PIECE_VALUES: [u16; NrOf::PIECE_TYPES] = [0, 900, 500, 330, 320, 100];
 
+#[derive(Debug)]
 pub enum Info {
     Search(SearchResult),
     Uci(UciData),

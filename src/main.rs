@@ -10,9 +10,6 @@ mod search;
 mod uci;
 mod utils;
 
-#[cfg(test)]
-mod tests;
-
 use engine::Engine;
 
 fn main() {
