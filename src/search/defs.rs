@@ -73,7 +73,7 @@ pub struct SearchInfo {
 pub struct SearchRefs<'a> {
     pub board: &'a mut Board,
     pub tt: &'a mut TT<SearchData>,
-    pub tt_loads: u64,
+    pub killer_moves: [[Move; 2]; MAX_PLY as usize],
     pub mg: &'a Arc<MoveGenerator>,
     pub time_control: SearchTime,
     pub info: &'a mut SearchInfo,

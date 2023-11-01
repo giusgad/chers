@@ -28,10 +28,12 @@ impl Search {
             return stand_pat;
         }
 
-        let moves = refs.mg.get_all_legal_moves(refs.board, true);
+        let mut moves = refs.mg.get_all_legal_moves(refs.board, true);
+        moves.give_scores(None, None);
 
-        for m in moves.iter() {
-            let legal = refs.board.make_move(*m, refs.mg);
+        for i in 0..moves.len() {
+            let m = moves.nth(i);
+            let legal = refs.board.make_move(m, refs.mg);
             if !legal {
                 continue;
             }
@@ -54,7 +56,7 @@ impl Search {
             if eval > alpha {
                 alpha = eval;
                 pv.clear();
-                pv.push(*m);
+                pv.push(m);
                 pv.append(&mut node_pv);
             }
         }

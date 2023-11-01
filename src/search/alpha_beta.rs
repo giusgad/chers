@@ -5,7 +5,7 @@ use super::{
 use crate::{
     engine::transposition::{EvalType, SearchData},
     eval::{defs::Eval, evaluate},
-    moves::defs::Move,
+    moves::defs::{Move, MoveType},
     search::defs::{SearchControl, SearchTerminate},
 };
 
@@ -54,7 +54,6 @@ impl Search {
                 tt_move = Some(m);
             }
             if let Some(eval) = tt_eval {
-                refs.tt_loads += 1;
                 return eval;
             }
         }
@@ -64,11 +63,13 @@ impl Search {
 
         let mut best_eval = -Eval::INF;
         let mut best_move = Move::default();
+        let ply = refs.info.ply as usize;
 
         let mut moves = refs.mg.get_all_legal_moves(refs.board, false);
-        moves.reorder(tt_move);
+        moves.give_scores(tt_move, Some(&refs.killer_moves[ply]));
 
-        for &m in moves.iter() {
+        for i in 0..moves.len() {
+            let m = moves.nth(i);
             let legal = refs.board.make_move(m, refs.mg);
             if !legal {
                 continue;
@@ -104,6 +105,10 @@ impl Search {
                     zobrist_hash: refs.board.state.zobrist_hash,
                     best_move,
                 });
+                if m.move_type() == MoveType::Quiet && refs.killer_moves[ply][0] != m {
+                    refs.killer_moves[ply][1] = refs.killer_moves[ply][0];
+                    refs.killer_moves[ply][0] = m;
+                }
                 return beta;
             }
 

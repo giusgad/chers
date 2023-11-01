@@ -31,13 +31,13 @@ impl Engine {
             #[allow(unused_must_use)]
             UciData::Dbg(s) => match s.as_str() {
                 "draw" => {
-                    dbg!(Search::is_draw(&self.board.lock().unwrap()));
+                    println!("{:?}", Search::is_draw(&self.board.lock().unwrap()));
                 }
                 "phase" => {
-                    dbg!(game_phase(&self.board.lock().unwrap()));
+                    println!("{:?}", game_phase(&self.board.lock().unwrap()));
                 }
                 "eval" => {
-                    dbg!(evaluate(&self.board.lock().unwrap()));
+                    println!("{:?}", evaluate(&self.board.lock().unwrap()));
                 }
                 "board" => println!(
                     "{}",
@@ -47,10 +47,21 @@ impl Engine {
                         .to_string(self.options.lock().expect(ErrFatal::LOCK).dbg_unicode)
                 ),
                 "opts" => {
-                    dbg!(self.options.lock().unwrap());
+                    println!("{:?}", self.options.lock().unwrap());
+                }
+                s if s.starts_with("moves") => {
+                    let mut moves = self
+                        .mg
+                        .get_all_legal_moves(&self.board.lock().unwrap(), false);
+                    if s.contains("sort") {
+                        moves.give_scores(None, None);
+                    }
+                    for i in 0..moves.len() {
+                        println!("{:?}", moves.nth(i));
+                    }
                 }
                 _ => {
-                    dbg!(self.board.lock().unwrap().state);
+                    println!("{:?}", self.board.lock().unwrap().state);
                 }
             },
 

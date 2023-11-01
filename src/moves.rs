@@ -86,7 +86,7 @@ mod tests {
         let mut captures = 0;
 
         let moves = refs.mg.get_all_legal_moves(refs.board, false);
-        for m in moves.iter() {
+        for m in moves.iter().map(|ext| &ext.m) {
             let legal = refs.board.make_move(*m, refs.mg);
             if !legal {
                 continue;

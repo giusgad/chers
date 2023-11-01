@@ -19,11 +19,11 @@ use crate::{
         options::Options,
         transposition::{SearchData, TT},
     },
-    moves::MoveGenerator,
+    moves::{defs::Move, MoveGenerator},
     search::defs::SearchTerminate,
 };
 
-use self::defs::{SearchControl, SearchInfo, SearchRefs, SearchTime};
+use self::defs::{SearchControl, SearchInfo, SearchRefs, SearchTime, MAX_PLY};
 
 #[derive(Default)]
 pub struct Search {
@@ -64,7 +64,7 @@ impl Search {
                     let mut refs = SearchRefs {
                         board: &mut board,
                         tt: &mut tt,
-                        tt_loads: 0,
+                        killer_moves: [[Move::default(); 2]; MAX_PLY as usize],
                         mg: &mg,
                         time_control: search_time,
                         timer: None,

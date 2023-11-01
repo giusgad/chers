@@ -111,7 +111,7 @@ impl Engine {
         for small_move in moves {
             let mut found = false;
             let pseudo_legal = mg.get_all_legal_moves(board, false);
-            for pl_move in pseudo_legal.iter() {
+            for pl_move in pseudo_legal.iter().map(|ext| &ext.m) {
                 if &small_move == pl_move {
                     found = true;
                     if !board.make_move(*pl_move, mg) {
