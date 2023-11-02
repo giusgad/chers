@@ -16,6 +16,7 @@ use crate::{
 };
 
 pub const MAX_PLY: u8 = 128;
+pub const MAX_DEPTH: u8 = 99;
 
 // Searchcontrol is used to receive signals from the gui
 #[derive(Debug)]

@@ -1,7 +1,7 @@
 use crate::{defs::ErrFatal, eval::defs::Eval, moves::defs::Move, uci::Uci};
 
 use super::{
-    defs::{SearchRefs, SearchResult, SearchTime},
+    defs::{SearchRefs, SearchResult, SearchTime, MAX_DEPTH},
     Search,
 };
 
@@ -24,7 +24,7 @@ impl Search {
 
         let (mut alpha, mut beta) = (-Eval::INF, Eval::INF);
 
-        while !stop {
+        while !stop && depth <= MAX_DEPTH {
             refs.info.depth = depth;
 
             let eval = Self::alpha_beta(depth, alpha, beta, &mut pv, refs);

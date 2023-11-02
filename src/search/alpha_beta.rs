@@ -23,6 +23,7 @@ impl Search {
         if refs.info.nodes & 2048 == 0 {
             Self::check_termination(refs);
         }
+        let is_root = refs.info.ply == 0;
 
         if refs.stopped() || refs.info.ply > MAX_PLY {
             return evaluate(refs.board);
@@ -45,7 +46,7 @@ impl Search {
 
         // only try to load from the tt if it's not the first move
         let mut tt_move = None;
-        if refs.info.ply != 0 {
+        if !is_root {
             let mut tt_eval = None;
             // try to get value from the transposition table
             if let Some(data) = refs.tt.get(refs.board.state.zobrist_hash) {
@@ -84,7 +85,10 @@ impl Search {
             let mut node_pv = Vec::new();
 
             let mut eval = 0;
-            if !Self::is_draw(refs.board) {
+            // search if it's not a draw OR if we are at the root
+            // The is_root check is needed because otherwise the engine will evaluate as a draw
+            // any position were a draw by repetition can be reached
+            if !Self::is_draw(refs.board) || is_root {
                 eval = -Self::alpha_beta(depth - 1, -beta, -alpha, &mut node_pv, refs);
             }
 

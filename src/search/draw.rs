@@ -15,7 +15,9 @@ impl Search {
         let mut count = 1;
         let current = board.state.zobrist_hash;
         for state in board.history.iter() {
-            if count >= 3 {
+            // consider it a draw when there is more than one repetition so that the engine doesn't
+            // repeat moves pointlessly
+            if count > 1 {
                 return true;
             }
             if state.zobrist_hash == current {
