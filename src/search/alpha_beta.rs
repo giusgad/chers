@@ -50,7 +50,7 @@ impl Search {
             let mut tt_eval = None;
             // try to get value from the transposition table
             if let Some(data) = refs.tt.get(refs.board.state.zobrist_hash) {
-                let (eval, m) = data.get_values(alpha, beta, depth);
+                let (eval, m) = data.get_values(alpha, beta, depth, refs.info.ply);
                 tt_eval = eval;
                 tt_move = Some(m);
             }
@@ -102,13 +102,14 @@ impl Search {
 
             // the move is too good for the opponent, stop searching
             if eval >= beta {
-                refs.tt.insert(SearchData {
-                    depth,
-                    eval: beta,
-                    eval_type: EvalType::Beta,
-                    zobrist_hash: refs.board.state.zobrist_hash,
+                refs.tt.insert(SearchData::new(
                     best_move,
-                });
+                    depth,
+                    refs.info.ply,
+                    beta,
+                    EvalType::Beta,
+                    refs.board.state.zobrist_hash,
+                ));
                 if m.move_type() == MoveType::Quiet && refs.killer_moves[ply][0] != m {
                     refs.killer_moves[ply][1] = refs.killer_moves[ply][0];
                     refs.killer_moves[ply][0] = m;
@@ -136,15 +137,14 @@ impl Search {
             }
         }
 
-        refs.tt.insert(SearchData {
-            depth,
-            eval: alpha,
-            eval_type,
-            zobrist_hash: refs.board.state.zobrist_hash,
+        refs.tt.insert(SearchData::new(
             best_move,
-        });
-
-        // didn't beat alpha
+            depth,
+            refs.info.ply,
+            alpha,
+            eval_type,
+            refs.board.state.zobrist_hash,
+        )); // didn't beat alpha
         alpha
     }
 

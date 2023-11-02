@@ -129,7 +129,7 @@ macro_rules! define_options {
 
 // This is the actual call to the macro, to add a new option simply add it here
 define_options! {
-    Hash,hash_size,usize,32,|tt:&mut MutexGuard<TT<SearchData>>,val| {tt.resize(val);},"min 1 max 32768"
+    Hash,hash_size,usize,128,|tt:&mut MutexGuard<TT<SearchData>>,val| {tt.resize(val);},"min 1 max 32768"
     EarlyStop,early_stop,bool,true
     DbgUnicode,dbg_unicode,bool,true
     Overhead,move_overhead,u128,200

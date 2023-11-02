@@ -1,4 +1,4 @@
-use crate::{defs::ZobristHash, moves::defs::Move};
+use crate::{defs::ZobristHash, eval::defs::Eval, moves::defs::Move};
 
 const BUCKET_ENTIRES: usize = 4;
 
@@ -31,11 +31,42 @@ impl Default for SearchData {
 }
 
 impl SearchData {
-    pub fn get_values(&self, alpha: i16, beta: i16, depth: u8) -> (Option<i16>, Move) {
+    pub fn new(
+        best_move: Move,
+        depth: u8,
+        ply: u8,
+        mut eval: i16,
+        eval_type: EvalType,
+        zobrist_hash: ZobristHash,
+    ) -> Self {
+        if eval >= Eval::CHECKMATE_TRESHOLD {
+            eval += ply as i16;
+        } else if eval <= -Eval::CHECKMATE_TRESHOLD {
+            eval -= ply as i16;
+        }
+        SearchData {
+            best_move,
+            depth,
+            eval,
+            eval_type,
+            zobrist_hash,
+        }
+    }
+
+    pub fn get_values(&self, alpha: i16, beta: i16, depth: u8, ply: u8) -> (Option<i16>, Move) {
         let mut eval = None;
         if self.depth >= depth {
             match self.eval_type {
-                EvalType::Exact => eval = Some(self.eval),
+                EvalType::Exact => {
+                    if self.eval >= Eval::CHECKMATE_TRESHOLD {
+                        //TODO: handle 50 move rule draw in this score
+                        eval = Some(self.eval - (ply as i16))
+                    } else if self.eval <= -Eval::CHECKMATE_TRESHOLD {
+                        eval = Some(self.eval + (ply as i16))
+                    } else {
+                        eval = Some(self.eval)
+                    }
+                }
                 EvalType::Alpha => {
                     if self.eval <= alpha {
                         eval = Some(alpha)
@@ -207,17 +238,18 @@ mod tests {
         let mut b = Board::new();
         b.read_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
             .unwrap();
-        let data_in = SearchData {
-            best_move: Move::default(),
-            depth: 5,
-            eval: 58,
-            eval_type: EvalType::Beta,
-            zobrist_hash: b.state.zobrist_hash,
-        };
+        let data_in = SearchData::new(
+            Move::default(),
+            5,
+            8,
+            Eval::CHECKMATE - 3,
+            EvalType::Exact,
+            b.state.zobrist_hash,
+        );
 
         tt.insert(data_in);
         let data_out = tt.get(b.state.zobrist_hash);
-
         assert_eq!(data_in, data_out.unwrap());
+        dbg!(data_out.unwrap().get_values(Eval::INF, -Eval::INF, 3, 1));
     }
 }
