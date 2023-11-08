@@ -141,7 +141,6 @@ impl std::fmt::Display for Move {
 pub enum MoveType {
     Quiet,
     Capture,
-    Both,
 }
 
 impl TryFrom<u32> for MoveType {
@@ -151,7 +150,6 @@ impl TryFrom<u32> for MoveType {
         match value {
             0 => Ok(Quiet),
             1 => Ok(Capture),
-            2 => Ok(Both),
             _ => Err("Not a valid movetype"),
         }
     }
@@ -162,7 +160,6 @@ impl Into<usize> for MoveType {
         match self {
             Quiet => 0,
             Capture => 1,
-            Both => 2,
         }
     }
 }

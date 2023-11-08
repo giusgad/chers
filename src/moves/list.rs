@@ -1,6 +1,10 @@
 use super::defs::{Move, MoveType};
-use crate::defs::{MAX_LEGAL_MOVES, PIECE_VALUES};
+use crate::{
+    defs::{Color, MAX_LEGAL_MOVES, PIECE_VALUES},
+    search::defs::HistoryHeuristic,
+};
 
+/// contains a [`Move`] and an u16 that represents the move's score used for move ordering
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct ExtMove {
     pub m: Move,
@@ -37,20 +41,22 @@ impl MoveList {
     }
 }
 
+/// contains the constants for scores used in move ordering
 struct MoveOrdering;
 impl MoveOrdering {
     const TT: u16 = u16::MAX;
     const PROMOTION: u16 = 15000;
     const CAPTURE: u16 = 10000;
     const KILLER: u16 = 9000;
-    const CASTLING: u16 = 5000;
+    const CASTLING: u16 = 8000;
 }
+
 /// implement the logic for giving scores to the moves according to an heuristic
 /// and for selecting the nth best move
 impl MoveList {
     /// perform a partial selection sort up to the specified limit, only ordering the first n moves
     /// and leaving the rest of the list unordered.
-    pub fn partial_selection_sort(&mut self, limit: usize) {
+    fn partial_selection_sort(&mut self, limit: usize) {
         for i in 0..limit.min(self.len) {
             let mut max = self.moves[i].s;
             let mut max_i = i;
@@ -64,13 +70,34 @@ impl MoveList {
         }
     }
 
+    /// Returns the move with the score that is nth in the ordered list.
+    /// [`MoveList`].give_scores() needs to be called first to have the moves ordered.
     pub fn nth(&mut self, i: usize) -> Move {
         self.partial_selection_sort(i + 1);
-        // print!("{} -> ", self.moves[i].s);
         self.moves[i].m
     }
 
-    pub fn give_scores(&mut self, tt_move: Option<Move>, killer_moves: Option<&[Move; 2]>) {
+    /**
+    For all the [`ExtMove`] in the list assign a score related to how
+    good the move might be, following the ordering defined in the constants
+    in [`MoveOrdering`].
+
+    Uses the following heuristics in order:
+    - TT move
+    - Promotions
+    - Captures ordered by MVV
+    - Quiet moves from killer heuristics
+    - Castling
+    - Quiet moves ordered with history heuristic
+    */
+    pub fn give_scores(
+        &mut self,
+        tt_move: Option<Move>,
+        killer_moves: Option<&[Move; 2]>,
+        history: Option<(&HistoryHeuristic, Color)>,
+    ) {
+        //TODO: PV first from previous iterative depennig
+        //TODO: Static Exchange Evaluation
         for i in 0..self.len {
             let curr = &mut self.moves[i];
             // the current move is the tt_move so it gets scored as best
@@ -93,9 +120,19 @@ impl MoveList {
             }
             if curr.m.is_castling() {
                 curr.s += MoveOrdering::CASTLING;
+                continue;
             }
             if curr.m.is_promotion() {
                 curr.s += MoveOrdering::PROMOTION;
+                continue;
+            }
+            if curr.m.move_type() == MoveType::Quiet {
+                if let Some((history, color)) = history {
+                    curr.s += history[color][curr.m.from()][curr.m.to()];
+                    if curr.s >= MoveOrdering::CASTLING {
+                        curr.s = MoveOrdering::CASTLING - 1;
+                    }
+                }
             }
         }
     }

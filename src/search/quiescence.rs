@@ -29,7 +29,7 @@ impl Search {
         }
 
         let mut moves = refs.mg.get_all_legal_moves(refs.board, true);
-        moves.give_scores(None, None);
+        moves.give_scores(None, None, None);
 
         for i in 0..moves.len() {
             let m = moves.nth(i);

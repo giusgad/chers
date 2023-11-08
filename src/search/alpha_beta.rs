@@ -67,7 +67,11 @@ impl Search {
         let ply = refs.info.ply as usize;
 
         let mut moves = refs.mg.get_all_legal_moves(refs.board, false);
-        moves.give_scores(tt_move, Some(&refs.killer_moves[ply]));
+        moves.give_scores(
+            tt_move,
+            Some(&refs.killer_moves[ply]),
+            Some((&refs.history_heuristic, refs.board.state.active_color)),
+        );
 
         for i in 0..moves.len() {
             let m = moves.nth(i);
@@ -110,9 +114,12 @@ impl Search {
                     EvalType::Beta,
                     refs.board.state.zobrist_hash,
                 ));
-                if m.move_type() == MoveType::Quiet && refs.killer_moves[ply][0] != m {
-                    refs.killer_moves[ply][1] = refs.killer_moves[ply][0];
-                    refs.killer_moves[ply][0] = m;
+                if m.move_type() == MoveType::Quiet {
+                    if refs.killer_moves[ply][0] != m {
+                        refs.killer_moves[ply][1] = refs.killer_moves[ply][0];
+                        refs.killer_moves[ply][0] = m;
+                    }
+                    refs.history_heuristic[refs.board.state.active_color][m.from()][m.to()] += 1;
                 }
                 return beta;
             }

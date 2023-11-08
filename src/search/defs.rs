@@ -7,7 +7,7 @@ use crossbeam_channel::{Receiver, Sender};
 
 use crate::{
     board::Board,
-    defs::Info,
+    defs::{Colors, Info, NrOf},
     engine::{
         options::Options,
         transposition::{SearchData, TT},
@@ -70,11 +70,14 @@ pub struct SearchInfo {
     pub allocated_time: u128,
 }
 
+pub type HistoryHeuristic = [[[u16; NrOf::SQUARES]; NrOf::SQUARES]; Colors::BOTH];
+
 // Refs that are used by the search algorithms and passed into recursion
 pub struct SearchRefs<'a> {
     pub board: &'a mut Board,
     pub tt: &'a mut TT<SearchData>,
     pub killer_moves: [[Move; 2]; MAX_PLY as usize],
+    pub history_heuristic: HistoryHeuristic,
     pub mg: &'a Arc<MoveGenerator>,
     pub time_control: SearchTime,
     pub info: &'a mut SearchInfo,

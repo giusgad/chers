@@ -14,7 +14,7 @@ use crossbeam_channel::Sender;
 
 use crate::{
     board::Board,
-    defs::{ErrFatal, Info},
+    defs::{Colors, ErrFatal, Info, NrOf},
     engine::{
         options::Options,
         transposition::{SearchData, TT},
@@ -65,6 +65,7 @@ impl Search {
                         board: &mut board,
                         tt: &mut tt,
                         killer_moves: [[Move::default(); 2]; MAX_PLY as usize],
+                        history_heuristic: [[[0; NrOf::SQUARES]; NrOf::SQUARES]; Colors::BOTH],
                         mg: &mg,
                         time_control: search_time,
                         timer: None,

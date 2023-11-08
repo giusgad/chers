@@ -54,7 +54,7 @@ impl Engine {
                         .mg
                         .get_all_legal_moves(&self.board.lock().unwrap(), false);
                     if s.contains("sort") {
-                        moves.give_scores(None, None);
+                        moves.give_scores(None, None, None);
                     }
                     for i in 0..moves.len() {
                         println!("{:?}", moves.nth(i));
