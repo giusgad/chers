@@ -1,5 +1,5 @@
 use super::{
-    defs::{SearchRefs, SearchTime},
+    defs::{GameTime, SearchRefs, SearchTime},
     Search,
 };
 use crate::defs::{Colors, ErrFatal};
@@ -10,12 +10,8 @@ const LOW_TIME: u128 = 5000;
 const CRIT_TIME: u128 = 1000;
 
 impl Search {
-    pub fn calculate_time(refs: &SearchRefs) -> u128 {
+    pub fn calculate_time(refs: &SearchRefs, gt: &GameTime) -> u128 {
         let overhead = refs.options.lock().expect(ErrFatal::LOCK).move_overhead;
-        let gt = match &refs.time_control {
-            SearchTime::Adaptive(gt) => gt,
-            _ => panic!(),
-        };
         let (mut time, inc) = match refs.board.state.active_color {
             Colors::WHITE => (gt.wtime, gt.winc),
             Colors::BLACK => (gt.btime, gt.binc),

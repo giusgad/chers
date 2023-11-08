@@ -71,7 +71,7 @@ impl MoveList {
     }
 
     /// Returns the move with the score that is nth in the ordered list.
-    /// [`MoveList`].give_scores() needs to be called first to have the moves ordered.
+    /// [`MoveList`].`give_scores`() needs to be called first to have the moves ordered.
     pub fn nth(&mut self, i: usize) -> Move {
         self.partial_selection_sort(i + 1);
         self.moves[i].m

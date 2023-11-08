@@ -9,7 +9,7 @@ pub mod bit_ops {
         let mut res = Vec::new();
         for i in 0..8 {
             if input >> i & 1 == 1 {
-                res.push(i)
+                res.push(i);
             }
         }
         res
@@ -88,7 +88,7 @@ pub fn add_square_i8(sq: usize, i: i8) -> Option<usize> {
 }
 
 #[allow(dead_code)]
-pub fn print_bb(bb: &Bitboard) {
+pub fn print_bb(bb: Bitboard) {
     let mut ranks = [0; 8];
     for (i, rank) in ranks.iter_mut().enumerate() {
         *rank = (bb >> (8 * i)) & MASK_8;
@@ -97,12 +97,12 @@ pub fn print_bb(bb: &Bitboard) {
         for bit in 0..8 {
             print!("|{}", ranks[rank] >> bit & 1);
         }
-        println!("|")
+        println!("|");
     }
 }
 
 pub fn remove_from_vec<T: PartialEq>(v: &mut Vec<T>, r: &[T]) {
-    for val in r.iter() {
+    for val in r {
         if let Some(i) = v.iter().position(|x| x == val) {
             v.remove(i);
         }

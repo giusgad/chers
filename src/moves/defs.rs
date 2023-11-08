@@ -63,40 +63,41 @@ impl Move {
         } else {
             data |= Pieces::NONE << MoveOffsets::PROMOTED_TO;
         }
+        #[allow(clippy::cast_possible_truncation)]
         let data = data as u32;
         Move { data }
     }
 
-    pub fn piece(&self) -> Piece {
+    pub fn piece(self) -> Piece {
         (self.data & MASK_3) as Piece
     }
-    pub fn from(&self) -> Square {
+    pub fn from(self) -> Square {
         ((self.data >> MoveOffsets::FROM) & MASK_6) as Square
     }
-    pub fn to(&self) -> Square {
+    pub fn to(self) -> Square {
         ((self.data >> MoveOffsets::TO) & MASK_6) as Square
     }
-    pub fn move_type(&self) -> MoveType {
+    pub fn move_type(self) -> MoveType {
         ((self.data >> MoveOffsets::TYPE) & 0b11)
             .try_into()
             .expect("move type invalid")
     }
-    pub fn captured_piece(&self) -> Piece {
+    pub fn captured_piece(self) -> Piece {
         ((self.data >> MoveOffsets::CAPTURED) & MASK_3) as Piece
     }
-    pub fn is_promotion(&self) -> bool {
+    pub fn is_promotion(self) -> bool {
         ((self.data >> MoveOffsets::PROMOTION) & 1) == 1
     }
-    pub fn promoted_to(&self) -> Piece {
+    pub fn promoted_to(self) -> Piece {
         ((self.data >> MoveOffsets::PROMOTED_TO) & MASK_3) as Piece
     }
-    pub fn is_en_passant(&self) -> bool {
+    pub fn is_en_passant(self) -> bool {
         ((self.data >> MoveOffsets::EN_PASSANT) & 1) == 1
     }
-    pub fn is_castling(&self) -> bool {
+    pub fn is_castling(self) -> bool {
         ((self.data >> MoveOffsets::CASTLING) & 1) == 1
     }
-    pub fn is_doublestep(&self) -> bool {
+    pub fn is_doublestep(self) -> bool {
         ((self.data >> MoveOffsets::DOUBLESTEP) & 1) == 1
     }
 }
@@ -125,7 +126,7 @@ impl std::fmt::Display for Move {
         let prom = if self.is_promotion() {
             PieceNames::CHAR_LOWERCASE[self.promoted_to()].to_string()
         } else {
-            "".to_string()
+            String::new()
         };
         write!(
             f,

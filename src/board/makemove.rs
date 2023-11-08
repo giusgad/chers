@@ -43,7 +43,7 @@ impl Board {
 
         // put the piece at the destination square
         if m.is_promotion() {
-            self.put_piece(m.promoted_to(), color, to)
+            self.put_piece(m.promoted_to(), color, to);
         } else {
             self.put_piece(piece, color, to);
         }
@@ -61,7 +61,7 @@ impl Board {
                 Colors::WHITE => from + 8,
                 _ => from - 8,
             };
-            self.set_ep_square(sq)
+            self.set_ep_square(sq);
         }
 
         // increment move count if black moved
@@ -83,7 +83,7 @@ impl Board {
 
         let is_check = mg.square_attacked(self, self.king_square(color), color ^ 1);
         if is_check {
-            self.unmake()
+            self.unmake();
         }
 
         debug_assert_eq!(self.zobrist_from_scratch(), self.state.zobrist_hash);
@@ -108,16 +108,16 @@ impl Board {
         let before = self.state.castling;
         // rook or king move
         match m.piece() {
-            Pieces::KING => match color {
-                Colors::BLACK => {
+            Pieces::KING => {
+                if color == Colors::BLACK {
                     self.state.castling &= !Castling::BQ;
                     self.state.castling &= !Castling::BK;
-                }
-                _ => {
+                } else {
                     self.state.castling &= !Castling::WQ;
                     self.state.castling &= !Castling::WK;
                 }
-            },
+            }
+
             Pieces::ROOK => self.rook_perms(m.from()),
             _ => (),
         }
@@ -173,7 +173,7 @@ impl Board {
         }
 
         if m.is_castling() {
-            self.uncastle_rook(to)
+            self.uncastle_rook(to);
         }
 
         if m.move_type() == MoveType::Capture {
@@ -182,7 +182,7 @@ impl Board {
                     Colors::WHITE => to - 8,
                     _ => to + 8,
                 };
-                put_piece(self, Pieces::PAWN, color ^ 1, ep_capture)
+                put_piece(self, Pieces::PAWN, color ^ 1, ep_capture);
             } else {
                 put_piece(self, m.captured_piece(), color ^ 1, to);
             }

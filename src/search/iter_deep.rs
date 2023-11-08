@@ -10,7 +10,7 @@ const WINDOW: i16 = 50;
 impl Search {
     pub fn iterative_deepening(refs: &mut SearchRefs) -> SearchResult {
         refs.info.allocated_time = match &refs.time_control {
-            SearchTime::Adaptive(_) => Self::calculate_time(refs),
+            SearchTime::Adaptive(game_time) => Self::calculate_time(refs, game_time),
             SearchTime::MoveTime(time) => *time,
             _ => 0,
         };

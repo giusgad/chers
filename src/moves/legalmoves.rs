@@ -26,10 +26,10 @@ impl MoveGenerator {
     ) {
         match p {
             p @ (Pieces::KING | Pieces::KNIGHT) => {
-                self.non_sliding_moves(p, board, list, only_captures)
+                self.non_sliding_moves(p, board, list, only_captures);
             }
             p @ (Pieces::QUEEN | Pieces::BISHOP | Pieces::ROOK) => {
-                self.sliding_moves(p, board, list, only_captures)
+                self.sliding_moves(p, board, list, only_captures);
             }
             Pieces::PAWN => self.pawn_moves(board, list, only_captures),
             _ => (),

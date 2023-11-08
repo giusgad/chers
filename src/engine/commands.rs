@@ -22,7 +22,7 @@ impl Engine {
             UciData::IsReady => Uci::output("readyok"),
             UciData::Go(time) => self.search.send(SearchControl::Start(time)),
             UciData::Position(fen, moves) => {
-                self.setup_position(fen, moves);
+                self.setup_position(&fen, moves);
             }
             UciData::Option(opt) => self.set_option(opt),
 
@@ -66,7 +66,7 @@ impl Engine {
             },
 
             UciData::Quit => self.quit(),
-            UciData::Error => (),
+            UciData::Error => Uci::output_err("Invalid command"),
         }
     }
 }

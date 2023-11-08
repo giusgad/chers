@@ -15,19 +15,16 @@ const ERR_FEN: &str = "Error reading fen, board not changed";
 const ERR_MOVE_PARSING: &str = "Error parsing moves, board not changed";
 
 impl Engine {
-    pub fn setup_position(&mut self, fen: String, moves: Vec<String>) {
+    pub fn setup_position(&mut self, fen: &str, moves: Vec<String>) {
         // setup fen position
         let fen = if fen.trim() == "startpos" {
             START_FEN
         } else {
-            fen.as_str()
+            fen
         };
-        let moves = match Self::parse_moves(moves) {
-            Ok(m) => m,
-            Err(_) => {
-                Uci::output_err(ERR_MOVE_PARSING);
-                return;
-            }
+        let Ok(moves) = Self::parse_moves(moves) else {
+            Uci::output_err(ERR_MOVE_PARSING);
+            return;
         };
 
         let mut board = self.board.lock().expect(ErrFatal::LOCK);
@@ -40,8 +37,8 @@ impl Engine {
         // play the moves from the gui
         let res = Self::play_moves(&mut board, &self.mg, moves);
         match res {
-            Ok(_) => (),
-            Err(e) => Uci::output_err(format!("Error Move {}, is not legal, board changed.", e)),
+            Ok(()) => (),
+            Err(e) => Uci::output_err(format!("Error Move {e}, is not legal, board changed.")),
         }
     }
 }
@@ -96,7 +93,7 @@ impl Engine {
         for s in strings {
             match s.try_into() {
                 Ok(m) => moves.push(m),
-                Err(_) => return Err(()),
+                Err(()) => return Err(()),
             };
         }
         Ok(moves)

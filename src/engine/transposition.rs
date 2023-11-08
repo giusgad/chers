@@ -40,9 +40,9 @@ impl SearchData {
         zobrist_hash: ZobristHash,
     ) -> Self {
         if eval >= Eval::CHECKMATE_TRESHOLD {
-            eval += ply as i16;
+            eval += i16::from(ply);
         } else if eval <= -Eval::CHECKMATE_TRESHOLD {
-            eval -= ply as i16;
+            eval -= i16::from(ply);
         }
         SearchData {
             best_move,
@@ -60,21 +60,21 @@ impl SearchData {
                 EvalType::Exact => {
                     if self.eval >= Eval::CHECKMATE_TRESHOLD {
                         //TODO: handle 50 move rule draw in this score
-                        eval = Some(self.eval - (ply as i16))
+                        eval = Some(self.eval - i16::from(ply));
                     } else if self.eval <= -Eval::CHECKMATE_TRESHOLD {
-                        eval = Some(self.eval + (ply as i16))
+                        eval = Some(self.eval + i16::from(ply));
                     } else {
-                        eval = Some(self.eval)
+                        eval = Some(self.eval);
                     }
                 }
                 EvalType::Alpha => {
                     if self.eval <= alpha {
-                        eval = Some(alpha)
+                        eval = Some(alpha);
                     }
                 }
                 EvalType::Beta => {
                     if self.eval >= beta {
-                        eval = Some(beta)
+                        eval = Some(beta);
                     }
                 }
             }

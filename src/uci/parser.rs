@@ -6,7 +6,7 @@ use crate::{
 use super::{defs::UciData, Uci};
 
 impl Uci {
-    pub fn commands_from_string(s: String) -> UciData {
+    pub fn commands_from_string(s: &str) -> UciData {
         let s = s.trim(); // remove the \n
         match s {
             "uci" => UciData::Uci,
@@ -63,7 +63,7 @@ impl Uci {
                 s => match token {
                     PosToken::Fen => {
                         fen.push_str(s);
-                        fen.push(' ')
+                        fen.push(' ');
                     }
                     PosToken::Moves => moves.push(s.to_string()),
                     PosToken::None => (),

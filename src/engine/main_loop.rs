@@ -21,7 +21,7 @@ impl Engine {
 
         while !self.quit {
             match rx.recv().expect(ErrFatal::RX_RECV) {
-                Info::Search(info) => self.search_report(info),
+                Info::Search(info) => Self::search_report(&info),
                 Info::Uci(info) => self.uci_command(info),
             }
         }
@@ -35,9 +35,9 @@ impl Engine {
         }
     }
 
-    fn search_report(&self, info: SearchResult) {
+    fn search_report(info: &SearchResult) {
         match info {
-            SearchResult::BestMove(m) => Uci::output(format!("bestmove {}", m)),
+            SearchResult::BestMove(m) => Uci::output(format!("bestmove {m}")),
             SearchResult::Error => Uci::output_err("Something went wrong with the search"),
         }
     }

@@ -48,8 +48,8 @@ impl Board {
         self.state.material[color] += PIECE_VALUES[piece];
         self.state.zobrist_hash ^= self.zobrist.piece_hash(color, piece, square);
 
-        self.state.psqt_mg[color] += self.get_psqt_val(piece, color, square, false);
-        self.state.psqt_eg[color] += self.get_psqt_val(piece, color, square, true);
+        self.state.psqt_mg[color] += Self::get_psqt_val(piece, color, square, false);
+        self.state.psqt_eg[color] += Self::get_psqt_val(piece, color, square, true);
     }
 
     fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
@@ -60,8 +60,8 @@ impl Board {
         self.state.material[color] -= PIECE_VALUES[piece];
         self.state.zobrist_hash ^= self.zobrist.piece_hash(color, piece, square);
 
-        self.state.psqt_mg[color] -= self.get_psqt_val(piece, color, square, false);
-        self.state.psqt_mg[color] -= self.get_psqt_val(piece, color, square, true);
+        self.state.psqt_mg[color] -= Self::get_psqt_val(piece, color, square, false);
+        self.state.psqt_mg[color] -= Self::get_psqt_val(piece, color, square, true);
     }
 
     pub fn get_piece_bb(&self, piece: Piece, color: Color) -> Bitboard {
@@ -84,7 +84,7 @@ impl Board {
         self.state.ep_square = None;
     }
 
-    fn get_psqt_val(&self, piece: Piece, color: Color, square: Square, is_endgame: bool) -> i16 {
+    fn get_psqt_val(piece: Piece, color: Color, square: Square, is_endgame: bool) -> i16 {
         let square = if color == Colors::WHITE {
             FLIP[square]
         } else {
@@ -128,12 +128,14 @@ impl Board {
         for (piecetype, bb) in self.piece_bbs[Colors::WHITE].iter().enumerate() {
             for rank_nr in 0..8 {
                 // shift the bitboard to the right to align the rank and mask it to preserve 8 bits
-                let rank = (bb >> (8 * rank_nr)) & (u8::MAX as u64);
+                let rank = (bb >> (8 * rank_nr)) & u64::from(u8::MAX);
                 for file_nr in find_ones_u8(rank) {
                     let i = rank_nr * 8 + file_nr;
-                    if board_chars[i] != ' ' {
-                        panic!("two pieces on {} printing board", SQUARE_NAMES[i])
-                    }
+                    assert!(
+                        board_chars[i] == ' ',
+                        "two pieces on {} printing board",
+                        SQUARE_NAMES[i]
+                    );
                     board_chars[i] = white_chars[piecetype];
                 }
             }
@@ -141,12 +143,14 @@ impl Board {
         for (piecetype, bb) in self.piece_bbs[Colors::BLACK].iter().enumerate() {
             for rank_nr in 0..8 {
                 // shift the bitboard to the right to align the rank and mask it to preserve 8 bits
-                let rank = (bb >> (8 * rank_nr)) & (u8::MAX as u64);
+                let rank = (bb >> (8 * rank_nr)) & u64::from(u8::MAX);
                 for file_nr in find_ones_u8(rank) {
                     let i = rank_nr * 8 + file_nr;
-                    if board_chars[i] != ' ' {
-                        panic!("two pieces on {} printing board", SQUARE_NAMES[i])
-                    }
+                    assert!(
+                        board_chars[i] == ' ',
+                        "two pieces on {} printing board",
+                        SQUARE_NAMES[i]
+                    );
                     board_chars[i] = black_chars[piecetype];
                 }
             }

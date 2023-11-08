@@ -49,7 +49,7 @@ impl MoveGenerator {
     pub fn get_all_legal_moves(&self, board: &Board, only_captures: bool) -> MoveList {
         let mut list = MoveList::default();
         for piece in 0..NrOf::PIECE_TYPES {
-            self.piece_legal_moves(&mut list, board, piece, only_captures)
+            self.piece_legal_moves(&mut list, board, piece, only_captures);
         }
         list
     }
@@ -142,7 +142,7 @@ mod tests {
         ];
         let time = Instant::now();
         for (depth, moves, captures) in startpos {
-            do_test(START_FEN, depth, moves, Some(captures))
+            do_test(START_FEN, depth, moves, Some(captures));
         }
         println!("Startpos time: {}ms", time.elapsed().as_millis());
     }
@@ -163,7 +163,7 @@ mod tests {
                 depth,
                 moves,
                 Some(captures),
-            )
+            );
         }
         println!("Kiwipete time: {}ms", time.elapsed().as_millis());
     }
@@ -179,6 +179,6 @@ mod tests {
         do_test(fen, 3, 89890, None);
         do_test(fen, 4, 3894594, None);
 
-        println!("Other positions time: {}ms", time.elapsed().as_millis())
+        println!("Other positions time: {}ms", time.elapsed().as_millis());
     }
 }

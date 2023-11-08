@@ -138,7 +138,7 @@ impl Search {
         // finished the loop if there are no legal moves it's either mate or a draw
         if legal_moves == 0 {
             if is_check {
-                return -Eval::CHECKMATE + refs.info.ply as i16;
+                return -Eval::CHECKMATE + i16::from(refs.info.ply);
             } else {
                 return Eval::STALEMATE; // draw
             }

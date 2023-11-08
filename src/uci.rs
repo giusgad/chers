@@ -26,7 +26,7 @@ impl Uci {
                 io.read_line(&mut buf).expect(ErrFatal::STDIN);
 
                 // parse input
-                let command = Self::commands_from_string(buf);
+                let command = Self::commands_from_string(&buf);
 
                 // update quit condition based on the new input
                 quit = command == UciData::Quit;

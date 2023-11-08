@@ -100,9 +100,7 @@ impl MoveGenerator {
                 let legal = Self::piece_rays_bb(piece, sq, blocker);
                 let magic = ROOK_MAGICS[sq];
                 let i = magic.get_index(blocker);
-                if table[i] != 0 {
-                    panic!("Magic indexing error.");
-                }
+                assert!(table[i] == 0, "Magic indexing error.");
                 table[i] = legal;
             }
         }
@@ -114,9 +112,7 @@ impl MoveGenerator {
                 let legal = Self::piece_rays_bb(piece, sq, blocker);
                 let magic = BISHOP_MAGICS[sq];
                 let i = magic.get_index(blocker);
-                if table[i] != 0 {
-                    panic!("Magic indexing error.");
-                }
+                assert!(table[i] == 0, "Magic indexing error.");
                 table[i] = legal;
             }
         }

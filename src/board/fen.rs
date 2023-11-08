@@ -39,7 +39,7 @@ impl Board {
             match c {
                 '/' => {
                     rank -= 1;
-                    file = 0
+                    file = 0;
                 }
                 c if c.is_ascii_digit() => {
                     let n = (c.to_digit(10).unwrap() as usize) + file;
@@ -70,7 +70,7 @@ impl Board {
                 'w' => board.state.active_color = Colors::WHITE,
                 'b' => {
                     board.state.active_color = Colors::BLACK;
-                    board.state.zobrist_hash ^= board.zobrist.color_hash()
+                    board.state.zobrist_hash ^= board.zobrist.color_hash();
                 }
                 _ => return Err(FenError::ActiveColor),
             }

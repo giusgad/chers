@@ -1,3 +1,4 @@
+#![allow(clippy::unreadable_literal)]
 use crate::defs::{Bitboard, NrOf};
 
 #[derive(Clone, Copy, Debug, Default)]

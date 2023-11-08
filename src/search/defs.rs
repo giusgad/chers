@@ -90,7 +90,7 @@ pub struct SearchRefs<'a> {
 
 impl SearchRefs<'_> {
     pub fn timer_start(&mut self) {
-        self.timer = Some(Instant::now())
+        self.timer = Some(Instant::now());
     }
     pub fn timer_elapsed(&self) -> u128 {
         match self.timer {
